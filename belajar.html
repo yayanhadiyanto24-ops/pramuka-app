@@ -690,7 +690,7 @@ function showStudentExamLetter(id){
  const url='https://yayanhadiyanto24-ops.github.io/pramuka-app/uji.html#t='+encodeURIComponent(r.token_value);
  $('studentLetterInfo').innerHTML='<b>Nomor:</b> '+esc(r.referral_no)+'<br><b>Butir:</b> '+esc(it?.nomor_butir||'')+' · '+esc(it?.judul_butir||'')+(sub?'<br><b>Subpoin:</b> '+esc(sub.judul_subpoint):'')+'<br><b>Penguji:</b> '+esc(r.examiner_expected_name||'-')+' · '+esc(r.examiner_expected_institution||'-')+'<br><b>Status:</b> '+esc(r.status==='menunggu'?'Menunggu pengujian':r.pembina_review_status==='selesai'?'Sudah disahkan Pembina':'Menunggu pemeriksaan Pembina');
  $('studentLetterQr').innerHTML='';new QRCode($('studentLetterQr'),{text:url,width:220,height:220,colorDark:'#1f2937',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
- $('studentLetterUrl').textContent=url;$('studentLetterModal').classList.remove('hidden');
+ $('studentLetterUrl').textContent=url;$('openExamOnThisPhone').onclick=()=>{window.location.href=url;};$('studentLetterModal').classList.remove('hidden');
 }
 $('closeStudentLetter').onclick=()=>$('studentLetterModal').classList.add('hidden');
 
