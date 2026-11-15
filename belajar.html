@@ -29,10 +29,12 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
  </section>
  <section id="application" class="hidden space-y-5">
   <div id="accountNotice" class="hidden panel p-4 text-sm"></div>
+  <div id="personalCodeCard" class="panel p-4 flex flex-wrap items-center justify-between gap-3"><div><p class="text-xs muted">Kode unik akun pribadi</p><p id="personalCode" class="font-mono text-xl font-bold tracking-wider">Memuat...</p><p class="text-xs muted">Simpan kode ini sebagai identitas akun. Tidak menggantikan email dan password.</p></div><button id="copyPersonalCode" class="rounded-lg border px-3 py-2 text-sm font-semibold">Salin kode</button></div>
   <nav class="flex flex-wrap gap-2">
    <button class="tab active rounded-lg px-4 py-2 text-sm font-semibold" data-tab="umum">Materi Umum</button>
    <button class="tab rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="sku">Materi SKU</button>
    <button id="monitorTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="pantau">Pantau Peserta</button>
+   <button id="adminPangkalanTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="administrasi">Administrasi Pangkalan</button>
   </nav>
   <section id="view-umum" class="space-y-4">
    <div><h2 class="text-xl font-bold">Pengantar Pramuka Penegak</h2><p class="text-sm muted">Pelajari bagian umum terlebih dahulu sebelum masuk ke butir-butir SKU.</p></div>
@@ -51,6 +53,21 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
    <div class="grid lg:grid-cols-[minmax(260px,0.8fr)_minmax(0,1.5fr)] gap-4">
     <div id="skuList" class="space-y-2"></div>
     <article id="skuDetail" class="panel p-5 min-h-64"><p class="muted text-sm">Pilih satu butir SKU untuk membuka materi dan progresnya.</p></article>
+   </div>
+  </section>
+  <section id="view-administrasi" class="hidden space-y-4">
+   <div><h2 class="text-xl font-bold">Administrasi Pangkalan &amp; Gudep</h2><p class="text-sm muted">Diisi dan diperbarui oleh Pembina. Perubahan berlaku untuk pangkalan bersama.</p></div>
+   <div class="panel p-4 space-y-3">
+    <div class="bg-amber-50 rounded-lg p-3"><p class="text-xs muted">Kode gabung pangkalan — digunakan saat pendaftaran pertama anggota baru</p><div class="flex items-center justify-between gap-2"><b id="pangkalanJoinCode" class="font-mono text-lg">Memuat...</b><button id="copyPangkalanJoinCode" class="text-sm font-semibold text-amber-900">Salin</button></div></div>
+    <div class="grid md:grid-cols-2 gap-3">
+     <label class="text-sm font-semibold">Nama pangkalan / sekolah<input id="paNama" maxlength="180" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
+     <label class="text-sm font-semibold">Nomor Gudep<input id="paGudep" maxlength="40" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
+     <label class="text-sm font-semibold">Nama Ambalan Putera<input id="paPutera" maxlength="120" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
+     <label class="text-sm font-semibold">Nama Ambalan Puteri<input id="paPuteri" maxlength="120" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
+     <label class="text-sm font-semibold">Ketua Gudep<input id="paKetuaGudep" maxlength="150" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
+     <label class="text-sm font-semibold">Ketua Mabigus<input id="paKetuaMabigus" maxlength="150" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
+    </div>
+    <button id="savePangkalan" class="rounded-lg bg-amber-800 text-white px-4 py-3 font-semibold">Simpan data pangkalan</button><p id="pangkalanMsg" class="text-sm muted"></p>
    </div>
   </section>
   <section id="view-pantau" class="hidden space-y-4">
@@ -86,7 +103,7 @@ function setMsg(t){$('appMsg').textContent=t||'';}
 function formatText(t){return esc(t||'').replace(/^## (.+)$/gm,'<strong class="block text-lg mt-4 mb-2">$1</strong>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}
 function showTab(name){
  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
- ['umum','sku','pantau'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==name));
+ ['umum','sku','pantau','administrasi'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==name));
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
 $('loginForm').addEventListener('submit',async e=>{
@@ -98,7 +115,7 @@ $('loginForm').addEventListener('submit',async e=>{
 $('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
 async function boot(user){
  currentUser=user;
- const {data:u,error:ue}=await sb.from('users').select('role,status_akun').eq('id_user',user.id).maybeSingle();
+ const {data:u,error:ue}=await sb.from('users').select('role,status_akun,kode_unik').eq('id_user',user.id).maybeSingle();
  if(ue)throw ue;if(!u)throw new Error('Profil akun belum tersedia. Hubungi Admin Utama.');
  account=u;
  $('login').classList.add('hidden');$('application').classList.remove('hidden');$('logout').classList.remove('hidden');
@@ -117,6 +134,29 @@ async function boot(user){
  else throw new Error('Peran akun tidak dikenali.');
  await loadAll();
 }
+async function loadPangkalanAdmin(){
+ $('pangkalanMsg').textContent='Memuat data pangkalan...';
+ try{
+  const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pembina_pangkalan'}});
+  if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Data pangkalan tidak dapat dimuat.');
+  const p=data.pangkalan;
+  $('paNama').value=p.nama_pangkalan||'';$('paGudep').value=p.no_gudep||'';
+  $('paPutera').value=p.nama_ambalan_putra||'';$('paPuteri').value=p.nama_ambalan_putri||'';
+  $('paKetuaGudep').value=p.nama_ketua_gudep||'';$('paKetuaMabigus').value=p.nama_ketua_mabigus||'';
+  $('pangkalanJoinCode').textContent=p.kode_gabung_peserta||'-';
+  $('copyPangkalanJoinCode').onclick=()=>navigator.clipboard?.writeText(p.kode_gabung_peserta||'');
+  $('pangkalanMsg').textContent='Data pangkalan siap diperbarui.';
+ }catch(err){$('pangkalanMsg').textContent='Gagal memuat administrasi pangkalan: '+(err.message||'Kesalahan');}
+}
+$('savePangkalan').addEventListener('click',async()=>{
+ const b=$('savePangkalan');b.disabled=true;b.textContent='Menyimpan...';$('pangkalanMsg').textContent='';
+ try{
+  const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'simpan_pangkalan_pembina',nama_pangkalan:$('paNama').value.trim(),no_gudep:$('paGudep').value.trim(),nama_ambalan_putra:$('paPutera').value.trim(),nama_ambalan_putri:$('paPuteri').value.trim(),nama_ketua_gudep:$('paKetuaGudep').value.trim(),nama_ketua_mabigus:$('paKetuaMabigus').value.trim()}});
+  if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Penyimpanan gagal.');
+  $('pangkalanMsg').textContent='Data pangkalan berhasil disimpan.';
+ }catch(err){$('pangkalanMsg').textContent='Gagal menyimpan: '+(err.message||'Kesalahan');}
+ finally{b.disabled=false;b.textContent='Simpan data pangkalan';}
+});
 async function loadAll(){
  setMsg('Memuat materi dan progres...');
  const [g,i,l,p,e]=await Promise.all([
