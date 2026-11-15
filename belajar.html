@@ -68,6 +68,7 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
     </div>
     <button id="savePangkalan" class="rounded-lg bg-amber-800 text-white px-4 py-3 font-semibold">Simpan data pangkalan</button><p id="pangkalanMsg" class="text-sm muted"></p>
    </div>
+   <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Persetujuan Peserta Didik</h3><p class="text-xs muted">Daftar hanya menampilkan peserta dari satuan yang sesuai dengan jabatan Pembina ini.</p></div><div id="pendingStudentList" class="space-y-2 text-sm muted">Memuat daftar peserta...</div></div>
   </section>
   <section id="view-pantau" class="hidden space-y-4">
    <div><h2 class="text-xl font-bold">Perkembangan Peserta Didik</h2><p class="text-sm muted">Daftar peserta dan hasil belajar yang berada dalam cakupan pangkalan Pembina atau Admin Utama.</p></div>
@@ -128,7 +129,7 @@ async function boot(user){
  $('login').classList.add('hidden');$('application').classList.remove('hidden');$('logout').classList.remove('hidden');
  $('who').textContent=user.email+' · '+u.role.replace('_',' ');
  if(u.status_akun!=='aktif'){
-  $('accountNotice').classList.remove('hidden');$('accountNotice').textContent='Akun masih '+u.status_akun+'. Akses belajar akan terbuka setelah disetujui Admin Utama.';return;
+  $('accountNotice').classList.remove('hidden');$('accountNotice').textContent=u.role==='peserta_didik'?'Pendaftaran diterima. Akses belajar akan terbuka setelah disetujui Pembina Satuan '+(participant?.jenis_kelamin==='L'?'Putera':'Puteri')+'.':'Akun masih '+u.status_akun+'. Akses belajar akan terbuka setelah disetujui Admin Utama.';return;
  }
  if(u.role==='peserta_didik'){
   const {data,error}=await sb.from('profil_peserta_didik').select('*').eq('id_user',user.id).maybeSingle();if(error)throw error;participant=data;
@@ -144,7 +145,17 @@ async function boot(user){
  else throw new Error('Peran akun tidak dikenali.');
  await loadAll();
 }
-async function loadPangkalanAdmin(){
+async function loadPangkalanPending(){
+  const box=$('pendingStudentList');box.textContent='Memuat daftar peserta...';
+  try{
+   const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pembina_peserta_pending'}});
+   if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Daftar peserta tidak dapat dimuat.');
+   const rows=data.peserta||[];
+   box.innerHTML=rows.map(p=>'<div class="flex flex-wrap items-center justify-between gap-2 border rounded-lg p-3"><div><b>'+esc(p.nama_lengkap)+'</b><p class="text-xs muted">'+esc(p.email)+' · '+esc(p.tingkatan)+' · '+(p.jenis_kelamin==='L'?'Putera':'Puteri')+'</p></div><button data-approve-student="'+esc(p.id_user)+'" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-xs font-semibold">Setujui</button></div>').join('')||'<p class="text-sm muted">Tidak ada peserta yang menunggu persetujuan pada satuan Anda.</p>';
+   box.querySelectorAll('[data-approve-student]').forEach(b=>b.onclick=async()=>{b.disabled=true;b.textContent='Menyetujui...';try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'setujui_peserta_pembina',user_id:b.dataset.approveStudent}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Persetujuan gagal.');await loadPangkalanPending();}catch(err){b.disabled=false;b.textContent='Setujui';alert(err.message||'Persetujuan gagal.');}});
+  }catch(err){box.textContent='Gagal memuat daftar peserta: '+(err.message||'Kesalahan');}
+ }
+ async function loadPangkalanAdmin(){
  $('pangkalanMsg').textContent='Memuat data pangkalan...';
  try{
   const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pembina_pangkalan'}});
@@ -156,6 +167,7 @@ async function loadPangkalanAdmin(){
   $('pangkalanJoinCode').textContent=p.kode_gabung_peserta||'-';
   $('copyPangkalanJoinCode').onclick=()=>navigator.clipboard?.writeText(p.kode_gabung_peserta||'');
   $('pangkalanMsg').textContent='Data pangkalan siap diperbarui.';
+   await loadPangkalanPending();
  }catch(err){$('pangkalanMsg').textContent='Gagal memuat administrasi pangkalan: '+(err.message||'Kesalahan');}
 }
 $('savePangkalan').addEventListener('click',async()=>{
