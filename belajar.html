@@ -69,6 +69,7 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
     <button id="savePangkalan" class="rounded-lg bg-amber-800 text-white px-4 py-3 font-semibold">Simpan data pangkalan</button><p id="pangkalanMsg" class="text-sm muted"></p>
    </div>
    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Persetujuan Peserta Didik</h3><p class="text-xs muted">Daftar hanya menampilkan peserta dari satuan yang sesuai dengan jabatan Pembina ini.</p></div><div id="pendingStudentList" class="space-y-2 text-sm muted">Memuat daftar peserta...</div></div>
+    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Pengaturan Sangga</h3><p class="text-xs muted">Atur nama sangga untuk Ambalan sesuai satuan Pembina. Peserta dapat dipindahkan sangga dari daftar di bawah.</p></div><div class="flex flex-wrap gap-2"><input id="newSanggaName" maxlength="80" placeholder="Nama sangga baru" class="flex-1 min-w-0 border rounded-lg p-2 text-sm"><button id="addSanggaBtn" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Tambah sangga</button></div><div id="sanggaNameList" class="flex flex-wrap gap-2 text-xs"></div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="sanggaStudentList" class="space-y-2 text-sm muted">Memuat data peserta...</div></div><p id="sanggaMsg" class="text-xs muted"></p></div>
   </section>
   <section id="view-pantau" class="hidden space-y-4">
    <div><h2 class="text-xl font-bold">Perkembangan Peserta Didik</h2><p class="text-sm muted">Daftar peserta dan hasil belajar yang berada dalam cakupan pangkalan Pembina atau Admin Utama.</p></div>
@@ -155,7 +156,22 @@ async function loadPangkalanPending(){
    box.querySelectorAll('[data-approve-student]').forEach(b=>b.onclick=async()=>{b.disabled=true;b.textContent='Menyetujui...';try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'setujui_peserta_pembina',user_id:b.dataset.approveStudent}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Persetujuan gagal.');await loadPangkalanPending();}catch(err){b.disabled=false;b.textContent='Setujui';alert(err.message||'Persetujuan gagal.');}});
   }catch(err){box.textContent='Gagal memuat daftar peserta: '+(err.message||'Kesalahan');}
  }
- async function loadPangkalanAdmin(){
+ async function loadSanggaAdmin(){
+   const names=$('sanggaNameList'),students=$('sanggaStudentList');names.textContent='Memuat sangga...';students.textContent='Memuat peserta...';
+   try{
+    const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pembina_sangga_data'}});
+    if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Data sangga tidak dapat dimuat.');
+    const sangga=data.sangga||[],peserta=data.peserta||[];
+    names.innerHTML=sangga.map(x=>'<span class="rounded-full bg-amber-50 border border-amber-200 px-3 py-1">'+esc(x.nama_sangga)+'</span>').join('')||'<span>Belum ada sangga. Tambahkan nama sangga terlebih dahulu.</span>';
+    students.innerHTML=peserta.map(p=>'<div class="border rounded-lg p-3 space-y-2"><div><b>'+esc(p.nama_lengkap)+'</b><p class="text-xs muted">'+esc(p.kelas_sekolah||'-')+' · '+esc(p.jurusan||'-')+' · '+esc(p.tahun_pelajaran||'-')+' · Sangga '+esc(p.sangga||'-')+'</p></div><div class="flex gap-2"><select data-move-sangga="'+esc(p.id_user)+'" class="min-w-0 flex-1 border rounded-lg p-2 text-sm">'+sangga.map(s=>'<option value="'+s.id_sangga+'" '+(String(s.id_sangga)===String(p.id_sangga)?'selected':'')+'>'+esc(s.nama_sangga)+'</option>').join('')+'</select><button data-save-sangga="'+esc(p.id_user)+'" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-xs font-semibold" '+(!sangga.length?'disabled':'')+'>Pindahkan</button></div></div>').join('')||'<p class="text-sm muted">Belum ada peserta aktif di satuan ini.</p>';
+    students.querySelectorAll('[data-save-sangga]').forEach(b=>b.onclick=async()=>{const id=b.dataset.saveSangga,select=students.querySelector('[data-move-sangga="'+id+'"]');b.disabled=true;b.textContent='Memindahkan...';try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pindah_sangga_peserta',user_id:id,id_sangga:select.value}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Pemindahan gagal.');$('sanggaMsg').textContent=data.message;await loadSanggaAdmin();}catch(err){$('sanggaMsg').textContent=err.message||'Pemindahan gagal.';b.disabled=false;b.textContent='Pindahkan';}});
+   }catch(err){names.textContent='Gagal memuat sangga: '+(err.message||'Kesalahan');students.textContent='';}
+  }
+  $('addSanggaBtn').addEventListener('click',async()=>{
+   const b=$('addSanggaBtn'),name=$('newSanggaName').value.trim();if(!name){$('sanggaMsg').textContent='Isi nama sangga terlebih dahulu.';return;}
+   b.disabled=true;b.textContent='Menambahkan...';try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'tambah_sangga_pembina',nama_sangga:name}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Gagal menambahkan sangga.');$('newSanggaName').value='';$('sanggaMsg').textContent='Sangga berhasil ditambahkan.';await loadSanggaAdmin();}catch(err){$('sanggaMsg').textContent=err.message||'Gagal menambahkan sangga.';}finally{b.disabled=false;b.textContent='Tambah sangga';}
+  });
+  async function loadPangkalanAdmin(){
  $('pangkalanMsg').textContent='Memuat data pangkalan...';
  try{
   const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pembina_pangkalan'}});
@@ -292,7 +308,7 @@ $('exportMonitorWord').addEventListener('click',()=>exportMonitorReport('word'))
 $('exportMonitorPdf').addEventListener('click',()=>exportMonitorReport('pdf'));
 async function loadMonitor(){
  const [{data:students,error},{data:rows,error:pe},{data:pangkalan,error:ge}]=await Promise.all([
-  sb.from('profil_peserta_didik').select('id_user,nama_lengkap,jenis_kelamin,tingkatan,sangga,id_pangkalan').order('id_pangkalan').order('jenis_kelamin').order('nama_lengkap'),
+  sb.from('profil_peserta_didik').select('id_user,nama_lengkap,jenis_kelamin,tingkatan,sangga,id_pangkalan,kelas_sekolah,jurusan,tahun_pelajaran,status_keanggotaan').order('id_pangkalan').order('jenis_kelamin').order('nama_lengkap'),
   sb.from('sku_learning_progress').select('*'),
   sb.from('pangkalan').select('id_pangkalan,nama_pangkalan,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus')
  ]);
@@ -317,7 +333,7 @@ async function loadMonitor(){
    const ps=allProgress.filter(p=>p.id_user===s.id_user);
    const detail=ps.map(p=>{const it=items.find(z=>z.id_sku_item===p.id_sku_item);return '<tr><td>'+esc(it?.tingkat||'-')+'</td><td>'+esc(it?.nomor_butir||'-')+'</td><td>'+esc(it?.judul_butir||'-')+'</td><td>'+esc(statusText(p.status))+'</td></tr>';}).join('');
    const c={lulus:ps.filter(p=>p.status==='lulus').length,siap:ps.filter(p=>p.status==='siap_diuji').length,revisi:ps.filter(p=>p.status==='perlu_perbaikan').length,belajar:ps.filter(p=>p.status==='dipelajari').length};
-   return '<h3>'+esc(s.nama_lengkap)+' — '+esc(s.tingkatan||'-')+' — Sangga '+esc(s.sangga||'-')+'</h3><p class="muted">Lulus: '+c.lulus+' · Menunggu ujian: '+c.siap+' · Perlu perbaikan: '+c.revisi+' · Sedang dipelajari: '+c.belajar+'</p><table><thead><tr><th>Tingkat</th><th>Butir</th><th>Materi</th><th>Status</th></tr></thead><tbody>'+detail+'</tbody></table>';
+   return '<h3>'+esc(s.nama_lengkap)+' — '+esc(s.tingkatan||'-')+' — Kelas '+esc(s.kelas_sekolah||'-')+' '+esc(s.jurusan||'')+' — TP '+esc(s.tahun_pelajaran||'-')+' — Sangga '+esc(s.sangga||'-')+'</h3><p class="muted">Lulus: '+c.lulus+' · Menunggu ujian: '+c.siap+' · Perlu perbaikan: '+c.revisi+' · Sedang dipelajari: '+c.belajar+'</p><table><thead><tr><th>Tingkat</th><th>Butir</th><th>Materi</th><th>Status</th></tr></thead><tbody>'+detail+'</tbody></table>';
   }).join('');
   return '<section class="group"><h2>'+esc(title)+'</h2>'+rows+'</section>';
  }).join('');
