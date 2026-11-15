@@ -1,0 +1,18 @@
+{
+  "name": "Ruang Tegak",
+  "short_name": "Ruang Tegak",
+  "description": "Ruang Belajar Pramuka Penegak",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffd400",
+  "theme_color": "#3b2619",
+  "icons": [
+    {
+      "src": "assets/ruang-tegak-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
