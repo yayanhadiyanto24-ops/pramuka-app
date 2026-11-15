@@ -88,8 +88,8 @@ async function loadExam(){
   $('studentName').textContent=data.student.nama_lengkap||'-';
   $('studentUnit').textContent=[data.student.nama_pangkalan,data.student.nama_ambalan].filter(Boolean).join(' · ')||'-';
   $('studentLevel').textContent=data.student.tingkatan||data.sku.tingkat||'-';
-  $('skuTitle').textContent=[data.sku.tingkat,data.sku.nomor_butir,data.sku.judul_butir].filter(Boolean).join(' · ');
-  $('skuRequirement').textContent=data.sku.persyaratan||'-';$('skuCriteria').textContent=data.sku.kriteria_pencapaian||'-';
+  $('skuTitle').textContent=[data.sku.tingkat,data.sku.nomor_butir,data.sku.judul_butir,data.subpoint?('Subpoin '+data.subpoint.kode_subpoint+' — '+data.subpoint.judul_subpoint):null].filter(Boolean).join(' · ');
+  $('skuRequirement').textContent=data.subpoint?data.subpoint.persyaratan:(data.sku.persyaratan||'-');$('skuCriteria').textContent=data.subpoint?'Penilaian dilakukan khusus untuk subpoin ini. '+(data.sku.kriteria_pencapaian||''):(data.sku.kriteria_pencapaian||'-');
   $('expiry').textContent='Berlaku sampai: '+new Date(data.referral.berlaku_sampai).toLocaleString('id-ID');
   $('loading').classList.add('hidden');$('exam').classList.remove('hidden');setupSignature();
  }catch(e){showError(e.message||'Terjadi kesalahan saat memeriksa surat.');}
@@ -107,7 +107,7 @@ $('examForm').addEventListener('submit',async e=>{
   $('certResult').textContent=result==='lulus'?'LULUS':'TIDAK LULUS';
   $('resultBanner').className='rounded-xl p-4 text-center '+(result==='lulus'?'result-pass':'result-fail');
   $('certStudent').textContent=examData.student.nama_lengkap;
-  $('certSku').textContent=[examData.sku.tingkat,examData.sku.nomor_butir,examData.sku.judul_butir].filter(Boolean).join(' · ');
+  $('certSku').textContent=[examData.sku.tingkat,examData.sku.nomor_butir,examData.sku.judul_butir,examData.subpoint?('Subpoin '+examData.subpoint.kode_subpoint+' — '+examData.subpoint.judul_subpoint):null].filter(Boolean).join(' · ');
   $('certExaminer').textContent=data.certificate.examiner_name;
   $('certInstitution').textContent=data.certificate.examiner_institution||'-';
   $('certNotes').textContent=data.certificate.examiner_notes||'-';
