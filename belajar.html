@@ -14,7 +14,7 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
 <body class="min-h-screen">
 <header class="brand text-white px-4 py-5">
  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
-  <div><div class="text-xl font-bold">⚜️ Ruang Belajar Pramuka Penegak</div><p class="text-amber-200 text-sm">Materi umum · SKU Bantara · SKU Laksana · Progres kecakapan</p></div>
+  <div><div class="text-xl font-bold">⚜️ Ruang Belajar Pramuka Penegak</div><p id="roleSubtitle" class="text-amber-200 text-sm">Materi umum · SKU Bantara · SKU Laksana · Progres kecakapan</p></div>
   <div class="flex items-center gap-3"><span id="who" class="text-sm text-amber-100"></span><button id="logout" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button></div>
  </div>
 </header>
@@ -133,10 +133,13 @@ async function boot(user){
  if(u.role==='peserta_didik'){
   const {data,error}=await sb.from('profil_peserta_didik').select('*').eq('id_user',user.id).maybeSingle();if(error)throw error;participant=data;
   if(!participant)throw new Error('Profil peserta didik belum ditemukan.');
+  $('roleSubtitle').textContent='Ruang Peserta Didik · Materi umum · Pembelajaran SKU · Progres pribadi';
  }else if(u.role==='pembina'){
   const {data,error}=await sb.from('profil_pembina').select('*').eq('id_user',user.id).maybeSingle();if(error)throw error;teacher=data;
   if(!teacher)throw new Error('Profil Pembina belum ditemukan.');
   $('monitorTab').classList.remove('hidden');
+  $('adminPangkalanTab').classList.remove('hidden');
+  $('roleSubtitle').textContent='Ruang Pembina · Pantau peserta · Administrasi pangkalan';
  }else if(u.role==='admin_kwarcab'){$('monitorTab').classList.remove('hidden');}
  else throw new Error('Peran akun tidak dikenali.');
  await loadAll();
