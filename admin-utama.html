@@ -280,6 +280,10 @@ $('brand-logo-upload').addEventListener('click',async()=>{
  if(!file){status.textContent='Pilih berkas logo terlebih dahulu.';return;}
  if(!['image/png','image/jpeg','image/webp'].includes(file.type)){status.textContent='Format harus PNG, JPG, atau WebP.';return;}
  if(file.size>5*1024*1024){status.textContent='Ukuran logo maksimal 5 MB.';return;}
+ const bitmap=await createImageBitmap(file);
+ const isSquare=bitmap.width===bitmap.height;
+ bitmap.close();
+ if(!isSquare){status.textContent='Gunakan gambar persegi (lebar dan tinggi sama) agar logo tidak terpotong.';return;}
  button.disabled=true;status.textContent='Mengunggah logo...';
  try{
   await ensureSb();
