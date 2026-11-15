@@ -287,7 +287,8 @@ async function loadMonitor(){
  $('monitorSummary').innerHTML=[
   ['Peserta didik',totals.peserta],['Sedang belajar',totals.belajar],['Menunggu ujian',totals.menunggu],['Butir lulus',totals.lulus]
  ].map(([label,value])=>'<div class="panel p-4"><p class="text-xs muted">'+label+'</p><b class="text-2xl">'+value+'</b></div>').join('');
- const pMap=new Map((pangkalan||[]).map(p=>[p.id_pangkalan,p]));\n if((pangkalan||[]).length===1){const p=pangkalan[0];if(!$('reportKetuaGudep').value)$('reportKetuaGudep').value=p.nama_ketua_gudep||'';if(!$('reportMabigus').value)$('reportMabigus').value=p.nama_ketua_mabigus||'';}
+ const pMap=new Map((pangkalan||[]).map(p=>[p.id_pangkalan,p]));
+ if((pangkalan||[]).length===1){const p=pangkalan[0];if(!$('reportKetuaGudep').value)$('reportKetuaGudep').value=p.nama_ketua_gudep||'';if(!$('reportMabigus').value)$('reportMabigus').value=p.nama_ketua_mabigus||'';}
  for(const s of (students||[])){
   const key=String(s.id_pangkalan)+'-'+s.jenis_kelamin;
   if(!groups.has(key))groups.set(key,{p:pMap.get(s.id_pangkalan),jk:s.jenis_kelamin,students:[]});
