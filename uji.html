@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
 <title>Ujian SKU Digital · Pramuka Penegak</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -73,7 +74,7 @@ function setupSignature(){
  canvas.addEventListener('pointerdown',e=>{e.preventDefault();drawing=true;canvas.setPointerCapture(e.pointerId);const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+0.1,p.y+0.1);ctx.stroke();hasSignature=true;});
  canvas.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
  const stop=()=>{drawing=false;};canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);canvas.addEventListener('pointerleave',stop);
- $('clearSignature').onclick=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);hasSignature=false;};
+ $('clearSignature').onclick=()=>{ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);const ratio=window.devicePixelRatio||1;ctx.setTransform(ratio,0,0,ratio,0,0);hasSignature=false;};
 }
 async function loadExam(){
  if(!token){showError('Kode QR tidak memuat token ujian. Minta Pembina membuat surat pengantar baru.');return;}
