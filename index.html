@@ -99,8 +99,8 @@ async function submitRegistration(payload, button, label) {
         if (error) throw error;
         if (!data || data.ok !== true) throw new Error(data?.message || 'Pendaftaran belum dapat diproses.');
         let msg = data.message || 'Pendaftaran berhasil dikirim.';
-        if (data.kode_gabung_peserta) msg += ' Kode Peserta: ' + data.kode_gabung_peserta + '.';
-        if (data.kode_gabung_pembina) msg += ' Kode Pembina: ' + data.kode_gabung_pembina + '.';
+        if (data.kode_unik) msg += ' Kode unik pribadi Anda: ' + data.kode_unik + '. Simpan kode ini untuk identitas akun Anda.';
+        if (data.kode_gabung_pangkalan) msg += ' Kode gabung pangkalan untuk pendaftaran pertama anggota lain: ' + data.kode_gabung_pangkalan + '. Simpan dan bagikan kepada anggota yang akan mendaftar.';
         showAlert(msg);
         return true;
     } catch (err) {
