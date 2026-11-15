@@ -164,7 +164,38 @@ button:not(.secondary):not(.danger),.btn-primary,
 }
 
 </style>
-<link rel="icon" type="image/svg+xml" href="assets/ruang-tegak-icon.svg"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#3b2619"><style>.rt-header-brand{display:flex;align-items:center;gap:13px}.rt-header-logo{width:68px;height:68px;object-fit:contain;flex:0 0 auto;filter:drop-shadow(0 3px 6px #0008)}.rt-header-name{font-weight:900;letter-spacing:.13em;color:#ffd84b;text-shadow:0 1px 2px #1a1008}.rt-header-sub{color:#fff!important}</style></head>
+<link rel="icon" type="image/svg+xml" href="assets/ruang-tegak-icon.svg"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#3b2619"><style>.rt-header-brand{display:flex;align-items:center;gap:13px}.rt-header-logo{width:68px;height:68px;object-fit:contain;flex:0 0 auto;filter:drop-shadow(0 3px 6px #0008)}.rt-header-name{font-weight:900;letter-spacing:.13em;color:#ffd84b;text-shadow:0 1px 2px #1a1008}.rt-header-sub{color:#fff!important}</style><style id="ruang-tegak-button-icons">
+/* Identitas tombol Ruang Tegak: lencana emas dengan ikon ringkas */
+button{transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}
+button:active{transform:translateY(1px)}
+button.bg-amber-800,button.bg-amber-900,button.bg-slate-700,
+#btn-peserta,#btn-pembina,#loginBtn,#saveProfile,#savePangkalan,
+#exportMonitorWord,#exportMonitorPdf,#submitExam,#printCert{
+ display:inline-flex;align-items:center;justify-content:center;gap:.58rem
+}
+#btn-peserta::before,#btn-pembina::before,#loginBtn::before,#saveProfile::before,
+#savePangkalan::before,#exportMonitorWord::before,#exportMonitorPdf::before,
+#submitExam::before,#printCert::before,#refresh::before,#logout::before,
+#tab-peserta::before,#tab-pembina::before,
+button[data-tab]::before{
+ content:"";display:inline-block;flex:0 0 1.45em;width:1.45em;height:1.45em;
+ background:linear-gradient(145deg,#fff2a6,#f4bd16 55%,#9b5d08);
+ border:1px solid #8b5a13;border-radius:50%;
+ box-shadow:inset 0 1px 2px #fff9,0 1px 3px #2b160a55;
+ color:#3b2413;text-align:center;font-size:.9em;line-height:1.42em;
+ font-weight:900;text-shadow:0 1px #fff8
+}
+#btn-peserta::before{content:"♟"} #btn-pembina::before{content:"⚜"}
+#loginBtn::before{content:"➜"} #saveProfile::before,#savePangkalan::before{content:"✓"}
+#exportMonitorWord::before{content:"▤"} #exportMonitorPdf::before,#printCert::before{content:"▣"}
+#submitExam::before{content:"✦"} #refresh::before{content:"↻"} #logout::before{content:"⇥"}
+#tab-peserta::before{content:"♟"} #tab-pembina::before{content:"⚜"}
+button[data-tab="umum"]::before{content:"▤"} button[data-tab="profile"]::before{content:"◉"}
+button[data-tab="sku"]::before{content:"✦"} button[data-tab="pantau"]::before{content:"◫"}
+button[data-tab="administrasi"]::before{content:"⌂"}
+button.bg-amber-800,button.bg-amber-900{box-shadow:inset 0 1px 0 #fff5,0 3px 8px #39200b30}
+button.bg-amber-800:hover,button.bg-amber-900:hover{filter:brightness(1.08);box-shadow:inset 0 1px 0 #fff8,0 5px 12px #39200b40}
+</style></head>
 <body class="min-h-screen">
 <header class="brand text-white px-4 py-5">
  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
