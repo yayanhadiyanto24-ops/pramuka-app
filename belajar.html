@@ -398,7 +398,7 @@ main{padding:10px!important}
   </section>
   <p id="appMsg" class="text-sm muted" role="status"></p>
  </section>
-<div id="examModal" class="hidden fixed inset-0 z-50 bg-black/60 p-4 overflow-y-auto"><div class="panel max-w-md mx-auto mt-8 p-5"><div class="flex justify-between items-center gap-3"><h3 class="font-bold text-lg">Buat Akses Penguji</h3><button id="closeExamModal" class="text-sm text-amber-800 font-semibold">Tutup ✕</button></div><p id="examModalInfo" class="text-sm muted mt-2">Masukkan identitas penguji. Peserta akan membuka akses ujian dari HP-nya sendiri.</p><label class="block text-sm font-semibold mt-3">Nama penguji<input id="expectedExaminerName" maxlength="150" required class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Nama lengkap penguji"></label><label class="block text-sm font-semibold mt-3">Instansi / jabatan penguji<input id="expectedExaminerInstitution" maxlength="150" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Opsional"></label><button id="createExamAccess" class="w-full rounded-lg bg-amber-800 text-white font-semibold p-3 mt-4">Buat akses penguji</button><p id="examModalMsg" class="text-xs muted mt-2" role="status"></p></div></div><div id="studentLetterModal" class="hidden fixed inset-0 z-50 bg-black/60 p-4 overflow-y-auto"><div class="panel max-w-md mx-auto mt-8 p-5"><div class="flex justify-between items-center gap-3"><h3 class="font-bold text-lg">Akses Pengujian SKU</h3><button id="closeStudentLetter" class="text-sm text-amber-800 font-semibold">Tutup ✕</button></div><div id="studentLetterInfo" class="text-sm leading-6 mt-3"></div><p class="text-xs muted mt-3">Buka halaman ini di HP peserta, lalu serahkan HP kepada penguji untuk memeriksa hasil dan membubuhkan tanda tangan digital.</p><button id="openExamOnThisPhone" class="w-full rounded-lg bg-amber-800 text-white font-bold p-3 mt-4">Buka halaman ujian di HP ini</button></div></div>
+<div id="examModal" class="hidden fixed inset-0 z-50 bg-black/60 p-4 overflow-y-auto"><div class="panel max-w-md mx-auto mt-8 p-5"><div class="flex justify-between items-center gap-3"><h3 class="font-bold text-lg">Buat Akses Penguji</h3><button id="closeExamModal" class="text-sm text-amber-800 font-semibold">Tutup ✕</button></div><p id="examModalInfo" class="text-sm muted mt-2">Masukkan identitas penguji. Peserta akan membuka akses ujian dari HP-nya sendiri.</p><label class="block text-sm font-semibold mt-3">Nama penguji<input id="expectedExaminerName" maxlength="150" required class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Nama lengkap penguji"></label><label class="block text-sm font-semibold mt-3">Instansi / jabatan penguji<input id="expectedExaminerInstitution" maxlength="150" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Opsional"></label><label class="block text-sm font-semibold mt-3">Jadwal ujian<input id="examScheduledAt" type="datetime-local" required class="w-full border rounded-lg p-3 mt-1 font-normal"><span class="block text-xs muted mt-1">Pilih waktu pertemuan dengan penguji (maksimal 90 hari ke depan).</span></label><label class="block text-sm font-semibold mt-3">Catatan jadwal<textarea id="examScheduleNote" rows="2" maxlength="500" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Tempat pertemuan atau keterangan tambahan (opsional)"></textarea></label><button id="createExamAccess" class="w-full rounded-lg bg-amber-800 text-white font-semibold p-3 mt-4">Buat akses penguji</button><p id="examModalMsg" class="text-xs muted mt-2" role="status"></p></div></div><div id="studentLetterModal" class="hidden fixed inset-0 z-50 bg-black/60 p-4 overflow-y-auto"><div class="panel max-w-md mx-auto mt-8 p-5"><div class="flex justify-between items-center gap-3"><h3 class="font-bold text-lg">Akses Pengujian SKU</h3><button id="closeStudentLetter" class="text-sm text-amber-800 font-semibold">Tutup ✕</button></div><div id="studentLetterInfo" class="text-sm leading-6 mt-3"></div><p class="text-xs muted mt-3">Buka halaman ini di HP peserta, lalu serahkan HP kepada penguji untuk memeriksa hasil dan membubuhkan tanda tangan digital.</p><button id="openExamOnThisPhone" class="w-full rounded-lg bg-amber-800 text-white font-bold p-3 mt-4">Buka halaman ujian di HP ini</button></div></div>
 </main>
 <script>
 'use strict';
@@ -602,7 +602,7 @@ async function loadAll(){
   sb.from('sku_items').select('*').eq('aktif',true).order('urutan').order('kode_butir'),
   sb.from('sku_lessons').select('*'),
   sb.from('sku_learning_progress').select('*'),
-  sb.from('sku_exam_referrals').select('id,referral_no,id_user,id_sku_item,id_subpoint,dibuat_oleh,dibuat_at,berlaku_sampai,status,examiner_name,examiner_institution,examiner_expected_name,examiner_expected_institution,result,examiner_notes,signature_data,signed_at,pembina_review_status,pembina_review_note,pembina_paraf_data,pembina_reviewed_at').order('dibuat_at',{ascending:false}),
+  sb.from('sku_exam_referrals').select('id,referral_no,id_user,id_sku_item,id_subpoint,dibuat_oleh,dibuat_at,berlaku_sampai,scheduled_at,schedule_note,status,examiner_name,examiner_institution,examiner_expected_name,examiner_expected_institution,result,examiner_notes,signature_data,signed_at,pembina_review_status,pembina_review_note,pembina_paraf_data,pembina_reviewed_at').order('dibuat_at',{ascending:false}),
   sb.from('sku_subpoints').select('*').order('id_sku_item').order('urutan'),
   sb.from('sku_subpoint_progress').select('*'),
   sb.from('sku_completion_plans').select('*')
@@ -1016,7 +1016,7 @@ function showStudentExamLetter(id){
  const r=examRecords.find(x=>x.id===id);if(!r||!r.token_value){setMsg('Akses ujian belum tersedia. Muat ulang halaman atau hubungi Pembina.');return;}
  const it=items.find(x=>x.id_sku_item===r.id_sku_item),sub=subpoints.find(x=>x.id_subpoint===r.id_subpoint);
  const url='https://yayanhadiyanto24-ops.github.io/pramuka-app/uji.html#t='+encodeURIComponent(r.token_value);
- $('studentLetterInfo').innerHTML='<b>Nomor akses:</b> '+esc(r.referral_no)+'<br><b>Butir:</b> '+esc(it?.nomor_butir||'')+' · '+esc(it?.judul_butir||'')+(sub?'<br><b>Subpoin:</b> '+esc(sub.judul_subpoint):'')+'<br><b>Penguji:</b> '+esc(r.examiner_expected_name||'-')+' · '+esc(r.examiner_expected_institution||'-')+'<br><b>Status:</b> '+esc(r.status==='menunggu'?'Menunggu pengujian':r.pembina_review_status==='selesai'?'Sudah disahkan Pembina':'Menunggu pemeriksaan Pembina');
+ $('studentLetterInfo').innerHTML='<b>Nomor akses:</b> '+esc(r.referral_no)+'<br><b>Butir:</b> '+esc(it?.nomor_butir||'')+' · '+esc(it?.judul_butir||'')+(sub?'<br><b>Subpoin:</b> '+esc(sub.judul_subpoint):'')+'<br><b>Penguji:</b> '+esc(r.examiner_expected_name||'-')+' · '+esc(r.examiner_expected_institution||'-')+'<br><b>Jadwal:</b> '+esc(r.scheduled_at?new Date(r.scheduled_at).toLocaleString('id-ID'):'Belum ditentukan')+(r.schedule_note?'<br><b>Catatan jadwal:</b> '+esc(r.schedule_note):'')+'<br><b>Status:</b> '+esc(r.status==='menunggu'?'Menunggu pengujian':r.pembina_review_status==='selesai'?'Sudah disahkan Pembina':'Menunggu pemeriksaan Pembina');
  $('openExamOnThisPhone').onclick=()=>{window.location.href=url;};$('studentLetterModal').classList.remove('hidden');
 }
 $('closeStudentLetter').onclick=()=>$('studentLetterModal').classList.add('hidden');
@@ -1059,17 +1059,19 @@ async function createExamReferral(studentId,skuItemId,subpointId=null){
  pendingReferralRequest={studentId,skuItemId,subpointId};
  $('examModalInfo').textContent='Isi identitas penguji yang akan melakukan penilaian dan tanda tangan pada HP peserta.';
  $('expectedExaminerName').value='';$('expectedExaminerInstitution').value='';
- $('createExamAccess').classList.remove('hidden');
+ const minSchedule=new Date(Date.now()+15*60*1000);$('examScheduledAt').min=new Date(minSchedule.getTime()-minSchedule.getTimezoneOffset()*60000).toISOString().slice(0,16);
+ const defaultSchedule=new Date(Date.now()+60*60*1000);$('examScheduledAt').value=new Date(defaultSchedule.getTime()-defaultSchedule.getTimezoneOffset()*60000).toISOString().slice(0,16);
+ $('examScheduleNote').value='';$('createExamAccess').classList.remove('hidden');
  $('examModalMsg').textContent='';$('examModal').classList.remove('hidden');
 }
 $('createExamAccess').onclick=async()=>{
  if(!pendingReferralRequest)return;
- const examinerName=$('expectedExaminerName').value.trim(),examinerInstitution=$('expectedExaminerInstitution').value.trim();
- if(examinerName.length<2){$('examModalMsg').textContent='Nama penguji wajib diisi.';return;}
+ const examinerName=$('expectedExaminerName').value.trim(),examinerInstitution=$('expectedExaminerInstitution').value.trim(),scheduledAt=$('examScheduledAt').value,scheduleNote=$('examScheduleNote').value.trim();
+ if(examinerName.length<2){$('examModalMsg').textContent='Nama penguji wajib diisi.';return;}if(!scheduledAt||new Date(scheduledAt).getTime()<=Date.now()){$('examModalMsg').textContent='Pilih jadwal ujian pada waktu mendatang.';return;}
  const btn=$('createExamAccess');btn.disabled=true;btn.textContent='Membuat akses...';
  try{
   const q=pendingReferralRequest;
-  const {data,error}=await sb.functions.invoke('sku-digital-exam',{body:{action:'create_referral',student_id:q.studentId,sku_item_id:q.skuItemId,subpoint_id:q.subpointId,examiner_name:examinerName,examiner_institution:examinerInstitution}});
+  const {data,error}=await sb.functions.invoke('sku-digital-exam',{body:{action:'create_referral',student_id:q.studentId,sku_item_id:q.skuItemId,subpoint_id:q.subpointId,examiner_name:examinerName,examiner_institution:examinerInstitution,scheduled_at:new Date(scheduledAt).toISOString(),schedule_note:scheduleNote}});
   if(error)throw new Error(data?.message||error.message);if(!data?.ok)throw new Error(data?.message||'Akses penguji gagal dibuat.');
   $('examModalMsg').textContent='Akses penguji '+data.referral.referral_no+' berhasil dibuat. Peserta dapat membukanya dari akun di HP peserta.';
   $('examModal').classList.add('hidden');
