@@ -127,6 +127,30 @@ button:focus-visible,a:focus-visible{outline:3px solid #c62828!important;outline
 [class~="bg-amber-900"],[class~="bg-amber-950"]{background:linear-gradient(120deg,#2b1b12,#765235)!important;color:#fff!important}
 [class~="text-amber-200"],[class~="text-amber-300"]{color:#684600!important}
 
+
+/* KONTRAS WAJIB: kuning = teks hitam; cokelat tua = teks putih */
+header,.brand{
+ color:#fff!important;
+ background:linear-gradient(112deg,#24150e 0%,#392316 28%,#60402a 52%,#392316 76%,#1f120c 100%)!important;
+}
+header *,header a,header button,.brand *,.brand a{
+ color:#fff!important;
+}
+header::before,.brand::before{
+ background:linear-gradient(125deg,transparent 0 28%,rgba(255,255,255,.16) 43%,transparent 56% 100%)!important;
+}
+button:not(.secondary):not(.danger),.btn-primary,
+[class~="bg-yellow-300"],[class~="bg-yellow-400"],[class~="bg-yellow-500"],
+[class~="bg-amber-300"],[class~="bg-amber-400"],[class~="bg-amber-500"],
+.pill,.tab.active{
+ color:#17120a!important;
+}
+[class~="bg-yellow-300"] *,[class~="bg-yellow-400"] *,[class~="bg-yellow-500"] *,
+[class~="bg-amber-300"] *,[class~="bg-amber-400"] *,[class~="bg-amber-500"] *,
+.pill *, .tab.active *{
+ color:#17120a!important;
+}
+
 </style>
 </head>
 <body class="min-h-screen">
