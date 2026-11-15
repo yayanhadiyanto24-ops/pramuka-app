@@ -270,11 +270,7 @@ async function loadPangkalanPending(){
     students.querySelectorAll('[data-save-sangga]').forEach(b=>b.onclick=async()=>{const id=b.dataset.saveSangga,select=students.querySelector('[data-move-sangga="'+id+'"]');b.disabled=true;b.textContent='Memindahkan...';try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pindah_sangga_peserta',user_id:id,id_sangga:select.value}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Pemindahan gagal.');$('sanggaMsg').textContent=data.message;await loadSanggaAdmin();}catch(err){$('sanggaMsg').textContent=err.message||'Pemindahan gagal.';b.disabled=false;b.textContent='Pindahkan';}});
    }catch(err){names.textContent='Gagal memuat sangga: '+(err.message||'Kesalahan');students.textContent='';}
   }
-  $('addSanggaBtn').addEventListener('click',async()=>{
-   const b=$('addSanggaBtn'),name=$('newSanggaName').value.trim();if(!name){$('sanggaMsg').textContent='Isi nama sangga terlebih dahulu.';return;}
-   b.disabled=true;b.textContent='Menambahkan...';try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'tambah_sangga_pembina',nama_sangga:name}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Gagal menambahkan sangga.');$('newSanggaName').value='';$('sanggaMsg').textContent='Sangga berhasil ditambahkan.';await loadSanggaAdmin();}catch(err){$('sanggaMsg').textContent=err.message||'Gagal menambahkan sangga.';}finally{b.disabled=false;b.textContent='Tambah sangga';}
-  });
-  async function loadPangkalanAdmin(){
+    async function loadPangkalanAdmin(){
  $('pangkalanMsg').textContent='Memuat data pangkalan...';
  try{
   const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pembina_pangkalan'}});
@@ -287,6 +283,7 @@ async function loadPangkalanPending(){
   $('copyPangkalanJoinCode').onclick=()=>navigator.clipboard?.writeText(p.kode_gabung_peserta||'');
   $('pangkalanMsg').textContent='Data pangkalan siap diperbarui.';
    await loadPangkalanPending();
+    await loadSanggaAdmin();
  }catch(err){$('pangkalanMsg').textContent='Gagal memuat administrasi pangkalan: '+(err.message||'Kesalahan');}
 }
 $('savePangkalan').addEventListener('click',async()=>{
