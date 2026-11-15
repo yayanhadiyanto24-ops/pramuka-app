@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Sistem Informasi Pramuka Penegak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-amber-50 min-h-screen flex items-center justify-center p-4 font-sans">
+    <div class="bg-white max-w-lg w-full rounded-2xl shadow-xl overflow-hidden border border-amber-200">
+        <div class="bg-amber-900 text-white p-6 text-center">
+            <h1 class="text-2xl font-bold tracking-wide">Pendaftaran Gugus Depan</h1>
+            <p class="text-amber-200 text-sm mt-1">Pilih jalur pendaftaran sesuai peran Anda</p>
+        </div>
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+            <button id="tab-peserta" type="button" onclick="switchTab('peserta')" class="py-3.5 text-sm font-bold text-amber-900 border-b-2 border-amber-800 bg-white transition">⚜️ Peserta Didik</button>
+            <button id="tab-pembina" type="button" onclick="switchTab('pembina')" class="py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition">🎖️ Pembina / Pangkalan</button>
+        </div>
+        <div id="alert-box" role="status" aria-live="polite" class="hidden mx-6 mt-4 p-3 rounded-lg text-sm font-medium"></div>
+        <form id="form-peserta" class="p-6 space-y-4">
+            <div class="bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded-lg text-xs">Minta <strong>Kode Gabung Peserta</strong> kepada Pembina pangkalanmu terlebih dahulu.</div>
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-kode">Kode Gabung Pangkalan *</label><input id="pd-kode" required autocomplete="off" placeholder="Kode dari Pembina" class="w-full px-3 py-2 border border-gray-300 rounded-lg uppercase font-mono"></div>
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-nama">Nama Lengkap *</label><input id="pd-nama" required maxlength="150" placeholder="Nama sesuai identitas" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-jk">Jenis Kelamin *</label><select id="pd-jk" required class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"><option value="L">Laki-laki (Putra)</option><option value="P">Perempuan (Putri)</option></select></div>
+                <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-tingkatan">Tingkatan *</label><select id="pd-tingkatan" required class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"><option value="Calon Penegak">Calon Penegak</option><option value="Bantara">Penegak Bantara</option><option value="Laksana">Penegak Laksana</option><option value="Garuda">Penegak Garuda</option></select></div>
+            </div>
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-email">Email Aktif *</label><input id="pd-email" type="email" required autocomplete="email" maxlength="254" placeholder="email@contoh.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-password">Password *</label><input id="pd-password" type="password" required minlength="8" autocomplete="new-password" placeholder="Minimal 8 karakter" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
+            <button type="submit" id="btn-peserta" class="w-full bg-amber-800 hover:bg-amber-900 disabled:opacity-60 text-white font-bold py-3 rounded-lg shadow transition">Daftar Sebagai Peserta Didik</button>
+        </form>
+        <form id="form-pembina" class="hidden p-6 space-y-4">
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pb-mode">Status Pangkalan *</label><select id="pb-mode" onchange="toggleModePembina()" class="w-full px-3 py-2 border border-amber-400 bg-amber-50 rounded-lg font-semibold text-amber-900"><option value="baru">Daftarkan Pangkalan Baru (Pembina Pertama)</option><option value="gabung">Gabung ke Pangkalan yang Sudah Terdaftar</option></select></div>
+            <div id="box-pangkalan-baru" class="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div><label class="block text-xs font-bold text-gray-700" for="pb-nama-pangkalan">Nama Pangkalan / Sekolah *</label><input id="pb-nama-pangkalan" maxlength="180" placeholder="Contoh: SMA Negeri 1 Nusantara" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-bold text-gray-700" for="pb-no-gudep">Nomor Gudep (Opsional)</label><input id="pb-no-gudep" maxlength="40" placeholder="Kosongkan jika belum terbit" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><label class="block text-xs font-bold text-gray-700" for="pb-ambalan-pa">Nama Ambalan Putra *</label><input id="pb-ambalan-pa" maxlength="120" placeholder="Contoh: Prabu Siliwangi" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></div>
+                    <div><label class="block text-xs font-bold text-gray-700" for="pb-ambalan-pi">Nama Ambalan Putri *</label><input id="pb-ambalan-pi" maxlength="120" placeholder="Contoh: Nyi Subang Larang" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></div>
+                </div>
+            </div>
+            <div id="box-pangkalan-gabung" class="hidden p-3 bg-gray-50 rounded-lg border border-gray-200"><label class="block text-xs font-bold text-gray-700 mb-1" for="pb-kode-gabung">Kode Khusus Pembina *</label><input id="pb-kode-gabung" placeholder="Masukkan kode dari admin pangkalan" class="w-full px-3 py-2 border border-gray-300 rounded-lg uppercase font-mono text-sm"></div>
+            <hr class="border-gray-200">
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pb-nama">Nama Lengkap Pembina *</label><input id="pb-nama" required maxlength="150" placeholder="Nama lengkap beserta gelar" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pb-jk">Jenis Kelamin *</label><select id="pb-jk" required class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
+                <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pb-jabatan">Jabatan *</label><select id="pb-jabatan" required class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"><option value="Pembina Gudep">Pembina Gudep</option><option value="Pembina Satuan Putra">Pembina Satuan Putra</option><option value="Pembina Satuan Putri">Pembina Satuan Putri</option><option value="Kamabigus">Kamabigus</option></select></div>
+            </div>
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pb-email">Email Pembina *</label><input id="pb-email" type="email" required autocomplete="email" maxlength="254" placeholder="pembina@sekolah.sch.id" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pb-password">Password *</label><input id="pb-password" type="password" required minlength="8" autocomplete="new-password" placeholder="Minimal 8 karakter" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
+            <button type="submit" id="btn-pembina" class="w-full bg-amber-800 hover:bg-amber-900 disabled:opacity-60 text-white font-bold py-3 rounded-lg shadow transition">Daftarkan Pembina</button>
+        </form>
+    </div>
+<script>
+'use strict';
+// Konfigurasi publik: isi URL dan anon/publishable key proyek PRAMUKA.
+// Jangan pernah menaruh service_role key di browser.
+const SUPABASE_URL = 'https://bopxmtxfrlrnywwhywne.supabase.co';
+const SUPABASE_ANON_KEY = 'ISI_ANON_KEY_PROYEK_PRAMUKA';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function switchTab(role) {
+    const peserta = role === 'peserta';
+    document.getElementById('form-peserta').classList.toggle('hidden', !peserta);
+    document.getElementById('form-pembina').classList.toggle('hidden', peserta);
+    document.getElementById('tab-peserta').className = peserta ? 'py-3.5 text-sm font-bold text-amber-900 border-b-2 border-amber-800 bg-white transition' : 'py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition';
+    document.getElementById('tab-pembina').className = !peserta ? 'py-3.5 text-sm font-bold text-amber-900 border-b-2 border-amber-800 bg-white transition' : 'py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition';
+    hideAlert();
+}
+function toggleModePembina() {
+    const baru = document.getElementById('pb-mode').value === 'baru';
+    document.getElementById('box-pangkalan-baru').classList.toggle('hidden', !baru);
+    document.getElementById('box-pangkalan-gabung').classList.toggle('hidden', baru);
+    ['pb-nama-pangkalan','pb-ambalan-pa','pb-ambalan-pi'].forEach(id => document.getElementById(id).required = baru);
+    document.getElementById('pb-kode-gabung').required = !baru;
+}
+function showAlert(message, error = false) {
+    const box = document.getElementById('alert-box');
+    box.textContent = message;
+    box.className = 'mx-6 mt-4 p-3 rounded-lg text-sm font-medium ' + (error ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-green-100 text-green-800 border border-green-300');
+}
+function hideAlert() { document.getElementById('alert-box').classList.add('hidden'); }
+function setBusy(button, busy, label) { button.disabled = busy; button.textContent = busy ? 'Memproses...' : label; }
+function validateConfig() {
+    if (SUPABASE_URL.includes('bopxmtxfrlrnywwhywne') && SUPABASE_ANON_KEY === 'ISI_ANON_KEY_PROYEK_PRAMUKA') {
+        throw new Error('Konfigurasi belum lengkap: masukkan anon/publishable key proyek PRAMUKA.');
+    }
+    if (!window.supabase) throw new Error('Supabase SDK gagal dimuat. Periksa koneksi internet.');
+}
+async function submitRegistration(payload, button, label) {
+    setBusy(button, true, label);
+    try {
+        validateConfig();
+        // Endpoint aman akan dibuat sebagai Supabase Edge Function.
+        // Browser tidak menulis langsung ke tabel dan tidak menerima service_role key.
+        const { data, error } = await supabaseClient.functions.invoke('pramuka-register', { body: payload });
+        if (error) throw error;
+        if (!data || data.ok !== true) throw new Error(data?.message || 'Pendaftaran belum dapat diproses.');
+        showAlert(data.message || 'Pendaftaran berhasil dikirim. Silakan periksa email Anda.');
+        return true;
+    } catch (err) {
+        showAlert(err.message || 'Terjadi kesalahan saat pendaftaran.', true);
+        return false;
+    } finally { setBusy(button, false, label); }
+}
+document.getElementById('form-peserta').addEventListener('submit', async e => {
+    e.preventDefault();
+    const ok = await submitRegistration({
+        role: 'peserta_didik',
+        kode_gabung: document.getElementById('pd-kode').value.trim().toUpperCase(),
+        nama_lengkap: document.getElementById('pd-nama').value.trim(),
+        jenis_kelamin: document.getElementById('pd-jk').value,
+        tingkatan: document.getElementById('pd-tingkatan').value,
+        email: document.getElementById('pd-email').value.trim(),
+        password: document.getElementById('pd-password').value
+    }, document.getElementById('btn-peserta'), 'Daftar Sebagai Peserta Didik');
+    if (ok) e.target.reset();
+});
+document.getElementById('form-pembina').addEventListener('submit', async e => {
+    e.preventDefault();
+    const baru = document.getElementById('pb-mode').value === 'baru';
+    const payload = {
+        role: 'pembina',
+        mode: baru ? 'baru' : 'gabung',
+        nama_lengkap: document.getElementById('pb-nama').value.trim(),
+        jenis_kelamin: document.getElementById('pb-jk').value,
+        jabatan: document.getElementById('pb-jabatan').value,
+        email: document.getElementById('pb-email').value.trim(),
+        password: document.getElementById('pb-password').value
+    };
+    if (baru) Object.assign(payload, {
+        nama_pangkalan: document.getElementById('pb-nama-pangkalan').value.trim(),
+        no_gudep: document.getElementById('pb-no-gudep').value.trim() || null,
+        nama_ambalan_putra: document.getElementById('pb-ambalan-pa').value.trim(),
+        nama_ambalan_putri: document.getElementById('pb-ambalan-pi').value.trim()
+    });
+    else payload.kode_gabung = document.getElementById('pb-kode-gabung').value.trim().toUpperCase();
+    const ok = await submitRegistration(payload, document.getElementById('btn-pembina'), 'Daftarkan Pembina');
+    if (ok) e.target.reset();
+    toggleModePembina();
+});
+toggleModePembina();
+</script>
+</body>
+</html>
