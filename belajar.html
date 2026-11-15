@@ -138,7 +138,7 @@ window.addEventListener('unhandledrejection',e=>{const m=$('loginMsg');if(m&&!cu
 const SUPABASE_KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
 const sb=window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 if(!sb){$('loginMsg').textContent='Layanan login belum termuat. Periksa koneksi internet, lalu muat ulang halaman.';}
-let currentUser=null, account=null, participant=null, teacher=null, items=[], lessons=[], progress=[], general=[], examRecords=[], subpoints=[], subpointProgress=[], monitorReportHtml='';
+let currentUser=null, account=null, participant=null, teacher=null, items=[], lessons=[], progress=[], general=[], examRecords=[], subpoints=[], subpointProgress=[], monitorReportHtml='', monitorStudents=[];
 let selectedItem=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const statusLabel=s=>({dipelajari:'Sedang dipelajari',siap_diuji:'Menunggu ujian',perlu_perbaikan:'Perlu perbaikan',lulus:'Lulus'})[s]||'Belum mulai';
