@@ -104,7 +104,15 @@ async function submitRegistration(payload, button, label) {
         showAlert(msg);
         return true;
     } catch (err) {
-        showAlert(err.message || 'Terjadi kesalahan saat pendaftaran.', true);
+        let message = err.message || 'Terjadi kesalahan saat pendaftaran.';
+        // Ambil pesan aman yang dikirim Edge Function saat status HTTP bukan 2xx.
+        if (err.context && typeof err.context.json === 'function') {
+            try {
+                const detail = await err.context.json();
+                if (detail && detail.message) message = detail.message;
+            } catch (_) {}
+        }
+        showAlert(message, true);
         return false;
     } finally { setBusy(button, false, label); }
 }
