@@ -113,7 +113,7 @@ $('loginForm').addEventListener('submit',async e=>{
  e.preventDefault();
  const email=$('email').value.trim(),password=$('password').value;
  if(!email||!password){$('loginMsg').textContent='Email dan password wajib diisi.';return;}
- if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){$('loginMsg').textContent='Format email belum benar.';return;}
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){$('loginMsg').textContent='Format email belum benar.';return;}
  $('loginBtn').disabled=true;$('loginBtn').textContent='Memeriksa...';$('loginMsg').textContent='Menghubungkan ke server...';
  try{if(!sb)throw new Error('Layanan login belum termuat. Muat ulang halaman.');const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;await boot(data.user);}
  catch(err){$('loginMsg').textContent='Login belum berhasil: '+(err.message||'Periksa email dan password.');}
