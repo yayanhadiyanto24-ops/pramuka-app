@@ -55,6 +55,10 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
   </section>
   <section id="view-pantau" class="hidden space-y-4">
    <div><h2 class="text-xl font-bold">Perkembangan Peserta Didik</h2><p class="text-sm muted">Daftar peserta dan hasil belajar yang berada dalam cakupan pangkalan Pembina atau Admin Utama.</p></div>
+   <div class="flex flex-wrap gap-2">
+    <button id="exportMonitorWord" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Unduh laporan Word</button>
+    <button id="exportMonitorPdf" class="rounded-lg bg-slate-700 text-white px-4 py-2 text-sm font-semibold">Cetak / Simpan PDF</button>
+   </div>
    <div id="monitorSummary" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div><div id="monitorList" class="space-y-5"></div>
   </section>
   <p id="appMsg" class="text-sm muted" role="status"></p>
@@ -67,7 +71,7 @@ const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
 const SUPABASE_KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
-let currentUser=null, account=null, participant=null, teacher=null, items=[], lessons=[], progress=[], general=[], examRecords=[];
+let currentUser=null, account=null, participant=null, teacher=null, items=[], lessons=[], progress=[], general=[], examRecords=[], monitorReportHtml='';
 let selectedItem=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const statusLabel=s=>({dipelajari:'Sedang dipelajari',siap_diuji:'Menunggu ujian',perlu_perbaikan:'Perlu perbaikan',lulus:'Lulus'})[s]||'Belum mulai';
@@ -179,6 +183,21 @@ async function saveProgress(status){
  const {data}=await sb.from('sku_learning_progress').select('*').eq('id_user',currentUser.id);
  progress=(data||[]);openSku(selectedItem.id_sku_item);setMsg(status==='siap_diuji'?'Pengajuan ujian terkirim kepada Pembina.':'Progres belajar tersimpan.');
 }
+function exportMonitorReport(kind){
+ if(!monitorReportHtml){setMsg('Data laporan belum tersedia. Muat ulang halaman pantau.');return;}
+ const full='<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Perkembangan SKU</title><style>body{font-family:Arial,sans-serif;color:#222;padding:24px}h1,h2{color:#78350f}table{width:100%;border-collapse:collapse;margin:12px 0 24px;font-size:12px}th,td{border:1px solid #bbb;padding:6px;text-align:left;vertical-align:top}th{background:#fef3c7}.muted{color:#555}.group{page-break-inside:avoid;margin-bottom:24px}@media print{body{padding:0}h2{page-break-after:avoid}}</style></head><body>'+monitorReportHtml+'</body></html>';
+ if(kind==='word'){
+  const blob=new Blob(['\ufeff',full],{type:'application/msword'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='Laporan_Perkembangan_SKU.doc';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+ }else{
+  const w=window.open('','_blank');
+  if(!w){setMsg('Jendela cetak diblokir. Izinkan pop-up untuk halaman ini lalu coba lagi.');return;}
+  w.document.open();w.document.write(full);w.document.close();w.focus();setTimeout(()=>w.print(),500);
+ }
+}
+$('exportMonitorWord').addEventListener('click',()=>exportMonitorReport('word'));
+$('exportMonitorPdf').addEventListener('click',()=>exportMonitorReport('pdf'));
 async function loadMonitor(){
  const [{data:students,error},{data:rows,error:pe},{data:pangkalan,error:ge}]=await Promise.all([
   sb.from('profil_peserta_didik').select('id_user,nama_lengkap,jenis_kelamin,tingkatan,sangga,id_pangkalan').order('id_pangkalan').order('jenis_kelamin').order('nama_lengkap'),
@@ -197,6 +216,19 @@ async function loadMonitor(){
   if(!groups.has(key))groups.set(key,{p:pMap.get(s.id_pangkalan),jk:s.jenis_kelamin,students:[]});
   groups.get(key).students.push(s);
  }
+ const statusText=s=>({lulus:'Lulus',siap_diuji:'Menunggu ujian',perlu_perbaikan:'Perlu perbaikan',dipelajari:'Sedang dipelajari'})[s]||'Belum mulai';
+ const reportGroups=[...groups.values()].map(g=>{
+  const ambalan=g.jk==='L'?g.p?.nama_ambalan_putra:g.p?.nama_ambalan_putri;
+  const title=(g.p?.nama_pangkalan||'Pangkalan')+' — Ambalan '+(g.jk==='L'?'Putera':'Puteri')+' '+(ambalan||'');
+  const rows=g.students.map(s=>{
+   const ps=allProgress.filter(p=>p.id_user===s.id_user);
+   const detail=ps.map(p=>{const it=items.find(z=>z.id_sku_item===p.id_sku_item);return '<tr><td>'+esc(it?.tingkat||'-')+'</td><td>'+esc(it?.nomor_butir||'-')+'</td><td>'+esc(it?.judul_butir||'-')+'</td><td>'+esc(statusText(p.status))+'</td></tr>';}).join('');
+   const c={lulus:ps.filter(p=>p.status==='lulus').length,siap:ps.filter(p=>p.status==='siap_diuji').length,revisi:ps.filter(p=>p.status==='perlu_perbaikan').length,belajar:ps.filter(p=>p.status==='dipelajari').length};
+   return '<h3>'+esc(s.nama_lengkap)+' — '+esc(s.tingkatan||'-')+' — Sangga '+esc(s.sangga||'-')+'</h3><p class="muted">Lulus: '+c.lulus+' · Menunggu ujian: '+c.siap+' · Perlu perbaikan: '+c.revisi+' · Sedang dipelajari: '+c.belajar+'</p><table><thead><tr><th>Tingkat</th><th>Butir</th><th>Materi</th><th>Status</th></tr></thead><tbody>'+detail+'</tbody></table>';
+  }).join('');
+  return '<section class="group"><h2>'+esc(title)+'</h2>'+rows+'</section>';
+ }).join('');
+ monitorReportHtml='<h1>Laporan Perkembangan SKU Pramuka Penegak</h1><p class="muted">Dibuat: '+new Date().toLocaleString('id-ID')+'</p>'+reportGroups;
  const html=[...groups.values()].map(g=>{
   const ambalan=g.jk==='L'?g.p?.nama_ambalan_putra:g.p?.nama_ambalan_putri;
   const groupTitle=(g.p?.nama_pangkalan||'Pangkalan')+' · Ambalan '+(g.jk==='L'?'Putra':'Putri')+' — '+(ambalan||'-');
