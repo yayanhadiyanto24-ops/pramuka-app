@@ -249,8 +249,8 @@ async function saveProfile(extra={}){
  if(isStudent)Object.assign(payload,{pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows});
  $('profileMsg').textContent='Menyimpan profil...';$('saveProfile').disabled=true;
  try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:payload});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Profil gagal disimpan.');
-  if(isTeacher)teacher={...teacher,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data};
-  if(isStudent){const nextLevel=participant.tingkatan;participant={...participant,nta:payload.nta,tingkatan:nextLevel,foto_profil_data:profilePhotoData,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows};}if($('studentTierLabel'))$('studentTierLabel').textContent='Tingkatan: '+participant.tingkatan;
+  if(isTeacher)teacher={...teacher,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:{})};
+  if(isStudent){const nextLevel=participant.tingkatan;participant={...participant,nta:payload.nta,tingkatan:nextLevel,foto_profil_data:profilePhotoData,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:{})};}if($('studentTierLabel'))$('studentTierLabel').textContent='Tingkatan: '+participant.tingkatan;
   if(!isTeacher&&!isStudent)account={...account,foto_profil_data:profilePhotoData};
   renderProfile();
    $('profileMsg').textContent='Profil berhasil disimpan.';
