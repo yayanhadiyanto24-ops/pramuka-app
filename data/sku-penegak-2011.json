@@ -27,36 +27,8 @@
                   "Mengetahui hukum dan tata cara merawat atau mengurus jenazah",
                   "Membaca doa ijab kabul zakat fitrah",
                   "Menghafal sekurang-kurangnya satu hadis dan menjelaskannya"
-                ],
-                "katolik": [
-                  "Mengetahui dan memahami makna serta arti Gereja Katolik",
-                  "Dapat memimpin doa dan membangun gerakan cinta kasih dalam keberagaman agama"
-                ],
-                "kristen_protestan": [
-                  "Mendalami Hukum Kasih dan mengamalkannya",
-                  "Mengikuti kebaktian dan kegiatan gereja",
-                  "Memimpin doa dalam pertemuan Penegak",
-                  "Menolong tanpa pembedaan dan mengikuti kegiatan kemanusiaan",
-                  "Membantu pelayanan sekolah minggu"
-                ],
-                "hindu": [
-                  "Menjelaskan sejarah perkembangan agama Hindu di Indonesia",
-                  "Menjelaskan makna persembahyangan sehari-hari dan hari besar keagamaan",
-                  "Menjelaskan tujuan kelahiran sebagai manusia",
-                  "Menjelaskan Tri Hita Karana dan pelestarian lingkungan",
-                  "Mempraktikkan gerakan Asanas dari Hatta Yoga",
-                  "Melafalkan atau mengkidungkan salah satu bentuk Dharma Gita",
-                  "Mendeskripsikan struktur, fungsi, dan sejarah pura dalam cakupan Sad Kahyangan"
-                ],
-                "buddha": [
-                  "Mengungkapkan Buddha Dharma sebagai salah satu agama",
-                  "Merumuskan dasar keyakinan dan cara mengembangkannya",
-                  "Menjelaskan sejarah Buddha Gotama",
-                  "Menjelaskan Tiratana sebagai pelindung",
-                  "Menjelaskan kisah sejarah penulisan kitab suci Tripitaka"
                 ]
-              },
-              "assessment_note": "Untuk cabang agama yang pada panduan menetapkan pengisian melalui tokoh agama, guru agama, atau orang tua, pertahankan mekanisme tersebut."
+              }
             }
           ]
         },
@@ -64,46 +36,112 @@
           "code": "EMOSIONAL",
           "name": "Emosional",
           "items": [
-            {"number":2,"title":"Berani menyampaikan kritik dan saran dengan sopan dan santun kepada sesama teman"},
-            {"number":3,"title":"Dapat mengikuti jalannya diskusi dengan baik"}
+            {
+              "number": 2,
+              "title": "Berani menyampaikan kritik dan saran dengan sopan dan santun kepada sesama teman"
+            },
+            {
+              "number": 3,
+              "title": "Dapat mengikuti jalannya diskusi dengan baik"
+            }
           ]
         },
         {
           "code": "SOSIAL",
           "name": "Sosial",
           "items": [
-            {"number":4,"title":"Saling menghormati dan toleransi dalam bakti antarumat beragama"},
-            {"number":5,"title":"Mengikuti pertemuan Ambalan sekurang-kurangnya 2 kali setiap bulan"},
-            {"number":6,"title":"Setia membayar iuran kepada gugus depan dengan uang hasil usaha sendiri"},
-            {"number":7,"title":"Berbahasa Indonesia dengan baik dan benar dalam pergaulan sehari-hari"},
-            {"number":8,"title":"Membantu mengelola kegiatan di Ambalan"},
-            {"number":9,"title":"Melakukan kerja bakti di masyarakat sekurang-kurangnya 2 kali"},
-            {"number":10,"title":"Memimpin kelompok dalam menampilkan salah satu jenis kesenian daerah"}
+            {
+              "number": 4,
+              "title": "Saling menghormati dan toleransi dalam bakti antarumat beragama"
+            },
+            {
+              "number": 5,
+              "title": "Mengikuti pertemuan Ambalan sekurang-kurangnya 2 kali setiap bulan"
+            },
+            {
+              "number": 6,
+              "title": "Setia membayar iuran kepada gugus depan dengan uang hasil usaha sendiri"
+            },
+            {
+              "number": 7,
+              "title": "Berbahasa Indonesia dengan baik dan benar dalam pergaulan sehari-hari"
+            },
+            {
+              "number": 8,
+              "title": "Membantu mengelola kegiatan di Ambalan"
+            },
+            {
+              "number": 9,
+              "title": "Melakukan kerja bakti di masyarakat sekurang-kurangnya 2 kali"
+            },
+            {
+              "number": 10,
+              "title": "Memimpin kelompok dalam menampilkan salah satu jenis kesenian daerah"
+            }
           ]
         },
         {
           "code": "INTELEKTUAL",
           "name": "Intelektual",
           "items": [
-            {"number":11,"title":"Menjelaskan isi AD dan ART Gerakan Pramuka"},
-            {"number":12,"title":"Menjelaskan sejarah kepramukaan Indonesia dan dunia"},
-            {"number":13,"title":"Menggunakan jam, kompas, tanda jejak, dan tanda alam dalam pengembaraan"},
-            {"number":14,"title":"Menjelaskan Pancasila"},
-            {"number":15,"title":"Menjelaskan organisasi ASEAN dan PBB"},
-            {"number":16,"title":"Memiliki keterampilan kewirausahaan"},
-            {"number":17,"title":"Membuat barang atau karya yang bermanfaat dari bahan bekas"},
-            {"number":18,"title":"Menerapkan keterampilan tali-temali dan pionering"}
+            {
+              "number": 11,
+              "title": "Menjelaskan isi AD dan ART Gerakan Pramuka"
+            },
+            {
+              "number": 12,
+              "title": "Menjelaskan sejarah kepramukaan Indonesia dan dunia"
+            },
+            {
+              "number": 13,
+              "title": "Menggunakan jam, kompas, tanda jejak, dan tanda alam dalam pengembaraan"
+            },
+            {
+              "number": 14,
+              "title": "Menjelaskan Pancasila"
+            },
+            {
+              "number": 15,
+              "title": "Menjelaskan organisasi ASEAN dan PBB"
+            },
+            {
+              "number": 16,
+              "title": "Memiliki keterampilan kewirausahaan"
+            },
+            {
+              "number": 17,
+              "title": "Membuat barang atau karya yang bermanfaat dari bahan bekas"
+            },
+            {
+              "number": 18,
+              "title": "Menerapkan keterampilan tali-temali dan pionering"
+            }
           ]
         },
         {
           "code": "FISIK",
           "name": "Fisik",
           "items": [
-            {"number":19,"title":"Berolahraga teratur, berenang gaya bebas, dan menguasai satu cabang olahraga lain"},
-            {"number":20,"title":"Memahami perkembangan fisik dan psikis laki-laki dan perempuan"},
-            {"number":21,"title":"Memimpin baris-berbaris"},
-            {"number":22,"title":"Menjelaskan penyakit, penyebab, dan pencegahannya"},
-            {"number":23,"title":"Mengikuti perkemahan selama sekurang-kurangnya 3 hari"}
+            {
+              "number": 19,
+              "title": "Berolahraga teratur, berenang gaya bebas, dan menguasai satu cabang olahraga lain"
+            },
+            {
+              "number": 20,
+              "title": "Memahami perkembangan fisik dan psikis laki-laki dan perempuan"
+            },
+            {
+              "number": 21,
+              "title": "Memimpin baris-berbaris"
+            },
+            {
+              "number": 22,
+              "title": "Menjelaskan penyakit, penyebab, dan pencegahannya"
+            },
+            {
+              "number": 23,
+              "title": "Mengikuti perkemahan selama sekurang-kurangnya 3 hari"
+            }
           ]
         }
       ]
@@ -127,13 +165,8 @@
                   "Mengetahui tata cara merawat atau mengurus jenazah",
                   "Pernah bertugas sebagai Amil Zakat",
                   "Menghafal ayat Al-Qur'an bertema tertentu dan menjelaskannya"
-                ],
-                "katolik": ["Materi dan pengisian mengikuti panduan serta penilaian tokoh agama/guru agama/orang tua."],
-                "kristen_protestan": ["Materi dan pengisian mengikuti butir agama Kristen Protestan pada panduan; penilaian dilakukan sesuai ketentuan pembimbing agama."],
-                "hindu": ["Materi dan pengisian mengikuti butir agama Hindu pada panduan; penilaian dilakukan sesuai ketentuan pembimbing agama."],
-                "buddha": ["Materi dan pengisian mengikuti butir agama Buddha pada panduan; penilaian dilakukan sesuai ketentuan pembimbing agama."]
-              },
-              "assessment_note": "Jangan menyamakan materi lintas agama. Butir rinci setiap agama perlu diverifikasi terhadap halaman sumber sebelum dipublikasikan."
+                ]
+              }
             }
           ]
         },
@@ -141,45 +174,108 @@
           "code": "EMOSIONAL",
           "name": "Emosional",
           "items": [
-            {"number":2,"title":"Menerima kritik dan menyampaikan pendapat dengan tertib, sopan, dan santun"},
-            {"number":3,"title":"Mengikuti dan/atau memimpin diskusi Ambalan serta mengambil keputusan"}
+            {
+              "number": 2,
+              "title": "Menerima kritik dan menyampaikan pendapat dengan tertib, sopan, dan santun"
+            },
+            {
+              "number": 3,
+              "title": "Mengikuti dan/atau memimpin diskusi Ambalan serta mengambil keputusan"
+            }
           ]
         },
         {
           "code": "SOSIAL",
           "name": "Sosial",
           "items": [
-            {"number":4,"title":"Menjadi penengah dan memberi solusi ketika terjadi ketidaksepahaman"},
-            {"number":5,"title":"Mengikuti pertemuan Ambalan sekurang-kurangnya 3 kali setiap bulan selama minimal 4 bulan"},
-            {"number":6,"title":"Membayar iuran dari usaha sendiri dan membantu administrasi keuangan Ambalan"},
-            {"number":7,"title":"Memimpin rapat dan membuat risalah rapat"},
-            {"number":8,"title":"Memimpin kegiatan Ambalan sebagai Ketua Sangga Kerja"},
-            {"number":9,"title":"Memimpin kerja bakti di masyarakat sekurang-kurangnya 2 kali"},
-            {"number":10,"title":"Memimpin kelompok dalam menampilkan kesenian daerah"}
+            {
+              "number": 4,
+              "title": "Menjadi penengah dan memberi solusi ketika terjadi ketidaksepahaman"
+            },
+            {
+              "number": 5,
+              "title": "Mengikuti pertemuan Ambalan sekurang-kurangnya 3 kali setiap bulan selama minimal 4 bulan"
+            },
+            {
+              "number": 6,
+              "title": "Membayar iuran dari usaha sendiri dan membantu administrasi keuangan Ambalan"
+            },
+            {
+              "number": 7,
+              "title": "Memimpin rapat dan membuat risalah rapat"
+            },
+            {
+              "number": 8,
+              "title": "Memimpin kegiatan Ambalan sebagai Ketua Sangga Kerja"
+            },
+            {
+              "number": 9,
+              "title": "Memimpin kerja bakti di masyarakat sekurang-kurangnya 2 kali"
+            },
+            {
+              "number": 10,
+              "title": "Memimpin kelompok dalam menampilkan kesenian daerah"
+            }
           ]
         },
         {
           "code": "INTELEKTUAL",
           "name": "Intelektual",
           "items": [
-            {"number":11,"title":"Menjelaskan isi AD dan ART Gerakan Pramuka"},
-            {"number":12,"title":"Menjelaskan sejarah kepramukaan Indonesia dan dunia"},
-            {"number":13,"title":"Merencanakan dan melaksanakan pengembaraan/perkemahan sekurang-kurangnya 3 hari"},
-            {"number":14,"title":"Menjelaskan sejarah, arti, tata cara penggunaan, dan kiasan Sang Merah Putih serta ketentuan perundang-undangannya"},
-            {"number":15,"title":"Menjelaskan peran Indonesia dalam ASEAN dan PBB"},
-            {"number":16,"title":"Melakukan kegiatan kewirausahaan yang menghasilkan uang"},
-            {"number":17,"title":"Membuat peralatan teknologi tepat guna"},
-            {"number":18,"title":"Membuat struktur dari keterampilan tali-temali dan pionering yang bermanfaat"}
+            {
+              "number": 11,
+              "title": "Menjelaskan isi AD dan ART Gerakan Pramuka"
+            },
+            {
+              "number": 12,
+              "title": "Menjelaskan sejarah kepramukaan Indonesia dan dunia"
+            },
+            {
+              "number": 13,
+              "title": "Merencanakan dan melaksanakan pengembaraan/perkemahan sekurang-kurangnya 3 hari"
+            },
+            {
+              "number": 14,
+              "title": "Menjelaskan sejarah, arti, tata cara penggunaan, dan kiasan Sang Merah Putih serta ketentuan perundang-undangannya"
+            },
+            {
+              "number": 15,
+              "title": "Menjelaskan peran Indonesia dalam ASEAN dan PBB"
+            },
+            {
+              "number": 16,
+              "title": "Melakukan kegiatan kewirausahaan yang menghasilkan uang"
+            },
+            {
+              "number": 17,
+              "title": "Membuat peralatan teknologi tepat guna"
+            },
+            {
+              "number": 18,
+              "title": "Membuat struktur dari keterampilan tali-temali dan pionering yang bermanfaat"
+            }
           ]
         },
         {
           "code": "FISIK",
           "name": "Fisik",
           "items": [
-            {"number":19,"title":"Berolahraga teratur, berenang selain gaya bebas, dan menguasai satu cabang olahraga lain"},
-            {"number":20,"title":"Memahami dan menjelaskan kesehatan reproduksi"},
-            {"number":21,"title":"Mempersiapkan dan melaksanakan upacara pembukaan serta penutupan latihan sekurang-kurangnya 3 kali"},
-            {"number":22,"title":"Menjelaskan penyebab dan pencegahan penyakit infeksi, degeneratif, dan akibat perilaku tidak sehat"}
+            {
+              "number": 19,
+              "title": "Berolahraga teratur, berenang selain gaya bebas, dan menguasai satu cabang olahraga lain"
+            },
+            {
+              "number": 20,
+              "title": "Memahami dan menjelaskan kesehatan reproduksi"
+            },
+            {
+              "number": 21,
+              "title": "Mempersiapkan dan melaksanakan upacara pembukaan serta penutupan latihan sekurang-kurangnya 3 kali"
+            },
+            {
+              "number": 22,
+              "title": "Menjelaskan penyebab dan pencegahan penyakit infeksi, degeneratif, dan akibat perilaku tidak sehat"
+            }
           ]
         }
       ]
@@ -187,8 +283,16 @@
   ],
   "implementation_contract": {
     "granularity": "Setiap butir SKU menjadi unit belajar, latihan, pengajuan ujian, dan progres tersendiri.",
-    "progress_states": ["belum_dipelajari", "sedang_dipelajari", "siap_diuji", "menunggu_pengesahan", "tuntas", "perlu_perbaikan"],
+    "progress_states": [
+      "belum_dipelajari",
+      "sedang_dipelajari",
+      "siap_diuji",
+      "menunggu_pengesahan",
+      "tuntas",
+      "perlu_perbaikan"
+    ],
     "exam": "Penilaian dilakukan perorangan oleh Pembina/penguji yang berwenang; tidak ada kelulusan otomatis hanya karena materi dibuka.",
     "source_integrity": "Teks butir resmi, indikator pencapaian, materi penjelasan, dan materi pengayaan disimpan sebagai jenis konten berbeda."
-  }
+  },
+  "scope_note": "Tahap pengembangan saat ini hanya memuat materi keagamaan Islam untuk butir spiritual Bantara dan Laksana. Cabang agama lain tidak disiapkan atau ditampilkan pada tahap ini."
 }
