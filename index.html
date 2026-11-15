@@ -97,7 +97,10 @@ async function submitRegistration(payload, button, label) {
         const { data, error } = await supabaseClient.functions.invoke('pramuka-register', { body: { action: 'register', ...payload } });
         if (error) throw error;
         if (!data || data.ok !== true) throw new Error(data?.message || 'Pendaftaran belum dapat diproses.');
-        let msg = data.message || 'Pendaftaran berhasil dikirim.';\n        if (data.kode_gabung_peserta) msg += ' Kode Peserta: ' + data.kode_gabung_peserta + '.';\n        if (data.kode_gabung_pembina) msg += ' Kode Pembina: ' + data.kode_gabung_pembina + '.';\n        showAlert(msg);
+        let msg = data.message || 'Pendaftaran berhasil dikirim.';
+        if (data.kode_gabung_peserta) msg += ' Kode Peserta: ' + data.kode_gabung_peserta + '.';
+        if (data.kode_gabung_pembina) msg += ' Kode Pembina: ' + data.kode_gabung_pembina + '.';
+        showAlert(msg);
         return true;
     } catch (err) {
         showAlert(err.message || 'Terjadi kesalahan saat pendaftaran.', true);
