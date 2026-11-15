@@ -41,7 +41,15 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
     <div><h2 class="text-xl font-bold">Lengkapi Profil</h2><p class="text-sm muted">Data profil digunakan untuk identitas kepramukaan dan administrasi SKU. Isi NTA sesuai KTA Nasional.</p></div>
     <div class="grid md:grid-cols-[150px_1fr] gap-4 items-start">
      <div class="space-y-2"><img id="profilePhotoPreview" class="w-32 h-32 rounded-full object-cover border bg-slate-50" alt="Foto profil"><label class="block text-sm font-semibold">Foto profil<input id="profilePhotoInput" type="file" accept="image/*" class="block w-full text-xs mt-1"></label><p class="text-xs muted">Foto akan diperkecil otomatis.</p></div>
-     <div class="space-y-2"><label id="ntaProfileField" class="block text-sm font-semibold">NTA/KTA Pramuka Nasional<input id="profileNta" maxlength="80" class="w-full border rounded-lg p-2 mt-1" placeholder="Masukkan nomor NTA/KTA"></label><p class="text-xs muted">NTA diperlukan untuk persyaratan ujian SKU dan kenaikan tingkatan setelah validasi.</p><div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"><b>Belum memiliki KTA Pramuka Nasional?</b><p class="mt-1">Kamu tetap dapat belajar di aplikasi. Hubungi Pembina pangkalanmu dan sampaikan bahwa kamu belum memiliki KTA. Pembina akan membantu meneruskan permohonan kepada Sekretaris Kwarran untuk proses penerbitan KTA Nasional. Setelah KTA terbit, lengkapi nomor NTA dan bukti pendukung pada profil.</p></div></div>
+     <div class="space-y-2"><label id="ntaProfileField" class="block text-sm font-semibold">NTA/KTA Pramuka Nasional<input id="profileNta" maxlength="80" class="w-full border rounded-lg p-2 mt-1" placeholder="Masukkan nomor NTA/KTA"></label><p class="text-xs muted">NTA diperlukan untuk persyaratan ujian SKU dan kenaikan tingkatan setelah validasi.</p>
+      <div class="rounded-xl border p-3 space-y-2">
+       <label class="block text-sm font-semibold" for="ktaEvidenceInput">Bukti KTA Nasional (foto atau PDF)</label>
+       <input id="ktaEvidenceInput" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="block w-full text-sm border rounded-lg p-2">
+       <p class="text-xs muted">Maksimal 10 MB. Pastikan nomor NTA dan nama pada bukti dapat dibaca. Berkas hanya dapat diakses oleh pemilik akun dan petugas berwenang.</p>
+       <p id="ktaEvidenceStatus" class="text-sm text-slate-600">Belum ada bukti KTA yang diunggah.</p>
+       <a id="ktaEvidenceLink" class="hidden text-sm font-semibold text-blue-700 underline" target="_blank" rel="noopener">Lihat bukti KTA tersimpan</a>
+      </div>
+      <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"><b>Belum memiliki KTA Pramuka Nasional?</b><p class="mt-1">Kamu tetap dapat belajar di aplikasi. Hubungi Pembina pangkalanmu dan sampaikan bahwa kamu belum memiliki KTA. Pembina akan membantu meneruskan permohonan kepada Sekretaris Kwarran untuk proses penerbitan KTA Nasional. Setelah KTA terbit, lengkapi nomor NTA dan bukti pendukung pada profil.</p></div></div>
     </div>
     <div id="teacherProfileFields" class="hidden space-y-4 border-t pt-4">
      <h3 class="font-bold">Pendidikan dan Pengesahan Pembina</h3><p id="teacherQuotaInfo" class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"></p><div class="flex flex-wrap gap-2"><input id="accessCodeInput" maxlength="40" class="flex-1 min-w-0 border rounded-lg p-2 text-sm uppercase" placeholder="Kode akses tambahan dari Admin Utama"><button id="activateAccessCode" type="button" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-sm font-semibold">Aktifkan kode</button></div><p id="accessCodeMsg" class="text-xs muted"></p>
@@ -194,6 +202,11 @@ function renderProfile(){
  profilePhotoData=p?.foto_profil_data||'';
  $('profilePhotoPreview').src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect width="100%25" height="100%25" fill="%23f1f5f9"/%3E%3Ctext x="50%25" y="54%25" text-anchor="middle" fill="%2364758b" font-size="12"%3EFoto%3C/text%3E%3C/svg%3E';
  $('profileNta').value=p?.nta||'';
+ const ktaStatus=p?.nta_status_verifikasi||'belum_ada';
+ const ktaLabels={belum_ada:'Belum ada bukti KTA yang diunggah.',menunggu:'Bukti KTA sudah diunggah dan menunggu pemeriksaan.',disetujui_pembina:'Bukti KTA telah diperiksa Pembina.',terverifikasi_resmi:'KTA terverifikasi melalui kanal resmi.',ditolak:'Bukti KTA perlu diperbaiki atau diunggah ulang.'};
+ if($('ktaEvidenceStatus'))$('ktaEvidenceStatus').textContent=ktaLabels[ktaStatus]||ktaLabels.belum_ada;
+ if($('ktaEvidenceLink')){const meta=p?.nta_bukti_kta;$('ktaEvidenceLink').classList.toggle('hidden',!meta?.path);$('ktaEvidenceLink').removeAttribute('href');if(meta?.path){sb.storage.from('sku-bukti').createSignedUrl(meta.path,300).then(({data,error})=>{if(!error&&data?.signedUrl){$('ktaEvidenceLink').href=data.signedUrl;$('ktaEvidenceLink').classList.remove('hidden');}});}}
+ if($('ktaEvidenceInput'))$('ktaEvidenceInput').value='';
  if(isTeacher){
   $('yearKmd').value=teacher.tahun_kmd||'';$('yearKml').value=teacher.tahun_kml||'';$('yearKpd').value=teacher.tahun_kpd||'';$('yearKpl').value=teacher.tahun_kpl||'';
   $('teacherSignaturePreview').src=teacher.tanda_tangan_data||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="500" height="90"%3E%3Crect width="100%25" height="100%25" fill="white"/%3E%3Ctext x="50%25" y="55%25" text-anchor="middle" fill="%2394a3b8" font-size="16"%3EBelum tersimpan%3C/text%3E%3C/svg%3E';
@@ -221,6 +234,17 @@ $('profilePhotoInput').addEventListener('change',async e=>{
 async function saveProfile(extra={}){
  const isTeacher=account.role==='pembina',isStudent=account.role==='peserta_didik';
  const payload={action:'save_profile',nta:$('profileNta').value.trim(),foto_profil_data:profilePhotoData,...extra};
+ const ktaFile=$('ktaEvidenceInput')?.files?.[0];
+ if(ktaFile){
+  const allowed=['image/jpeg','image/png','image/webp','application/pdf'];
+  if(!allowed.includes(ktaFile.type)||ktaFile.size>10*1024*1024){$('profileMsg').textContent='Bukti KTA harus PDF/JPG/PNG/WEBP maksimal 10 MB.';return false;}
+  $('profileMsg').textContent='Mengunggah bukti KTA...';
+  const ext=ktaFile.type==='application/pdf'?'pdf':ktaFile.type==='image/png'?'png':ktaFile.type==='image/webp'?'webp':'jpg';
+  const path=currentUser.id+'/nta-kta/'+Date.now()+'-'+crypto.randomUUID()+'.'+ext;
+  const {error:uploadError}=await sb.storage.from('sku-bukti').upload(path,ktaFile,{contentType:ktaFile.type,upsert:false});
+  if(uploadError){$('profileMsg').textContent='Unggah bukti KTA gagal: '+uploadError.message;return false;}
+  payload.nta_bukti_kta={path,name:ktaFile.name,size:ktaFile.size,mime_type:ktaFile.type,uploaded_at:new Date().toISOString()};
+ }
  if(isTeacher)Object.assign(payload,{tahun_kmd:$('yearKmd').value||null,tahun_kml:$('yearKml').value||null,tahun_kpd:$('yearKpd').value||null,tahun_kpl:$('yearKpl').value||null,tanda_tangan_data:extra.tanda_tangan_data??teacher.tanda_tangan_data??null,paraf_data:extra.paraf_data??teacher.paraf_data??null});
  if(isStudent)Object.assign(payload,{pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows});
  $('profileMsg').textContent='Menyimpan profil...';$('saveProfile').disabled=true;
