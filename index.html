@@ -57,7 +57,7 @@
 // Konfigurasi publik: isi URL dan anon/publishable key proyek PRAMUKA.
 // Jangan pernah menaruh service_role key di browser.
 const SUPABASE_URL = 'https://bopxmtxfrlrnywwhywne.supabase.co';
-const SUPABASE_ANON_KEY = 'ISI_ANON_KEY_PROYEK_PRAMUKA';
+const SUPABASE_ANON_KEY = 'sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function switchTab(role) {
@@ -94,10 +94,10 @@ async function submitRegistration(payload, button, label) {
         validateConfig();
         // Endpoint aman akan dibuat sebagai Supabase Edge Function.
         // Browser tidak menulis langsung ke tabel dan tidak menerima service_role key.
-        const { data, error } = await supabaseClient.functions.invoke('pramuka-register', { body: payload });
+        const { data, error } = await supabaseClient.functions.invoke('pramuka-register', { body: { action: 'register', ...payload } });
         if (error) throw error;
         if (!data || data.ok !== true) throw new Error(data?.message || 'Pendaftaran belum dapat diproses.');
-        showAlert(data.message || 'Pendaftaran berhasil dikirim. Silakan periksa email Anda.');
+        let msg = data.message || 'Pendaftaran berhasil dikirim.';\n        if (data.kode_gabung_peserta) msg += ' Kode Peserta: ' + data.kode_gabung_peserta + '.';\n        if (data.kode_gabung_pembina) msg += ' Kode Pembina: ' + data.kode_gabung_pembina + '.';\n        showAlert(msg);
         return true;
     } catch (err) {
         showAlert(err.message || 'Terjadi kesalahan saat pendaftaran.', true);
