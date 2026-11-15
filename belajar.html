@@ -196,48 +196,58 @@ button[data-tab="administrasi"]::before{content:"⌂"}
 button.bg-amber-800,button.bg-amber-900{box-shadow:inset 0 1px 0 #fff5,0 3px 8px #39200b30}
 button.bg-amber-800:hover,button.bg-amber-900:hover{filter:brightness(1.08);box-shadow:inset 0 1px 0 #fff8,0 5px 12px #39200b40}
 </style><style id="ruang-tegak-install-style">#logout{position:absolute;top:7px;right:8px;z-index:2;padding:5px 9px!important;font-size:11px!important;border-radius:9px!important;min-height:30px}.rt-account-actions{display:flex;align-items:center;justify-content:flex-end;gap:18px;min-width:0}#profileIdentity{display:flex;align-items:center;gap:9px;min-width:0}#who{overflow-wrap:anywhere;line-height:1.35} .rt-profile-mark{display:block;object-fit:cover;flex:0 0 40px;width:40px;height:40px;border-radius:50%;background:linear-gradient(145deg,#fff0a1,#f5c52b 55%,#a66a0a);border:2px solid #ffe58a;box-shadow:inset 0 1px 3px #fff,0 2px 7px #160b0877}#headerButtons{display:flex;flex-direction:column;align-items:flex-end;gap:7px}#installAppBtn{align-items:center;gap:.4rem;white-space:nowrap}#installAppBtn:not(.hidden){display:inline-flex}#installAppMsg{font-size:12px;color:#fff1b7;margin-top:5px;text-align:right}@media(max-width:640px){header .max-w-6xl>div{align-items:flex-start}header .rt-header-brand{width:100%;min-width:0;padding-right:82px}header .rt-header-logo{width:64px!important;height:64px!important}.rt-account-actions{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px}#profileIdentity{flex:1;min-width:0}#headerButtons{flex:0 0 auto}#logout{top:0;right:0}#who{min-width:0;max-width:210px;text-align:left}#installAppMsg{text-align:right}}</style><style id="ruang-tegak-compact-layout">
-/* Tata letak ringkas dan konsisten */
-header{padding:10px 14px 18px!important}
-header::after{height:8px!important}
-header .max-w-6xl{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand logout" "identity install";align-items:center!important;column-gap:12px!important;row-gap:7px!important}
-.rt-header-brand{grid-area:brand;gap:9px!important;min-width:0}
-.rt-header-logo{width:50px!important;height:50px!important}
-.rt-header-name{font-size:18px!important;line-height:1.1!important;letter-spacing:.1em!important}
-.rt-header-sub{font-size:12px!important;line-height:1.2!important;margin-top:3px!important}
-#roleSubtitle{font-size:10px!important;line-height:1.2!important;margin-top:2px!important}
-#logout{grid-area:logout;position:static!important;justify-self:end;align-self:start;padding:4px 8px!important;min-height:27px!important;font-size:10px!important}
+/* Header satu susunan ringkas: identitas kiri, aksi kanan */
+header{padding:8px 12px 14px!important;min-height:0!important}
+header::after{height:6px!important}
+header .max-w-6xl{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr) auto!important;
+ grid-template-rows:auto auto!important;
+ grid-template-areas:"brand logout" "identity install"!important;
+ align-items:center!important;
+ column-gap:8px!important;row-gap:5px!important;
+ width:100%!important;
+}
+.rt-header-brand{grid-area:brand!important;display:flex!important;align-items:center!important;gap:7px!important;width:auto!important;min-width:0!important;padding:0!important}
+.rt-header-logo{width:44px!important;height:44px!important;flex:0 0 44px!important}
+.rt-header-name{font-size:16px!important;line-height:1.05!important;letter-spacing:.08em!important}
+.rt-header-sub{font-size:11px!important;line-height:1.15!important;margin-top:2px!important}
+#roleSubtitle{font-size:9px!important;line-height:1.1!important;margin-top:2px!important}
+#logout{grid-area:logout!important;position:static!important;justify-self:end!important;align-self:start!important;padding:3px 7px!important;min-height:24px!important;font-size:10px!important;line-height:1!important}
 #headerActions{display:contents!important}
-#profileIdentity{grid-area:identity;min-width:0;gap:7px!important}
-#headerProfileAvatar{width:34px!important;height:34px!important;flex-basis:34px!important}
-#who{font-size:12px!important;line-height:1.2!important;max-width:none!important}
-#headerButtons{grid-area:install;justify-self:end;align-self:center}
-#installAppBtn{padding:7px 10px!important;font-size:11px!important;border-radius:10px!important}
-#installAppMsg{font-size:10px!important;margin-top:2px!important}
-main{padding:12px!important}
-#application{gap:12px!important}
-#application nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px!important;align-items:stretch}
-#application nav .tab{width:100%;min-width:0;min-height:40px;padding:8px 7px!important;border-radius:10px!important;font-size:12px!important;line-height:1.2!important;white-space:normal}
-#application nav .tab:last-child:nth-child(odd){grid-column:1/-1}
+#profileIdentity{grid-area:identity!important;display:flex!important;align-items:center!important;min-width:0!important;gap:6px!important}
+#headerProfileAvatar{width:30px!important;height:30px!important;flex:0 0 30px!important}
+#who{font-size:11px!important;line-height:1.15!important;max-width:none!important;overflow-wrap:anywhere}
+#headerButtons{grid-area:install!important;display:flex!important;justify-self:end!important;align-items:center!important}
+#installAppBtn{padding:5px 8px!important;font-size:10px!important;line-height:1.1!important;border-radius:8px!important}
+#installAppMsg{font-size:9px!important;margin-top:1px!important}
+main{padding:10px!important}
+#application{gap:10px!important}
+#application nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;align-items:stretch!important}
+#application nav .tab{width:100%!important;min-width:0!important;min-height:36px!important;padding:7px 5px!important;border-radius:9px!important;font-size:11px!important;line-height:1.15!important;white-space:normal!important}
+#application nav .tab:last-child:nth-child(odd){grid-column:1/-1!important}
 #application>section{margin-top:0!important}
-.panel{border-radius:13px!important}
-#view-profile>.panel{padding:14px!important}
-#view-profile h2{font-size:18px!important;line-height:1.25!important}
-#view-profile p{line-height:1.45}
+.panel{border-radius:12px!important}
+#view-profile>.panel{padding:12px!important}
+#view-profile h2{font-size:17px!important;line-height:1.2!important}
+#view-profile p{line-height:1.35}
 @media(min-width:768px){
- header{padding:12px 20px 20px!important}
- header .max-w-6xl{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand logout" "identity install";max-width:1152px}
- .rt-header-logo{width:56px!important;height:56px!important}
- #application nav{display:flex!important;flex-wrap:wrap;gap:8px!important}
- #application nav .tab{width:auto;min-width:150px;flex:1 1 auto;font-size:13px!important}
- #application nav .tab:last-child:nth-child(odd){grid-column:auto}
- main{padding:20px!important}
+ header{padding:10px 18px 16px!important}
+ header .max-w-6xl{max-width:1152px!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:"brand logout" "identity install"!important}
+ .rt-header-logo{width:50px!important;height:50px!important;flex-basis:50px!important}
+ .rt-header-name{font-size:18px!important}
+ #application nav{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+ #application nav .tab{width:auto!important;min-width:150px!important;flex:1 1 auto!important;font-size:13px!important}
+ #application nav .tab:last-child:nth-child(odd){grid-column:auto!important}
+ main{padding:18px!important}
 }
 @media(max-width:360px){
- .rt-header-logo{width:44px!important;height:44px!important}
- .rt-header-name{font-size:16px!important}
- .rt-header-sub{font-size:11px!important}
- #installAppBtn{padding:6px 7px!important;font-size:10px!important}
- #who{font-size:11px!important}
+ .rt-header-logo{width:40px!important;height:40px!important;flex-basis:40px!important}
+ .rt-header-name{font-size:14px!important}
+ .rt-header-sub{font-size:10px!important}
+ #roleSubtitle{display:none!important}
+ #installAppBtn{padding:5px 6px!important;font-size:9px!important}
+ #who{font-size:10px!important}
 }
 </style>
 </head>
