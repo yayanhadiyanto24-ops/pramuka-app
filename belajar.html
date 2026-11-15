@@ -1009,34 +1009,57 @@ sb.auth.getSession().then(async({data})=>{if(data.session){try{await boot(data.s
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(err=>console.warn('Service worker Ruang Tegak gagal didaftarkan:',err)));}
 
 let ruangTegakInstallPrompt=null;
-const installButton=$('installAppBtn');
-const installMessage=document.createElement('div');
+const installButton=document.getElementById('installAppBtn');
+const installMessage=document.getElementById('installAppMsg')||document.createElement('div');
 installMessage.id='installAppMsg';
 installMessage.setAttribute('role','status');
-installMessage.className='hidden';
-installButton?.parentElement?.insertAdjacentElement('afterend',installMessage);
+installMessage.style.cssText='display:none;max-width:230px;padding:7px 9px;margin-top:5px;border-radius:9px;background:#fff4c2;color:#432b13;font-size:11px;line-height:1.35;text-align:left;white-space:normal';
+if(!installMessage.parentElement) installButton?.parentElement?.insertAdjacentElement('afterend',installMessage);
+function showInstallMessage(message){
+ if(!installMessage)return;
+ installMessage.textContent=message;
+ installMessage.style.display='block';
+}
 window.addEventListener('beforeinstallprompt',event=>{
  event.preventDefault();
  ruangTegakInstallPrompt=event;
- installButton?.classList.remove('hidden');
+ if(installButton){installButton.disabled=false;installButton.textContent='⬇ Pasang Aplikasi';}
 });
 window.addEventListener('appinstalled',()=>{
  ruangTegakInstallPrompt=null;
- installButton?.classList.add('hidden');
- installMessage.textContent='Ruang Tegak berhasil dipasang di perangkat ini.';
- installMessage.classList.remove('hidden');
+ showInstallMessage('Ruang Tegak sudah berhasil dipasang di perangkat ini.');
+ if(installButton)installButton.style.display='none';
 });
-installButton?.addEventListener('click',async()=>{
- if(ruangTegakInstallPrompt){
-  ruangTegakInstallPrompt.prompt();
-  const choice=await ruangTegakInstallPrompt.userChoice;
-  ruangTegakInstallPrompt=null;
-  installMessage.textContent=choice?.outcome==='accepted'?'Permintaan pemasangan diterima.':'Pemasangan belum dilakukan. Kamu bisa mencobanya lagi nanti.';
- }else{
-  installMessage.textContent='Chrome belum menyediakan dialog otomatis. Buka menu ⋮ di Chrome lalu pilih “Instal aplikasi” atau “Tambahkan ke layar utama”. Jika pilihan itu belum ada, tunggu pembaruan halaman beberapa saat lalu muat ulang.';
- }
- installMessage.classList.remove('hidden');
-});
-</script>
+if(installButton){
+ installButton.addEventListener('click',async event=>{
+  event.preventDefault();
+  event.stopPropagation();
+  installButton.disabled=true;
+  const original=installButton.dataset.originalText||installButton.textContent;
+  installButton.dataset.originalText=original;
+  installButton.textContent='Memeriksa…';
+  showInstallMessage('Sedang memeriksa dukungan pemasangan…');
+  try{
+   if(ruangTegakInstallPrompt){
+    const promptEvent=ruangTegakInstallPrompt;
+    ruangTegakInstallPrompt=null;
+    await promptEvent.prompt();
+    const choice=await promptEvent.userChoice;
+    if(choice?.outcome==='accepted')showInstallMessage('Permintaan pemasangan diterima. Ikuti konfirmasi dari Chrome.');
+    else showInstallMessage('Pemasangan dibatalkan. Kamu bisa mencobanya kembali melalui tombol ini atau menu Chrome.');
+   }else if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone){
+    showInstallMessage('Ruang Tegak sudah berjalan sebagai aplikasi di perangkat ini.');
+   }else{
+    showInstallMessage('Instal otomatis belum tersedia di Chrome saat ini. Ketuk menu ⋮ Chrome di kanan atas, lalu pilih “Instal aplikasi” atau “Tambahkan ke layar utama”. Jika pilihan belum muncul, pastikan membuka tautan ini langsung di Chrome, bukan browser dalam aplikasi lain.');
+   }
+  }catch(error){
+   showInstallMessage('Chrome belum dapat memulai pemasangan. Buka menu ⋮ Chrome, lalu pilih “Instal aplikasi” atau “Tambahkan ke layar utama”.');
+   console.warn('Pemasangan Ruang Tegak:',error);
+  }finally{
+   installButton.disabled=false;
+   installButton.textContent=original;
+  }
+ });
+}</script>
 </body>
 </html>
