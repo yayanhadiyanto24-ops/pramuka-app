@@ -684,7 +684,7 @@ function openSku(id){
  if($('submitTest'))$('submitTest').onclick=()=>saveProgress('siap_diuji');
  if($('saveSkuPlan'))$('saveSkuPlan').onclick=()=>saveCompletionPlan('rancangan');
  if($('submitSkuPlan'))$('submitSkuPlan').onclick=()=>saveCompletionPlan('diajukan');
- $('skuDetail').querySelectorAll('[data-subpoint]).forEach(b=>b.onclick=()=>openSubpoint(Number(b.dataset.subpoint)));
+ $('skuDetail').querySelectorAll('[data-subpoint]').forEach(b=>b.onclick=()=>openSubpoint(Number(b.dataset.subpoint)));
 }
 function subpointStatus(userId,subId){return subpointProgress.find(p=>p.id_user===userId&&p.id_subpoint===subId);}
 function renderSubpointIndex(){
