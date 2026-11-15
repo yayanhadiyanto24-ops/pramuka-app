@@ -6,7 +6,7 @@
 <title>Ruang Tegak · Belajar Pramuka Penegak</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <style>
 body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45309}.panel{background:#fff;border:1px solid #f3e8c8;border-radius:16px;box-shadow:0 4px 18px #78350f0c}.tab.active{background:#78350f;color:#fff}.muted{color:#64748b}.sku-card{border:1px solid #e7e5e4;border-radius:12px;background:#fff}.sku-card.selected{border-color:#b45309;box-shadow:0 0 0 2px #fef3c7}.pill{font-size:11px;padding:3px 8px;border-radius:999px;background:#fef3c7;color:#92400e}.lesson-text{white-space:pre-wrap;line-height:1.7}.status-lulus{background:#dcfce7;color:#166534}.status-menunggu{background:#dbeafe;color:#1d4ed8}.status-revisi{background:#ffedd5;color:#9a3412}
 
@@ -398,7 +398,7 @@ main{padding:10px!important}
   </section>
   <p id="appMsg" class="text-sm muted" role="status"></p>
  </section>
-<div id="examModal" class="hidden fixed inset-0 z-50 bg-black/60 p-4 overflow-y-auto"><div class="panel max-w-md mx-auto mt-8 p-5"><div class="flex justify-between items-center gap-3"><h3 class="font-bold text-lg">Surat Pengantar Ujian SKU</h3><button id="closeExamModal" class="text-sm text-amber-800 font-semibold">Tutup ✕</button></div><p id="examModalInfo" class="text-sm muted mt-2"></p><div id="examQr" class="mx-auto my-4 bg-white p-3 w-fit"></div><p class="text-xs muted">Penguji dapat memindai QR ini dengan kamera HP. Tautan hanya dapat digunakan satu kali dan berlaku 7 hari.</p><p id="examUrl" class="text-xs break-all bg-amber-50 rounded-lg p-2 mt-3"></p><button id="copyExamUrl" class="w-full rounded-lg bg-amber-800 text-white font-semibold p-3 mt-3">Salin tautan ujian</button><p id="examModalMsg" class="text-xs muted mt-2"></p></div></div>
+<div id="examModal" class="hidden fixed inset-0 z-50 bg-black/60 p-4 overflow-y-auto"><div class="panel max-w-md mx-auto mt-8 p-5"><div class="flex justify-between items-center gap-3"><h3 class="font-bold text-lg">Buat Akses Penguji</h3><button id="closeExamModal" class="text-sm text-amber-800 font-semibold">Tutup ✕</button></div><p id="examModalInfo" class="text-sm muted mt-2">Masukkan identitas penguji. Peserta akan membuka akses ujian dari HP-nya sendiri.</p><label class="block text-sm font-semibold mt-3">Nama penguji<input id="expectedExaminerName" maxlength="150" required class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Nama lengkap penguji"></label><label class="block text-sm font-semibold mt-3">Instansi / jabatan penguji<input id="expectedExaminerInstitution" maxlength="150" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Opsional"></label><button id="createExamAccess" class="w-full rounded-lg bg-amber-800 text-white font-semibold p-3 mt-4">Buat akses penguji</button><p id="examModalMsg" class="text-xs muted mt-2" role="status"></p></div></div><div id="studentLetterModal" class="hidden fixed inset-0 z-50 bg-black/60 p-4 overflow-y-auto"><div class="panel max-w-md mx-auto mt-8 p-5"><div class="flex justify-between items-center gap-3"><h3 class="font-bold text-lg">Akses Pengujian SKU</h3><button id="closeStudentLetter" class="text-sm text-amber-800 font-semibold">Tutup ✕</button></div><div id="studentLetterInfo" class="text-sm leading-6 mt-3"></div><p class="text-xs muted mt-3">Buka halaman ini di HP peserta, lalu serahkan HP kepada penguji untuk memeriksa hasil dan membubuhkan tanda tangan digital.</p><button id="openExamOnThisPhone" class="w-full rounded-lg bg-amber-800 text-white font-bold p-3 mt-4">Buka halaman ujian di HP ini</button></div></div>
 </main>
 <script>
 'use strict';
@@ -667,7 +667,7 @@ function openSku(id){
  const ownExams=examRecords.filter(r=>r.id_user===currentUser.id&&r.id_sku_item===id);
  const completedOwnExams=ownExams.filter(r=>r.status==='selesai');
  if(completedOwnExams.length)html+='<div class="border-t mt-4 pt-4"><h4 class="font-bold">Surat pengantar & hasil ujian digital</h4>'+completedOwnExams.map(r=>'<div class="rounded-lg bg-slate-50 border p-3 mt-2 text-sm"><div class="flex flex-wrap justify-between gap-2"><b>'+esc(r.referral_no)+'</b><span class="pill '+(r.result==='lulus'?'status-lulus':'status-revisi')+'">'+(r.result==='lulus'?'LULUS':'TIDAK LULUS')+'</span></div><p class="mt-1">Penguji: '+esc(r.examiner_name||'-')+' · '+esc(r.examiner_institution||'-')+'</p><p>Waktu: '+esc(r.signed_at?new Date(r.signed_at).toLocaleString('id-ID'):'-')+'</p><p>Catatan: '+esc(r.examiner_notes||'-')+'</p><img src="'+esc(r.signature_data||'')+'" alt="Tanda tangan penguji" class="max-h-16 max-w-40 object-contain mt-2 bg-white border rounded"></div>').join('')+'</div>';
- html+=ownExams.filter(r=>r.status==='menunggu').map(r=>'<button data-student-letter="'+r.id+'" class="student-letter-btn mt-2 rounded-lg bg-blue-800 text-white px-3 py-2 text-sm">Tampilkan surat & QR untuk penguji</button>').join('');
+ html+=ownExams.filter(r=>r.status==='menunggu').map(r=>'<button data-student-letter="'+r.id+'" class="student-letter-btn mt-2 rounded-lg bg-blue-800 text-white px-3 py-2 text-sm">Buka akses penguji</button>').join('');
  const itemSubs=subpoints.filter(s=>s.id_sku_item===id);
  if(itemSubs.length){
   const ownSubs=subpointProgress.filter(p=>p.id_user===currentUser.id&&p.id_sku_item===id);
@@ -709,7 +709,7 @@ function openSubpoint(id){
  const history=examRecords.filter(r=>r.id_user===currentUser.id&&r.id_subpoint===id&&r.status==='selesai');
  if(history.length)html+='<div class="border-t mt-4 pt-3"><b>Riwayat ujian subpoin</b>'+history.map(r=>'<p class="text-sm mt-2">'+esc(r.referral_no)+' · '+(r.result==='lulus'?'LULUS':'TIDAK LULUS')+' · '+esc(r.examiner_name||'-')+'</p>').join('')+'</div>';
  const ownSubLetters=examRecords.filter(r=>r.id_user===currentUser.id&&r.id_subpoint===id&&r.status==='menunggu');
- if(canEdit&&ownSubLetters.length)html+='<div class="border-t mt-4 pt-3"><b class="text-sm">Surat pengantar untuk penguji</b>'+ownSubLetters.map(r=>'<button data-student-letter="'+r.id+'" class="student-letter-btn block mt-2 rounded-lg bg-blue-800 text-white px-3 py-2 text-sm">Tampilkan surat & QR</button>').join('')+'</div>';
+ if(canEdit&&ownSubLetters.length)html+='<div class="border-t mt-4 pt-3"><b class="text-sm">Akses penguji</b>'+ownSubLetters.map(r=>'<button data-student-letter="'+r.id+'" class="student-letter-btn block mt-2 rounded-lg bg-blue-800 text-white px-3 py-2 text-sm">Buka akses penguji</button>').join('')+'</div>';
  $('skuDetail').innerHTML=html;
  $('skuDetail').querySelectorAll('.student-letter-btn').forEach(btn=>btn.onclick=()=>showStudentExamLetter(btn.dataset.studentLetter));$('skuDetail').scrollIntoView({behavior:'smooth',block:'start'});
  $('backSubpoints').onclick=()=>openSku(s.id_sku_item);
@@ -985,7 +985,7 @@ async function loadMonitor(){
 
    return '<article class="panel p-4"><div class="flex flex-wrap justify-between gap-2"><div><b>'+esc(s.nama_lengkap)+'</b><p class="text-xs muted">'+esc(s.tingkatan)+' · Sangga '+esc(s.sangga||'-')+'</p></div><div class="flex flex-wrap gap-2 text-xs"><span class="pill status-lulus">'+counts.lulus+' lulus</span><span class="pill status-menunggu">'+counts.siap+' menunggu</span><span class="pill status-revisi">'+counts.revisi+' perbaikan</span><span class="pill">'+counts.belajar+' dipelajari</span></div></div>'+(pending.length?'<div class="mt-3 space-y-3">'+pending.map(p=>{
     const it=items.find(z=>z.id_sku_item===p.id_sku_item);
-    return '<div class="border-t pt-3"><b class="text-sm">'+esc(it?.tingkat||'SKU')+' · '+esc(it?.nomor_butir||'')+' '+esc(it?.judul_butir||'')+'</b><p class="text-sm mt-1">Bukti/Pengalaman: '+esc(p.bukti_pencapaian||'-')+'</p><p class="text-sm">Jawaban: '+esc(p.catatan_peserta||'-')+'</p><div id="evidence_sku_'+p.id_progress+'" class="mt-2"></div><div class="flex flex-wrap gap-2 mt-2"><button data-stamp="'+p.id_progress+'" class="stamp-btn rounded-lg bg-emerald-700 text-white px-3 py-2 text-xs" '+(!teacher?.paraf_data?'disabled title="Simpan paraf pada Lengkapi Profil terlebih dahulu"':'')+'>Uji langsung & sahkan</button><button data-student="'+s.id_user+'" data-sku="'+p.id_sku_item+'" class="referral-btn rounded-lg bg-blue-800 text-white px-3 py-2 text-xs">Buat surat pengantar + QR untuk penguji</button></div></div>';
+    return '<div class="border-t pt-3"><b class="text-sm">'+esc(it?.tingkat||'SKU')+' · '+esc(it?.nomor_butir||'')+' '+esc(it?.judul_butir||'')+'</b><p class="text-sm mt-1">Bukti/Pengalaman: '+esc(p.bukti_pencapaian||'-')+'</p><p class="text-sm">Jawaban: '+esc(p.catatan_peserta||'-')+'</p><div id="evidence_sku_'+p.id_progress+'" class="mt-2"></div><div class="flex flex-wrap gap-2 mt-2"><button data-stamp="'+p.id_progress+'" class="stamp-btn rounded-lg bg-emerald-700 text-white px-3 py-2 text-xs" '+(!teacher?.paraf_data?'disabled title="Simpan paraf pada Lengkapi Profil terlebih dahulu"':'')+'>Uji langsung & sahkan</button><button data-student="'+s.id_user+'" data-sku="'+p.id_sku_item+'" class="referral-btn rounded-lg bg-blue-800 text-white px-3 py-2 text-xs">Buat akses penguji</button></div></div>';
    }).join('')+'</div>':'<p class="text-xs muted mt-3">Belum ada pengajuan ujian.</p>')+plansHtml+renderStudentSubpointProgress(studentSubpoints,s.id_user)+examHistory+'</article>';
   }).join('');
   return '<section class="space-y-3"><h3 class="font-bold text-amber-950 border-b border-amber-200 pb-2">'+esc(groupTitle)+'</h3><div class="space-y-3">'+cards+'</div></section>';
@@ -1013,12 +1013,11 @@ function printExamDocument(referralId){
 }
 
 function showStudentExamLetter(id){
- const r=examRecords.find(x=>x.id===id);if(!r||!r.token_value){setMsg('QR surat belum tersedia. Muat ulang halaman atau hubungi Pembina.');return;}
+ const r=examRecords.find(x=>x.id===id);if(!r||!r.token_value){setMsg('Akses ujian belum tersedia. Muat ulang halaman atau hubungi Pembina.');return;}
  const it=items.find(x=>x.id_sku_item===r.id_sku_item),sub=subpoints.find(x=>x.id_subpoint===r.id_subpoint);
  const url='https://yayanhadiyanto24-ops.github.io/pramuka-app/uji.html#t='+encodeURIComponent(r.token_value);
- $('studentLetterInfo').innerHTML='<b>Nomor:</b> '+esc(r.referral_no)+'<br><b>Butir:</b> '+esc(it?.nomor_butir||'')+' · '+esc(it?.judul_butir||'')+(sub?'<br><b>Subpoin:</b> '+esc(sub.judul_subpoint):'')+'<br><b>Penguji:</b> '+esc(r.examiner_expected_name||'-')+' · '+esc(r.examiner_expected_institution||'-')+'<br><b>Status:</b> '+esc(r.status==='menunggu'?'Menunggu pengujian':r.pembina_review_status==='selesai'?'Sudah disahkan Pembina':'Menunggu pemeriksaan Pembina');
- $('studentLetterQr').innerHTML='';new QRCode($('studentLetterQr'),{text:url,width:220,height:220,colorDark:'#1f2937',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
- $('studentLetterUrl').textContent=url;$('openExamOnThisPhone').onclick=()=>{window.location.href=url;};$('studentLetterModal').classList.remove('hidden');
+ $('studentLetterInfo').innerHTML='<b>Nomor akses:</b> '+esc(r.referral_no)+'<br><b>Butir:</b> '+esc(it?.nomor_butir||'')+' · '+esc(it?.judul_butir||'')+(sub?'<br><b>Subpoin:</b> '+esc(sub.judul_subpoint):'')+'<br><b>Penguji:</b> '+esc(r.examiner_expected_name||'-')+' · '+esc(r.examiner_expected_institution||'-')+'<br><b>Status:</b> '+esc(r.status==='menunggu'?'Menunggu pengujian':r.pembina_review_status==='selesai'?'Sudah disahkan Pembina':'Menunggu pemeriksaan Pembina');
+ $('openExamOnThisPhone').onclick=()=>{window.location.href=url;};$('studentLetterModal').classList.remove('hidden');
 }
 $('closeStudentLetter').onclick=()=>$('studentLetterModal').classList.add('hidden');
 
@@ -1060,24 +1059,21 @@ async function createExamReferral(studentId,skuItemId,subpointId=null){
  pendingReferralRequest={studentId,skuItemId,subpointId};
  $('examModalInfo').textContent='Isi identitas penguji yang akan menerima surat pengantar ini.';
  $('expectedExaminerName').value='';$('expectedExaminerInstitution').value='';
- $('examQrArea').classList.add('hidden');$('createExamQr').classList.remove('hidden');
+ $('createExamAccess').classList.remove('hidden');
  $('examModalMsg').textContent='';$('examModal').classList.remove('hidden');
 }
-$('createExamQr').onclick=async()=>{
+$('createExamAccess').onclick=async()=>{
  if(!pendingReferralRequest)return;
  const examinerName=$('expectedExaminerName').value.trim(),examinerInstitution=$('expectedExaminerInstitution').value.trim();
  if(examinerName.length<2){$('examModalMsg').textContent='Nama penguji wajib diisi.';return;}
- const btn=$('createExamQr');btn.disabled=true;btn.textContent='Membuat surat...';
+ const btn=$('createExamAccess');btn.disabled=true;btn.textContent='Membuat surat...';
  try{
   const q=pendingReferralRequest;
   const {data,error}=await sb.functions.invoke('sku-digital-exam',{body:{action:'create_referral',student_id:q.studentId,sku_item_id:q.skuItemId,subpoint_id:q.subpointId,examiner_name:examinerName,examiner_institution:examinerInstitution}});
   if(error)throw new Error(data?.message||error.message);if(!data?.ok)throw new Error(data?.message||'Surat pengantar gagal dibuat.');
-  $('examModalInfo').textContent='Surat '+data.referral.referral_no+' diterbitkan untuk '+examinerName+'. Tunjukkan QR ini kepada penguji.';
-  $('examQr').innerHTML='';new QRCode($('examQr'),{text:data.exam_url,width:220,height:220,colorDark:'#1f2937',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
-  $('examQrArea').classList.remove('hidden');btn.classList.add('hidden');$('examUrl').textContent=data.exam_url;
-  $('examModalMsg').textContent='Berlaku sampai '+new Date(data.referral.berlaku_sampai).toLocaleString('id-ID');
-  $('copyExamUrl').onclick=async()=>{try{await navigator.clipboard.writeText(data.exam_url);$('examModalMsg').textContent='Tautan berhasil disalin.';}catch(e){$('examModalMsg').textContent='Salin tautan secara manual dari teks di atas.';}};
-  setMsg('Surat pengantar dan QR berhasil dibuat.');
+  $('examModalMsg').textContent='Akses penguji '+data.referral.referral_no+' berhasil dibuat. Peserta dapat membukanya dari akun di HP peserta.';
+  $('examModal').classList.add('hidden');
+  setMsg('Akses penguji berhasil dibuat. Peserta dapat membuka ujian langsung di HP-nya.');
  }catch(err){$('examModalMsg').textContent=err.message||'Gagal membuat surat.';}
  finally{btn.disabled=false;btn.textContent='Buat surat pengantar dan QR';}
 };
