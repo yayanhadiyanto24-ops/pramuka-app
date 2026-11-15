@@ -1,44 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 <defs>
- <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff9bd"/><stop offset=".2" stop-color="#ffe65b"/><stop offset=".48" stop-color="#ffc400"/><stop offset=".72" stop-color="#d99500"/><stop offset="1" stop-color="#fff0a0"/></linearGradient>
- <linearGradient id="goldEdge" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff8bd"/><stop offset=".45" stop-color="#d99a00"/><stop offset="1" stop-color="#fff0a0"/></linearGradient>
- <linearGradient id="brown" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#633719"/><stop offset=".55" stop-color="#351b0e"/><stop offset="1" stop-color="#1c100a"/></linearGradient>
- <linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ff5555"/><stop offset=".5" stop-color="#d71920"/><stop offset="1" stop-color="#8f0712"/></linearGradient>
- <linearGradient id="white" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#dedbd5"/></linearGradient>
- <filter id="ds" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff4a8"/><stop offset=".38" stop-color="#ffd000"/><stop offset=".72" stop-color="#e7a900"/><stop offset="1" stop-color="#fff07a"/></linearGradient>
+ <linearGradient id="brown" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#68401f"/><stop offset="1" stop-color="#28170e"/></linearGradient>
+ <linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ef3838"/><stop offset="1" stop-color="#a80f19"/></linearGradient>
+ <linearGradient id="white" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#ddd"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
 </defs>
-<rect x="5" y="5" width="502" height="502" rx="83" fill="#100904"/>
-<rect x="13" y="13" width="486" height="486" rx="76" fill="url(#gold)" stroke="#fff2a1" stroke-width="5"/>
-<path d="M256 48 Q330 111 433 113 L425 321 Q415 420 256 477 Q97 420 87 321 L79 113 Q182 111 256 48Z" fill="#100804" opacity=".35" transform="translate(0 7)" filter="url(#ds)"/>
-<path d="M256 49 Q330 111 433 113 L425 321 Q415 420 256 477 Q97 420 87 321 L79 113 Q182 111 256 49Z" fill="url(#brown)" stroke="url(#goldEdge)" stroke-width="11"/>
-<path d="M256 69 Q331 128 414 130 L407 315 Q397 405 256 456 Q115 405 105 315 L98 130 Q181 128 256 69Z" fill="none" stroke="#b47b20" stroke-width="4"/>
-<!-- WOSM fleur-de-lis motif -->
-<g fill="url(#gold)" stroke="#ffdf58" stroke-width="3" stroke-linejoin="round">
- <path d="M256 91 C232 119 237 153 256 174 C275 153 280 119 256 91Z"/>
- <path d="M251 166 C224 138 190 150 192 177 C194 202 222 207 240 185 C227 210 239 228 256 239 C273 228 285 210 272 185 C290 207 318 202 320 177 C322 150 288 138 261 166Z"/>
- <path d="M245 174 L267 174 L264 222 L256 241 L248 222Z"/>
- <rect x="233" y="173" width="46" height="10" rx="4"/>
+<rect x="8" y="8" width="496" height="496" rx="86" fill="#160e08"/>
+<rect x="15" y="15" width="482" height="482" rx="80" fill="url(#gold)" stroke="#fff2a0" stroke-width="7"/>
+<path d="M256 56 Q337 116 432 118 L425 322 Q413 420 256 476 Q99 420 87 322 L80 118 Q175 116 256 56Z" fill="url(#brown)" stroke="#f8c928" stroke-width="12"/>
+<path d="M256 75 Q338 130 412 132 L405 315 Q392 405 256 454 Q120 405 107 315 L100 132 Q174 130 256 75Z" fill="none" stroke="#a97825" stroke-width="4"/>
+<g fill="url(#gold)" stroke="#f8d95a" stroke-width="3" stroke-linejoin="round">
+ <path d="M256 102 C231 132 237 156 256 172 C275 156 281 132 256 102Z"/>
+ <path d="M251 166 C225 139 193 151 194 177 C196 198 221 202 239 185 C228 207 238 224 256 230 C274 224 284 207 273 185 C291 202 316 198 318 177 C319 151 287 139 261 166Z"/>
+ <path d="M245 178 L267 178 L264 222 L256 239 L248 222Z"/>
+ <rect x="234" y="174" width="44" height="9" rx="4"/>
 </g>
-<!-- twin kitri: mirrored outward-facing shoots, each with three leaves, coconut and roots -->
-<g fill="url(#gold)" stroke="#ffe36a" stroke-width="3.5" stroke-linejoin="round">
- <g id="kitri">
-  <path d="M220 352 C194 334 180 306 176 272 C203 286 221 307 229 329 C217 291 219 250 239 211 C259 248 257 290 245 326 C264 298 285 283 314 279 C302 315 279 340 249 354Z"/>
-  <path d="M220 326 C192 324 170 310 157 286 C181 286 204 297 220 326Z" fill="#f7bb08"/>
-  <path d="M239 302 C218 276 211 244 218 211 C240 233 249 265 239 302Z" fill="#ffe16a"/>
-  <path d="M248 350 C230 374 222 390 221 409" fill="none" stroke-width="8" stroke-linecap="round"/>
-  <path d="M221 409 C199 414 181 408 166 394 C190 391 208 397 221 409Z"/>
-  <path d="M221 409 C205 427 184 434 162 430 C177 411 198 405 221 409Z"/>
-  <path d="M221 409 C232 419 243 423 256 422" fill="none" stroke-width="7" stroke-linecap="round"/>
-  <path d="M183 350 C163 331 132 327 109 343 C120 373 149 392 178 382 C198 375 202 361 183 350Z"/>
-  <path d="M111 344 C132 350 152 362 177 382" fill="none" stroke="#fff0a0" stroke-width="2.5" opacity=".8"/>
+<!-- mirrored paired kitri -->
+<g fill="url(#gold)" stroke="#ffdf52" stroke-width="4" stroke-linejoin="round">
+ <g>
+  <path d="M244 344 C205 327 174 297 158 250 C190 257 218 278 235 311 C220 267 222 226 242 194 C260 229 261 273 249 309 C269 283 295 268 326 266 C309 308 280 337 244 344Z"/>
+  <path d="M239 339 C224 366 208 380 187 388" fill="none" stroke-width="10" stroke-linecap="round"/>
+  <path d="M185 388 C155 384 137 369 126 346 C158 348 179 359 195 380Z"/>
+  <path d="M186 388 C161 405 137 408 113 396 C133 379 157 373 186 388Z"/>
+  <path d="M187 388 C181 407 182 421 190 436" fill="none" stroke-width="7" stroke-linecap="round"/>
  </g>
- <use href="#kitri" transform="translate(512 0) scale(-1 1)"/>
+ <g transform="translate(512 0) scale(-1 1)">
+  <path d="M244 344 C205 327 174 297 158 250 C190 257 218 278 235 311 C220 267 222 226 242 194 C260 229 261 273 249 309 C269 283 295 268 326 266 C309 308 280 337 244 344Z"/>
+  <path d="M239 339 C224 366 208 380 187 388" fill="none" stroke-width="10" stroke-linecap="round"/>
+  <path d="M185 388 C155 384 137 369 126 346 C158 348 179 359 195 380Z"/>
+  <path d="M186 388 C161 405 137 408 113 396 C133 379 157 373 186 388Z"/>
+  <path d="M187 388 C181 407 182 421 190 436" fill="none" stroke-width="7" stroke-linecap="round"/>
+ </g>
 </g>
-<!-- scarf -->
-<path d="M92 365 Q172 382 256 418 Q340 382 420 365 L414 391 Q337 412 256 445 Q175 412 98 391Z" fill="url(#red)" stroke="#870914" stroke-width="3"/>
-<path d="M98 391 Q177 412 256 445 Q335 412 414 391 L407 411 Q333 436 256 464 Q179 436 105 411Z" fill="url(#white)" stroke="#d8cfc3" stroke-width="2"/>
-<path d="M238 427 Q211 449 198 480 Q231 472 256 450 Q281 472 314 480 Q301 449 274 427Z" fill="url(#red)" stroke="#f4d2b2" stroke-width="3"/>
-<path d="M198 480 Q230 476 256 450 Q282 476 314 480 L303 494 Q279 488 256 469 Q233 488 209 494Z" fill="url(#white)"/>
-<ellipse cx="256" cy="438" rx="18" ry="19" fill="url(#red)" stroke="#fff0b0" stroke-width="3"/>
-<path d="M250 422 Q243 438 250 454" fill="none" stroke="#fff" stroke-width="4" opacity=".85"/>
+<path d="M92 366 Q170 383 256 418 Q342 383 420 366 L414 390 Q337 410 256 446 Q175 410 98 390Z" fill="url(#red)" stroke="#8c1118" stroke-width="3"/>
+<path d="M98 391 Q177 411 256 446 Q335 411 414 391 L408 410 Q334 434 256 466 Q178 434 104 410Z" fill="url(#white)" stroke="#e5d9c5" stroke-width="2"/>
+<path d="M238 426 Q211 448 199 479 Q232 471 256 450 Q280 471 313 479 Q301 448 274 426Z" fill="url(#red)" stroke="#f4d2b2" stroke-width="3"/>
+<path d="M199 479 Q230 475 256 450 Q282 475 313 479 L303 493 Q279 488 256 469 Q233 488 209 493Z" fill="url(#white)"/>
+<circle cx="256" cy="437" r="17" fill="url(#red)" stroke="#fff0b0" stroke-width="3"/>
 </svg>
