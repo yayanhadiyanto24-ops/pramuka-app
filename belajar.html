@@ -352,7 +352,7 @@ async function boot(user){
  if(ue)throw ue;if(!u)throw new Error('Profil akun belum tersedia. Hubungi Admin Utama.');
  account=u;
  $('login').classList.add('hidden');$('application').classList.remove('hidden');$('logout').classList.remove('hidden');
- $('who').textContent=user.email+' · '+u.role.replace('_',' ');
+ $('who').textContent=(user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_kwarcab'?'Admin Utama':'Pengguna'))+' · '+u.role.replace('_',' ');
  if(u.status_akun!=='aktif'){
   $('accountNotice').classList.remove('hidden');$('accountNotice').textContent=u.role==='peserta_didik'?'Pendaftaran diterima. Akses belajar akan terbuka setelah disetujui Pembina sesuai satuan putera atau puteri.':'Akun masih '+u.status_akun+'. Akses belajar akan terbuka setelah disetujui Admin Utama.';return;
  }
@@ -371,6 +371,8 @@ async function boot(user){
   $('roleSubtitle').textContent='Ruang Pembina · Pantau peserta · Administrasi pangkalan';
  }else if(u.role==='admin_kwarcab'){$('monitorTab').classList.remove('hidden');}
  else throw new Error('Peran akun tidak dikenali.');
+ const accountName=participant?.nama_lengkap||teacher?.nama_lengkap||user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_kwarcab'?'Admin Utama':'Pengguna');
+ $('who').textContent=accountName+' · '+u.role.replace('_',' ');
  renderProfile();
   await loadAll();
 }
