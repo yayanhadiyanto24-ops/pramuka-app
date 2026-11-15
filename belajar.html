@@ -41,10 +41,10 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
     <div><h2 class="text-xl font-bold">Lengkapi Profil</h2><p class="text-sm muted">Data profil digunakan untuk identitas kepramukaan dan administrasi SKU. Pastikan NTA/KTA benar.</p></div>
     <div class="grid md:grid-cols-[150px_1fr] gap-4 items-start">
      <div class="space-y-2"><img id="profilePhotoPreview" class="w-32 h-32 rounded-full object-cover border bg-slate-50" alt="Foto profil"><label class="block text-sm font-semibold">Foto profil<input id="profilePhotoInput" type="file" accept="image/*" class="block w-full text-xs mt-1"></label><p class="text-xs muted">Foto akan diperkecil otomatis.</p></div>
-     <div class="space-y-2"><label class="block text-sm font-semibold">NTA/KTA Pramuka Nasional<input id="profileNta" maxlength="80" class="w-full border rounded-lg p-2 mt-1" placeholder="Masukkan nomor NTA/KTA"></label><p class="text-xs muted">NTA/KTA diperlukan untuk pengajuan pengujian SKU dan melanjutkan jenjang.</p></div>
+     <div class="space-y-2"><label id="ntaProfileField" class="block text-sm font-semibold">NTA/KTA Pramuka Nasional<input id="profileNta" maxlength="80" class="w-full border rounded-lg p-2 mt-1" placeholder="Masukkan nomor NTA/KTA"></label><p class="text-xs muted">NTA/KTA diperlukan untuk pengajuan pengujian SKU dan melanjutkan jenjang.</p></div>
     </div>
     <div id="teacherProfileFields" class="hidden space-y-4 border-t pt-4">
-     <h3 class="font-bold">Pendidikan dan Pengesahan Pembina</h3>
+     <h3 class="font-bold">Pendidikan dan Pengesahan Pembina</h3><p id="teacherQuotaInfo" class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"></p><div class="flex flex-wrap gap-2"><input id="accessCodeInput" maxlength="40" class="flex-1 min-w-0 border rounded-lg p-2 text-sm uppercase" placeholder="Kode akses tambahan dari Admin Utama"><button id="activateAccessCode" type="button" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-sm font-semibold">Aktifkan kode</button></div><p id="accessCodeMsg" class="text-xs muted"></p>
      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
       <label class="text-sm">Tahun KMD<input id="yearKmd" type="number" min="1950" max="2100" class="w-full border rounded-lg p-2 mt-1"></label>
       <label class="text-sm">Tahun KML<input id="yearKml" type="number" min="1950" max="2100" class="w-full border rounded-lg p-2 mt-1"></label>
@@ -155,7 +155,7 @@ $('loginForm').addEventListener('submit',async e=>{
 $('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
 async function boot(user){
  currentUser=user;
- const {data:u,error:ue}=await sb.from('users').select('role,status_akun,kode_unik').eq('id_user',user.id).maybeSingle();
+ const {data:u,error:ue}=await sb.from('users').select('role,status_akun,kode_unik,foto_profil_data').eq('id_user',user.id).maybeSingle();
  if(ue)throw ue;if(!u)throw new Error('Profil akun belum tersedia. Hubungi Admin Utama.');
  account=u;
  $('login').classList.add('hidden');$('application').classList.remove('hidden');$('logout').classList.remove('hidden');
@@ -187,7 +187,9 @@ function renderProfile(){
  const isTeacher=account?.role==='pembina',isStudent=account?.role==='peserta_didik';
  $('teacherProfileFields').classList.toggle('hidden',!isTeacher);
  $('studentProfileFields').classList.toggle('hidden',!isStudent);
- const p=isTeacher?teacher:(isStudent?participant:null);
+ const p=isTeacher?teacher:(isStudent?participant:account);
+ $('ntaProfileField').classList.toggle('hidden',!isTeacher&&!isStudent);
+ if(isTeacher)$('teacherQuotaInfo').textContent='Kuota penerimaan saat ini: '+((teacher.nta?10:5)+Number(teacher.kuota_tambahan||0))+' peserta. '+(!teacher.nta?'Lengkapi NTA/KTA untuk membuka kuota dasar 10 peserta. ':'')+'Jika kuota habis, transfer nominal seikhlasnya ke DANA 085624189461 dan konfirmasi WhatsApp 081322578732 kepada Admin Utama untuk mendapatkan kode akses tambahan.';
  profilePhotoData=p?.foto_profil_data||'';
  $('profilePhotoPreview').src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect width="100%25" height="100%25" fill="%23f1f5f9"/%3E%3Ctext x="50%25" y="54%25" text-anchor="middle" fill="%2364758b" font-size="12"%3EFoto%3C/text%3E%3C/svg%3E';
  $('profileNta').value=p?.nta||'';
@@ -224,6 +226,7 @@ async function saveProfile(extra={}){
  try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:payload});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Profil gagal disimpan.');
   if(isTeacher)teacher={...teacher,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data};
   if(isStudent){participant={...participant,nta:payload.nta,foto_profil_data:profilePhotoData,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows};}
+  if(!isTeacher&&!isStudent)account={...account,foto_profil_data:profilePhotoData};
   $('profileMsg').textContent='Profil berhasil disimpan.';
   if(extra.tanda_tangan_data){$('teacherSignaturePreview').src=extra.tanda_tangan_data;$('teacherSignatureEditor').classList.add('hidden');}
   if(extra.paraf_data){$('teacherParafPreview').src=extra.paraf_data;$('teacherParafEditor').classList.add('hidden');}
@@ -244,6 +247,7 @@ function setupProfilePad(canvasId,openId,clearId,saveId,editorId,field){
 }
 setupProfilePad('teacherSignatureCanvas','openTeacherSignature','clearTeacherSignature','saveTeacherSignature','teacherSignatureEditor','tanda_tangan_data');
 setupProfilePad('teacherParafCanvas','openTeacherParaf','clearTeacherParaf','saveTeacherParaf','teacherParafEditor','paraf_data');
+$('activateAccessCode').onclick=async()=>{const code=$('accessCodeInput').value.trim().toUpperCase();if(!code){$('accessCodeMsg').textContent='Masukkan kode akses.';return;}const b=$('activateAccessCode');b.disabled=true;$('accessCodeMsg').textContent='Memeriksa kode...';try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'activate_access_code',kode_akses:code}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Kode tidak dapat diaktifkan.');teacher.kuota_tambahan=Number(teacher.kuota_tambahan||0)+10;$('accessCodeInput').value='';renderProfile();$('accessCodeMsg').textContent=data.message;}catch(err){$('accessCodeMsg').textContent=err.message||'Kode tidak dapat diaktifkan.';}finally{b.disabled=false;}};
 
 async function loadPangkalanPending(){
   const box=$('pendingStudentList');box.textContent='Memuat daftar peserta...';
@@ -460,7 +464,7 @@ async function loadMonitor(){
 
 async function stampSkuProgress(progressId){
  if(!teacher?.paraf_data){setMsg('Simpan paraf terlebih dahulu pada menu Lengkapi Profil.');showTab('profile');return;}
- if(!confirm('Sahkan butir SKU ini menggunakan paraf tersimpan?'))return;
+
  const {error}=await sb.from('sku_learning_progress').update({status:'lulus',paraf_pembina_data:teacher.paraf_data,nama_pembina_pengesah:teacher.nama_lengkap,diperiksa_oleh:currentUser.id,diperiksa_at:new Date().toISOString()}).eq('id_progress',progressId);
  if(error){setMsg('Pengesahan gagal: '+error.message);return;}
  const {data}=await sb.from('sku_learning_progress').select('*');progress=data||[];await loadMonitor();setMsg('Butir SKU berhasil disahkan dengan paraf Pembina.');
