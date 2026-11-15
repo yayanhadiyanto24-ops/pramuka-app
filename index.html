@@ -69,7 +69,13 @@ function switchTab(role) {
     document.getElementById('tab-pembina').className = !peserta ? 'py-3.5 text-sm font-bold text-amber-900 border-b-2 border-amber-800 bg-white transition' : 'py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition';
     hideAlert();
 }
-function updatePembinaType() {\n    const putera = document.getElementById('pb-jk').value === 'L';\n    const jabatan = putera ? 'Pembina Satuan Putera' : 'Pembina Satuan Puteri';\n    document.getElementById('pb-jabatan').value = jabatan;\n    document.getElementById('pb-jenis-akun').textContent = jabatan;\n}\nfunction toggleModePembina() {
+function updatePembinaType() {
+    const putera = document.getElementById('pb-jk').value === 'L';
+    const jabatan = putera ? 'Pembina Satuan Putera' : 'Pembina Satuan Puteri';
+    document.getElementById('pb-jabatan').value = jabatan;
+    document.getElementById('pb-jenis-akun').textContent = jabatan;
+}
+function toggleModePembina() {
     const baru = document.getElementById('pb-mode').value === 'baru';
     document.getElementById('box-pangkalan-baru').classList.toggle('hidden', !baru);
     document.getElementById('box-pangkalan-gabung').classList.toggle('hidden', baru);
