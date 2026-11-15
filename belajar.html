@@ -36,6 +36,7 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
    <button id="adminPangkalanTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="administrasi">Administrasi Pangkalan</button>
   </nav>
   <section id="view-umum" class="space-y-4">
+   <div id="studentIdentity" class="panel hidden p-4 text-sm space-y-1"></div>
    <div><h2 class="text-xl font-bold">Pengantar Pramuka Penegak</h2><p class="text-sm muted">Pelajari bagian umum terlebih dahulu sebelum masuk ke butir-butir SKU.</p></div>
    <div id="generalList" class="grid md:grid-cols-2 gap-3"></div>
    <article id="generalDetail" class="panel hidden p-5 space-y-3"></article>
@@ -135,6 +136,9 @@ async function boot(user){
  if(u.role==='peserta_didik'){
   const {data,error}=await sb.from('profil_peserta_didik').select('*').eq('id_user',user.id).maybeSingle();if(error)throw error;participant=data;
   if(!participant)throw new Error('Profil peserta didik belum ditemukan.');
+  let ambalan='-',namaPangkalan='-';try{const {data:p}=await sb.from('pangkalan').select('nama_pangkalan,nama_ambalan_putra,nama_ambalan_putri').eq('id_pangkalan',participant.id_pangkalan).maybeSingle();if(p){namaPangkalan=p.nama_pangkalan||'-';ambalan=(participant.jenis_kelamin==='L'?p.nama_ambalan_putra:p.nama_ambalan_putri)||'-';}}catch(_){}
+  $('studentIdentity').classList.remove('hidden');
+  $('studentIdentity').innerHTML='<b class="text-base">Identitas Peserta Didik</b><p>Pangkalan: '+esc(namaPangkalan)+'</p><p>Ambalan: '+esc(ambalan)+'</p><p>Sangga: '+esc(participant.sangga||'-')+'</p><p>Kelas: '+esc(participant.kelas_sekolah||'-')+' · Jurusan: '+esc(participant.jurusan||'-')+'</p><p>Tahun pelajaran: '+esc(participant.tahun_pelajaran||'-')+'</p><p class="font-semibold '+(participant.status_keanggotaan==='alumni'?'text-amber-700':'text-emerald-700')+'">'+(participant.status_keanggotaan==='alumni'?'Alumni Ambalan'+(participant.tanggal_alumni?' sejak '+new Date(participant.tanggal_alumni+'T00:00:00').toLocaleDateString('id-ID'):''):'Anggota aktif Ambalan')+'</p>';
   $('roleSubtitle').textContent='Ruang Peserta Didik · Materi umum · Pembelajaran SKU · Progres pribadi';
  }else if(u.role==='pembina'){
   const {data,error}=await sb.from('profil_pembina').select('*').eq('id_user',user.id).maybeSingle();if(error)throw error;teacher=data;
