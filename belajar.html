@@ -350,18 +350,18 @@ function openSku(id){
  if(l&&(l.status_publikasi==='terbit'||canSeeDraft)){
   html+='<div class="border-t mt-4 pt-4"><div class="flex justify-between items-center gap-2"><h4 class="font-bold">Materi pembelajaran</h4><span class="pill">'+(l.status_publikasi==='terbit'?'Sudah diterbitkan':'Pratinjau draf')+'</span></div><p class="text-sm muted mt-2">'+esc(l.pengantar)+'</p><div class="lesson-text text-sm mt-3">'+formatText(l.materi_markdown)+'</div><h4 class="font-bold mt-4">Contoh penerapan</h4><p class="text-sm">'+esc(l.contoh_penerapan)+'</p><h4 class="font-bold mt-4">Latihan praktik</h4><p class="lesson-text text-sm">'+esc(l.latihan_praktik)+'</p><h4 class="font-bold mt-4">Pertanyaan evaluasi</h4><ol class="list-decimal pl-5 text-sm space-y-2 mt-2">'+(l.pertanyaan_evaluasi||[]).map(q=>'<li>'+esc(q.pertanyaan)+'</li>').join('')+'</ol></div>';
   if(account.role==='peserta_didik'&&l.status_publikasi==='terbit'){
-   html+='<div class="border-t mt-4 pt-4 space-y-3"><label class="block text-sm font-semibold">Catatan belajar<textarea id="learnerNotes" rows="3" class="w-full border rounded-lg p-2 mt-1" placeholder="Apa yang sudah kamu pahami?">'+esc(pr?.catatan_peserta||'')+'</textarea></label><label class="block text-sm font-semibold">Bukti atau pengalaman<textarea id="learnerEvidence" rows="3" class="w-full border rounded-lg p-2 mt-1" placeholder="Tuliskan pengalaman, hasil karya, atau bukti yang relevan.">'+esc(pr?.bukti_pencapaian||'')+'</textarea></label><div class="flex flex-wrap gap-2"><button id="saveStudy" class="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm font-semibold">Simpan progres</button><button id="submitTest" class="rounded-lg bg-emerald-700 text-white px-4 py-2 text-sm font-semibold">Ajukan ujian ke Pembina</button></div></div>';
+   html+='<div class="border-t mt-4 pt-4 space-y-3"><label class="block text-sm font-semibold">Jawaban evaluasi<textarea id="learnerNotes" rows="5" class="w-full border rounded-lg p-2 mt-1" placeholder="Ketik jawaban untuk pertanyaan evaluasi di atas...">'+esc(pr?.catatan_peserta||'')+'</textarea></label><label class="block text-sm font-semibold">Bukti/Pengalaman<textarea id="learnerEvidence" rows="2" class="w-full border rounded-lg p-2 mt-1" placeholder="Keterangan pengalaman atau penjelasan bukti (opsional)">'+esc(pr?.bukti_pencapaian||'')+'</textarea></label><div><label class="block text-sm font-semibold">Unggah foto, video (maksimal 10 detik), atau file<input id="learnerEvidenceFiles" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" class="block w-full text-sm mt-2"></label><p class="text-xs muted mt-1">Maksimal 25 MB per file. Video dibatasi 10 detik.</p><div id="learnerEvidenceList" class="text-sm mt-2"></div></div><div class="flex flex-wrap gap-2"><button id="saveStudy" class="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm font-semibold">Simpan progres</button><button id="submitTest" class="rounded-lg bg-emerald-700 text-white px-4 py-2 text-sm font-semibold">Ajukan ujian ke Pembina</button></div></div>';
   }
  }else{
   html+='<div class="mt-4 rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm"><b>Materi terperinci belum diterbitkan.</b><p class="mt-1">Persyaratan dan kriteria dari panduan sudah tercatat. Penjelasan, contoh, latihan, serta evaluasi khusus butir ini masih perlu dilengkapi dan ditinjau sebelum dapat dipelajari peserta didik.</p></div>';
  }
- if(pr&&account.role!=='peserta_didik')html+='<div class="border-t mt-4 pt-3 text-sm"><b>Progres peserta:</b> '+esc(statusLabel(pr.status))+'<p class="mt-1">Catatan peserta: '+esc(pr.catatan_peserta||'-')+'</p><p>Bukti: '+esc(pr.bukti_pencapaian||'-')+'</p><p>Catatan Pembina: '+esc(pr.catatan_pembina||'-')+'</p></div>';
+ if(pr&&account.role!=='peserta_didik')html+='<div class="border-t mt-4 pt-3 text-sm"><b>Progres peserta:</b> '+esc(statusLabel(pr.status))+'<p class="mt-1">Jawaban: '+esc(pr.catatan_peserta||'-')+'</p><p>Bukti/Pengalaman: '+esc(pr.bukti_pencapaian||'-')+'</p><div id="learnerEvidenceList" class="mt-2"></div><p>Catatan Pembina: '+esc(pr.catatan_pembina||'-')+'</p></div>';
  const ownExams=examRecords.filter(r=>r.id_user===currentUser.id&&r.id_sku_item===id&&r.status==='selesai');
  if(ownExams.length)html+='<div class="border-t mt-4 pt-4"><h4 class="font-bold">Arsip hasil ujian digital</h4>'+ownExams.map(r=>'<div class="rounded-lg bg-slate-50 border p-3 mt-2 text-sm"><div class="flex flex-wrap justify-between gap-2"><b>'+esc(r.referral_no)+'</b><span class="pill '+(r.result==='lulus'?'status-lulus':'status-revisi')+'">'+(r.result==='lulus'?'LULUS':'TIDAK LULUS')+'</span></div><p class="mt-1">Penguji: '+esc(r.examiner_name||'-')+' · '+esc(r.examiner_institution||'-')+'</p><p>Waktu: '+esc(r.signed_at?new Date(r.signed_at).toLocaleString('id-ID'):'-')+'</p><p>Catatan: '+esc(r.examiner_notes||'-')+'</p><img src="'+esc(r.signature_data||'')+'" alt="Tanda tangan penguji" class="max-h-16 max-w-40 object-contain mt-2 bg-white border rounded"></div>').join('')+'</div>';
  $('skuDetail').innerHTML=html;
  $('skuDetail').scrollIntoView({behavior:'smooth',block:'start'});
  if($('backSkuList'))$('backSkuList').onclick=()=>$('skuList').scrollIntoView({behavior:'smooth',block:'start'});
- if($('saveStudy'))$('saveStudy').onclick=()=>saveProgress('dipelajari');
+ if($('learnerEvidenceList'))renderEvidenceAttachments('learnerEvidenceList',pr?.bukti_lampiran||[]);if($('saveStudy'))$('saveStudy').onclick=()=>saveProgress('dipelajari');
  if($('submitTest'))$('submitTest').onclick=()=>saveProgress('siap_diuji');
 }
 function subpointStatus(userId,subId){return subpointProgress.find(p=>p.id_user===userId&&p.id_subpoint===subId);}
@@ -380,19 +380,22 @@ function openSubpoint(id){
  const s=subpoints.find(x=>x.id_subpoint===id);if(!s)return;
  const p=subpointStatus(currentUser.id,id),canEdit=account.role==='peserta_didik';
  let html='<button id="backSubpoints" class="text-sm text-amber-800 font-semibold mb-3">← Kembali ke enam persyaratan</button><span class="pill">Subpoin '+esc(s.kode_subpoint)+'</span><h3 class="text-xl font-bold mt-2">'+esc(s.judul_subpoint)+'</h3><p class="text-sm mt-2">'+esc(s.persyaratan)+'</p><div class="border-t mt-4 pt-4"><h4 class="font-bold">Materi pembelajaran</h4><div class="lesson-text text-sm mt-2">'+formatText(s.materi_markdown)+'</div><h4 class="font-bold mt-4">Contoh penerapan</h4><p class="text-sm mt-1">'+esc(s.contoh_penerapan)+'</p><h4 class="font-bold mt-4">Latihan praktik</h4><p class="text-sm lesson-text mt-1">'+esc(s.latihan_praktik)+'</p><h4 class="font-bold mt-4">Evaluasi</h4><ol class="list-decimal pl-5 text-sm space-y-2 mt-2">'+(s.pertanyaan_evaluasi||[]).map(q=>'<li>'+esc(q.pertanyaan)+'</li>').join('')+'</ol></div>';
- if(canEdit)html+='<div class="border-t mt-4 pt-4 space-y-3"><label class="block text-sm font-semibold">Catatan belajar<textarea id="subNotes" rows="3" class="w-full border rounded-lg p-2 mt-1">'+esc(p?.catatan_peserta||'')+'</textarea></label><label class="block text-sm font-semibold">Bukti/pengalaman<textarea id="subEvidence" rows="3" class="w-full border rounded-lg p-2 mt-1" placeholder="Tuliskan bukti atau pengalaman untuk persyaratan ini">'+esc(p?.bukti_pencapaian||'')+'</textarea></label><div class="flex flex-wrap gap-2"><button id="subSave" class="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm">Simpan progres</button><button id="subSubmit" class="rounded-lg bg-emerald-700 text-white px-4 py-2 text-sm">Ajukan ujian subpoin ini</button></div></div>';
- else if(p)html+='<div class="border-t mt-4 pt-3 text-sm"><b>Status peserta:</b> '+esc(statusLabel(p.status))+'<p>Catatan: '+esc(p.catatan_peserta||'-')+'</p><p>Bukti: '+esc(p.bukti_pencapaian||'-')+'</p><p>Catatan Pembina: '+esc(p.catatan_pembina||'-')+'</p></div>';
+ if(canEdit)html+='<div class="border-t mt-4 pt-4 space-y-3"><label class="block text-sm font-semibold">Jawaban evaluasi<textarea id="subNotes" rows="5" class="w-full border rounded-lg p-2 mt-1" placeholder="Ketik jawaban untuk evaluasi subpoin ini...">'+esc(p?.catatan_peserta||'')+'</textarea></label><label class="block text-sm font-semibold">Bukti/Pengalaman<textarea id="subEvidence" rows="2" class="w-full border rounded-lg p-2 mt-1" placeholder="Keterangan pengalaman atau penjelasan bukti (opsional)">'+esc(p?.bukti_pencapaian||'')+'</textarea></label><div><label class="block text-sm font-semibold">Unggah foto, video (maksimal 10 detik), atau file<input id="subEvidenceFiles" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" class="block w-full text-sm mt-2"></label><p class="text-xs muted mt-1">Maksimal 25 MB per file. Video dibatasi 10 detik.</p><div id="subEvidenceList" class="text-sm mt-2"></div></div><div class="flex flex-wrap gap-2"><button id="subSave" class="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm">Simpan progres</button><button id="subSubmit" class="rounded-lg bg-emerald-700 text-white px-4 py-2 text-sm">Ajukan ujian subpoin ini</button></div></div>';
+ else if(p)html+='<div class="border-t mt-4 pt-3 text-sm"><b>Status peserta:</b> '+esc(statusLabel(p.status))+'<p>Jawaban: '+esc(p.catatan_peserta||'-')+'</p><p>Bukti/Pengalaman: '+esc(p.bukti_pencapaian||'-')+'</p><div id="subEvidenceList" class="mt-2"></div><p>Catatan Pembina: '+esc(p.catatan_pembina||'-')+'</p></div>';
  const history=examRecords.filter(r=>r.id_user===currentUser.id&&r.id_subpoint===id&&r.status==='selesai');
  if(history.length)html+='<div class="border-t mt-4 pt-3"><b>Riwayat ujian subpoin</b>'+history.map(r=>'<p class="text-sm mt-2">'+esc(r.referral_no)+' · '+(r.result==='lulus'?'LULUS':'TIDAK LULUS')+' · '+esc(r.examiner_name||'-')+'</p>').join('')+'</div>';
  $('skuDetail').innerHTML=html;$('skuDetail').scrollIntoView({behavior:'smooth',block:'start'});
  $('backSubpoints').onclick=renderSubpointIndex;
+ if($('subEvidenceList'))renderEvidenceAttachments('subEvidenceList',p?.bukti_lampiran||[]);
  if(canEdit){$('subSave').onclick=()=>saveSubpointProgress(id,'dipelajari');$('subSubmit').onclick=()=>saveSubpointProgress(id,'siap_diuji');}
 }
 async function saveSubpointProgress(subId,status){
  const notes=$('subNotes')?.value||'',evidence=$('subEvidence')?.value||'';
  if(status==='siap_diuji'&&!participant?.nta){setMsg('Lengkapi NTA/KTA pada menu Profil sebelum mengajukan ujian.');showTab('profile');return;}
- if(status==='siap_diuji'&&!evidence.trim()){setMsg('Isi bukti atau pengalaman khusus untuk subpoin ini.');return;}
- const payload={id_user:currentUser.id,id_sku_item:1,id_subpoint:subId,status,catatan_peserta:notes,bukti_pencapaian:evidence};
+ if(status==='siap_diuji'&&!evidence.trim()&&!($('subEvidenceFiles')?.files?.length)&&!subpointStatus(currentUser.id,subId)?.bukti_lampiran?.length){setMsg('Tambahkan bukti/pengalaman atau unggah lampiran sebelum mengajukan ujian.');return;}
+ let uploaded=[];try{uploaded=await uploadEvidenceFiles($('subEvidenceFiles')?.files,currentUser.id+'/subpoint-'+subId);}catch(err){setMsg('Unggah bukti gagal: '+err.message);return;}
+ const previous=subpointStatus(currentUser.id,subId)?.bukti_lampiran||[];
+ const payload={id_user:currentUser.id,id_sku_item:1,id_subpoint:subId,status,catatan_peserta:notes,bukti_pencapaian:evidence,bukti_lampiran:previous.concat(uploaded)};
  if(status==='siap_diuji')payload.diajukan_at=new Date().toISOString();
  setMsg('Menyimpan progres subpoin...');
  const {error}=await sb.from('sku_subpoint_progress').upsert(payload,{onConflict:'id_user,id_subpoint'});
@@ -404,7 +407,10 @@ async function saveSubpointProgress(subId,status){
 }
 async function saveProgress(status){
  const notes=$('learnerNotes')?.value||'',evidence=$('learnerEvidence')?.value||'';
- const payload={id_user:currentUser.id,id_sku_item:selectedItem.id_sku_item,status,catatan_peserta:notes,bukti_pencapaian:evidence};
+ const existing=progress.find(x=>x.id_user===currentUser.id&&x.id_sku_item===selectedItem.id_sku_item);
+ if(status==='siap_diuji'&&!evidence.trim()&&!($('learnerEvidenceFiles')?.files?.length)&&!existing?.bukti_lampiran?.length){setMsg('Tambahkan bukti/pengalaman atau unggah lampiran sebelum mengajukan ujian.');return;}
+ let uploaded=[];try{uploaded=await uploadEvidenceFiles($('learnerEvidenceFiles')?.files,currentUser.id+'/sku-'+selectedItem.id_sku_item);}catch(err){setMsg('Unggah bukti gagal: '+err.message);return;}
+ const payload={id_user:currentUser.id,id_sku_item:selectedItem.id_sku_item,status,catatan_peserta:notes,bukti_pencapaian:evidence,bukti_lampiran:(existing?.bukti_lampiran||[]).concat(uploaded)};
  if(status==='siap_diuji'&&account.role==='peserta_didik'&&!participant?.nta){setMsg('Pengujian SKU belum dapat diajukan. Lengkapi NTA/KTA terlebih dahulu.');showTab('profile');return;}
  if(status==='siap_diuji'&&!evidence.trim()){setMsg('Tuliskan bukti atau pengalaman sebelum mengajukan ujian.');return;}
  if(status==='siap_diuji')payload.diajukan_at=new Date().toISOString();
@@ -413,6 +419,38 @@ async function saveProgress(status){
  if(error){setMsg('Progres belum tersimpan: '+error.message);return;}
  const {data}=await sb.from('sku_learning_progress').select('*').eq('id_user',currentUser.id);
  progress=(data||[]);openSku(selectedItem.id_sku_item);setMsg(status==='siap_diuji'?'Pengajuan ujian terkirim kepada Pembina.':'Progres belajar tersimpan.');
+}
+async function validateEvidenceFile(file){
+ if(file.size>25*1024*1024)throw new Error('Ukuran file maksimal 25 MB: '+file.name);
+ if(file.type.startsWith('video/')){
+  const url=URL.createObjectURL(file);
+  try{const duration=await new Promise((resolve,reject)=>{const v=document.createElement('video');v.preload='metadata';v.onloadedmetadata=()=>resolve(v.duration);v.onerror=()=>reject(new Error('Video tidak dapat dibaca: '+file.name));v.src=url;});if(!Number.isFinite(duration)||duration>10.05)throw new Error('Durasi video maksimal 10 detik: '+file.name);}
+  finally{URL.revokeObjectURL(url);}
+ }
+}
+async function uploadEvidenceFiles(fileList,folder){
+ const files=Array.from(fileList||[]);if(!files.length)return [];
+ const out=[];
+ for(const file of files){
+  await validateEvidenceFile(file);
+  const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').slice(-100);
+  const path=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'_'+safe;
+  const {data,error}=await sb.storage.from('sku-bukti').upload(path,file,{contentType:file.type||'application/octet-stream',upsert:false});
+  if(error)throw error;
+  out.push({path:data.path,name:file.name,type:file.type||'application/octet-stream',size:file.size});
+ }
+ return out;
+}
+async function renderEvidenceAttachments(containerId,attachments){
+ const el=$(containerId);if(!el)return;
+ const files=Array.isArray(attachments)?attachments:[];
+ if(!files.length){el.innerHTML='';return;}
+ el.innerHTML='<p class="font-semibold mb-1">Lampiran bukti:</p>'+files.map((f,i)=>'<div class="text-xs py-1" id="'+containerId+'_'+i+'">'+esc(f.name||'Lampiran')+' · Memuat tautan...</div>').join('');
+ for(let i=0;i<files.length;i++){
+  const {data,error}=await sb.storage.from('sku-bukti').createSignedUrl(files[i].path,3600);
+  const row=$(containerId+'_'+i);if(!row)continue;
+  row.innerHTML=error?esc(files[i].name||'Lampiran')+' · Tidak dapat dibuka':'<a class="text-amber-800 underline" target="_blank" rel="noopener" href="'+esc(data.signedUrl)+'">'+esc(files[i].name||'Buka lampiran')+'</a> · '+Math.max(1,Math.round((files[i].size||0)/1024))+' KB';
+ }
 }
 function signatureImage(canvasId){
  const canvas=$(canvasId);if(!canvas)return '';
