@@ -135,7 +135,7 @@ function renderSkuList(){
  const level=$('levelFilter').value,area=$('areaFilter').value;
  const rows=items.filter(x=>x.tingkat===level&&(!area||x.area_pengembangan===area));
  $('skuList').innerHTML=rows.map(x=>{
-  const pr=progress.find(p=>p.id_sku_item===x.id_sku_item);
+  const pr=progress.find(p=>p.id_sku_item===x.id_sku_item&&p.id_user===currentUser.id);
   const l=lessons.find(z=>z.id_sku_item===x.id_sku_item);
   const locked=account.role==='peserta_didik'&&(!l||l.status_publikasi!=='terbit');
   return '<button class="sku-card w-full text-left p-3 '+(selectedItem?.id_sku_item===x.id_sku_item?'selected':'')+'" data-item="'+x.id_sku_item+'"><div class="flex justify-between gap-2"><span class="text-xs font-bold gold">'+esc(x.nomor_butir)+' · '+esc(x.area_pengembangan)+'</span><span class="pill">'+(locked?'Materi disiapkan':statusLabel(pr?.status))+'</span></div><div class="font-semibold text-sm mt-1">'+esc(x.judul_butir)+'</div></button>';
