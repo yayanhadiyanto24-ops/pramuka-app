@@ -36,7 +36,7 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.panel{backgroun
   <label class="block text-sm font-semibold">Instansi / jabatan penguji<input id="examinerInstitution" maxlength="150" readonly class="w-full border rounded-lg p-3 mt-1 font-normal bg-slate-100" placeholder="Sesuai surat pengantar"></label>
   <fieldset class="space-y-2"><legend class="text-sm font-semibold mb-2">Hasil pengujian</legend>
    <label class="flex items-center gap-3 border rounded-lg p-3"><input type="radio" name="result" value="lulus" required><span><b class="text-green-800">LULUS</b><span class="block text-xs muted">Peserta telah memenuhi kriteria butir SKU ini.</span></span></label>
-   <label class="flex items-center gap-3 border rounded-lg p-3"><input type="radio" name="result" value="tidak_lulus" required><span><b class="text-amber-800">TIDAK LULUS</b><span class="block text-xs muted">Peserta perlu belajar atau berlatih kembali.</span></span></label>
+   <label class="flex items-center gap-3 border rounded-lg p-3"><input type="radio" name="result" value="tidak_lulus" required><span><b class="text-amber-800">BELUM LULUS</b><span class="block text-xs muted">Peserta perlu belajar atau berlatih kembali.</span></span></label>
   </fieldset>
   <label class="block text-sm font-semibold">Catatan / alasan hasil ujian<textarea id="examNotes" rows="3" maxlength="2000" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Tuliskan catatan penilaian atau hal yang perlu ditingkatkan."></textarea></label>
   <div><div class="flex items-center justify-between gap-2"><label class="text-sm font-semibold">Tanda tangan penguji</label><button type="button" id="clearSignature" class="text-xs text-amber-800 underline">Hapus tanda tangan</button></div><canvas id="signature" class="signature mt-2" aria-label="Area tanda tangan penguji"></canvas><p class="text-xs muted mt-1">Bubuhkan tanda tangan dengan jari atau stylus pada area di atas.</p></div>
@@ -104,7 +104,7 @@ $('examForm').addEventListener('submit',async e=>{
   if(error)throw new Error(data?.message||error.message);if(!data?.ok)throw new Error(data?.message||'Hasil ujian gagal disimpan.');
   $('exam').classList.add('hidden');$('certificate').classList.remove('hidden');
   $('certRef').textContent='Nomor surat: '+data.certificate.referral_no;
-  $('certResult').textContent=result==='lulus'?'LULUS':'TIDAK LULUS';
+  $('certResult').textContent=result==='lulus'?'LULUS':'BELUM LULUS';
   $('resultBanner').className='rounded-xl p-4 text-center '+(result==='lulus'?'result-pass':'result-fail');
   $('certStudent').textContent=examData.student.nama_lengkap;
   $('certSku').textContent=[examData.sku.tingkat,examData.sku.nomor_butir,examData.sku.judul_butir,examData.subpoint?('Subpoin '+examData.subpoint.kode_subpoint+' — '+examData.subpoint.judul_subpoint):null].filter(Boolean).join(' · ');
