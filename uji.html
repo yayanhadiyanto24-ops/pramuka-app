@@ -62,7 +62,8 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const params=new URLSearchParams(location.search);
-const token=params.get('t')||'';
+const hashParams=new URLSearchParams(location.hash.replace(/^#/,'').replace(/^\?/,'') );
+const token=params.get('t')||hashParams.get('t')||'';
 let examData=null, drawing=false, hasSignature=false;
 function showError(message){$('loading').classList.add('hidden');$('exam').classList.add('hidden');$('errorBox').classList.remove('hidden');$('errorText').textContent=message;}
 function invoke(body){return sb.functions.invoke('sku-digital-exam',{body});}
