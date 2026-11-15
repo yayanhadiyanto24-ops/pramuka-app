@@ -9,15 +9,21 @@
   "theme_color": "#3b2619",
   "icons": [
     {
-      "src": "https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "assets/ruang-tegak-icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
       "src": "assets/ruang-tegak-icon.svg",
-      "sizes": "any",
+      "sizes": "512x512",
       "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
