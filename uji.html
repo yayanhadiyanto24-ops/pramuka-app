@@ -185,15 +185,15 @@ button.bg-amber-800,button.bg-amber-900{box-shadow:inset 0 1px 0 #fff5,0 3px 8px
 button.bg-amber-800:hover,button.bg-amber-900:hover{filter:brightness(1.08);box-shadow:inset 0 1px 0 #fff8,0 5px 12px #39200b40}
 </style></head>
 <body class="min-h-screen">
-<header class="brand text-white px-4 py-5"><div class="max-w-3xl mx-auto rt-exam-brand"><img class="rt-exam-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div><div class="rt-exam-name text-xl">RUANG TEGAK</div><div class="text-lg font-bold">Pengujian SKU Digital</div><p class="text-amber-200 text-sm">Surat pengantar dan pernyataan hasil ujian elektronik</p></div></div></header>
+<header class="brand text-white px-4 py-5"><div class="max-w-3xl mx-auto rt-exam-brand"><img class="rt-exam-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div><div class="rt-exam-name text-xl">RUANG TEGAK</div><div class="text-lg font-bold">Pengesahan Hasil Uji SKU</div><p class="text-amber-200 text-sm">Penguji menilai kecakapan dan membubuhkan tanda tangan langsung di HP peserta</p></div></div></header>
 <main class="max-w-3xl mx-auto p-4 md:p-6 space-y-4">
 <section id="loading" class="panel p-6 text-center">Memeriksa surat pengantar...</section>
 <section id="errorBox" class="hidden panel p-6"><h1 class="text-lg font-bold text-red-800">Surat tidak dapat dibuka</h1><p id="errorText" class="text-sm mt-2"></p></section>
 <section id="exam" class="hidden space-y-4">
  <article class="panel p-5 space-y-3">
-  <div class="flex flex-wrap items-center justify-between gap-2"><span class="text-xs font-bold tracking-wide text-amber-800">SURAT PENGANTAR UJIAN SKU</span><span id="refNo" class="text-xs font-semibold"></span></div>
-  <h1 class="text-xl font-bold">Permohonan Pengujian Satu Butir SKU</h1>
-  <p class="text-sm muted">Pembina memohon kesediaan penguji untuk menilai kecakapan peserta pada butir yang tercantum berikut ini.</p>
+  <div class="flex flex-wrap items-center justify-between gap-2"><span class="text-xs font-bold tracking-wide text-amber-800">FORMULIR PENGUJIAN SKU</span><span id="refNo" class="text-xs font-semibold"></span></div>
+  <h1 class="text-xl font-bold">Pengujian Satu Butir SKU</h1>
+  <p class="text-sm muted">Penguji memeriksa kecakapan peserta pada butir yang tercantum berikut ini, kemudian mengisi hasil dan tanda tangan digital.</p>
   <div class="grid sm:grid-cols-2 gap-3 text-sm">
    <div class="rounded-lg bg-amber-50 p-3"><div class="text-xs muted">Nama peserta</div><b id="studentName"></b></div>
    <div class="rounded-lg bg-amber-50 p-3"><div class="text-xs muted">Pangkalan / Ambalan</div><b id="studentUnit"></b></div>
@@ -205,7 +205,7 @@ button.bg-amber-800:hover,button.bg-amber-900:hover{filter:brightness(1.08);box-
  </article>
  <form id="examForm" class="panel p-5 space-y-4">
   <div><h2 class="text-lg font-bold">Pernyataan Hasil Pengujian</h2><p class="text-sm muted">Penguji mengisi hasil setelah melakukan pemeriksaan kecakapan secara langsung.</p></div>
-  <label class="block text-sm font-semibold">Nama penguji yang dituju<input id="examinerName" required maxlength="150" readonly class="w-full border rounded-lg p-3 mt-1 font-normal bg-slate-100" placeholder="Nama sesuai surat pengantar"><span class="block text-xs muted mt-1">Nama ini ditetapkan Pembina pada surat pengantar. Jika salah, minta Pembina menerbitkan surat baru.</span></label>
+  <label class="block text-sm font-semibold">Nama penguji<input id="examinerName" required maxlength="150" readonly class="w-full border rounded-lg p-3 mt-1 font-normal bg-slate-100" placeholder="Nama sesuai surat pengantar"><span class="block text-xs muted mt-1">Nama ini ditetapkan Pembina pada surat pengantar. Jika salah, minta Pembina menerbitkan surat baru.</span></label>
   <label class="block text-sm font-semibold">Instansi / jabatan penguji<input id="examinerInstitution" maxlength="150" readonly class="w-full border rounded-lg p-3 mt-1 font-normal bg-slate-100" placeholder="Sesuai surat pengantar"></label>
   <fieldset class="space-y-2"><legend class="text-sm font-semibold mb-2">Hasil pengujian</legend>
    <label class="flex items-center gap-3 border rounded-lg p-3"><input type="radio" name="result" value="lulus" required><span><b class="text-green-800">LULUS</b><span class="block text-xs muted">Peserta telah memenuhi kriteria butir SKU ini.</span></span></label>
@@ -251,7 +251,7 @@ function setupSignature(){
  $('clearSignature').onclick=()=>{ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);const ratio=window.devicePixelRatio||1;ctx.setTransform(ratio,0,0,ratio,0,0);hasSignature=false;};
 }
 async function loadExam(){
- if(!token){showError('Kode QR tidak memuat token ujian. Minta Pembina membuat surat pengantar baru.');return;}
+ if(!token){showError('Tautan ini tidak memuat akses ujian yang sah. Minta Pembina menerbitkan akses penguji.');return;}
  try{
   const {data,error}=await invoke({action:'get_exam',token});
   if(error)throw new Error(data?.message||error.message);
@@ -263,7 +263,7 @@ async function loadExam(){
   $('studentLevel').textContent=data.student.tingkatan||data.sku.tingkat||'-';
   $('skuTitle').textContent=[data.sku.tingkat,data.sku.nomor_butir,data.sku.judul_butir,data.subpoint?('Subpoin '+data.subpoint.kode_subpoint+' — '+data.subpoint.judul_subpoint):null].filter(Boolean).join(' · ');
   $('skuRequirement').textContent=data.subpoint?data.subpoint.persyaratan:(data.sku.persyaratan||'-');$('skuCriteria').textContent=data.subpoint?'Penilaian dilakukan khusus untuk subpoin ini. '+(data.sku.kriteria_pencapaian||''):(data.sku.kriteria_pencapaian||'-');
-  $('expiry').textContent='Berlaku sampai: '+new Date(data.referral.berlaku_sampai).toLocaleString('id-ID');
+  $('expiry').textContent='Akses berlaku sampai: '+new Date(data.referral.berlaku_sampai).toLocaleString('id-ID');
   $('loading').classList.add('hidden');$('exam').classList.remove('hidden');setupSignature();
  }catch(e){showError(e.message||'Terjadi kesalahan saat memeriksa surat.');}
 }
