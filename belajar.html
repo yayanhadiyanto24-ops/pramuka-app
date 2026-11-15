@@ -330,8 +330,10 @@ function renderSkuList(){
  $('skuList').innerHTML=rows.map(x=>{
   const pr=progress.find(p=>p.id_sku_item===x.id_sku_item&&p.id_user===currentUser.id);
   const l=lessons.find(z=>z.id_sku_item===x.id_sku_item);
-  const locked=account.role==='peserta_didik'&&(!l||l.status_publikasi!=='terbit');
-  return '<button class="sku-card w-full text-left p-3 '+(selectedItem?.id_sku_item===x.id_sku_item?'selected':'')+'" data-item="'+x.id_sku_item+'"><div class="flex justify-between gap-2"><span class="text-xs font-bold gold">'+esc(x.nomor_butir)+' · '+esc(x.area_pengembangan)+'</span><span class="pill">'+(locked?'Materi disiapkan':statusLabel(pr?.status))+'</span></div><div class="font-semibold text-sm mt-1">'+esc(x.judul_butir)+'</div></button>';
+  const locked=account.role==='peserta_didik'&&(!l||l.status_publikasi!=='terbit')&&x.id_sku_item!==1;
+  const subRows=x.id_sku_item===1?subpointProgress.filter(p=>p.id_user===currentUser.id&&p.id_sku_item===1):[];
+  const subStatus=x.id_sku_item===1?(subRows.filter(p=>p.status==='lulus').length+'/6 lulus · '+subRows.filter(p=>p.status==='siap_diuji').length+' menunggu'):statusLabel(pr?.status);
+  return '<button class="sku-card w-full text-left p-3 '+(selectedItem?.id_sku_item===x.id_sku_item?'selected':'')+'" data-item="'+x.id_sku_item+'"><div class="flex justify-between gap-2"><span class="text-xs font-bold gold">'+esc(x.nomor_butir)+' · '+esc(x.area_pengembangan)+'</span><span class="pill">'+(locked?'Materi disiapkan':subStatus)+'</span></div><div class="font-semibold text-sm mt-1">'+esc(x.judul_butir)+'</div></button>';
  }).join('')||'<div class="panel p-4 text-sm muted">Tidak ada butir pada area ini.</div>';
  $('skuList').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>openSku(Number(b.dataset.item)));
 }
