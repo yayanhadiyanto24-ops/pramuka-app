@@ -8,7 +8,7 @@ on:
       - '.github/workflows/build-android.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -39,3 +39,15 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Terbitkan APK untuk diunduh
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: Ruang Tegak Android v1.0.0
+          body: |
+            APK Android Ruang Tegak.
+            Aplikasi Android ini membuka layanan web Ruang Tegak versi terbaru.
+            Unduh file app-debug.apk, lalu pasang di perangkat Android.
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          fail_on_unmatched_files: true
