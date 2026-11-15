@@ -1033,7 +1033,7 @@ installButton?.addEventListener('click',async()=>{
   ruangTegakInstallPrompt=null;
   installMessage.textContent=choice?.outcome==='accepted'?'Permintaan pemasangan diterima.':'Pemasangan belum dilakukan. Kamu bisa mencobanya lagi nanti.';
  }else{
-  installMessage.textContent='Buka menu ⋮ Chrome, lalu pilih “Tambahkan ke layar utama” atau “Instal aplikasi”.';
+  installMessage.textContent='Chrome belum menyediakan dialog otomatis. Buka menu ⋮ di Chrome lalu pilih “Instal aplikasi” atau “Tambahkan ke layar utama”. Jika pilihan itu belum ada, tunggu pembaruan halaman beberapa saat lalu muat ulang.';
  }
  installMessage.classList.remove('hidden');
 });
