@@ -27,6 +27,20 @@
                 <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-jk">Jenis Kelamin *</label><select id="pd-jk" required class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"><option value="L">Laki-laki (Putra)</option><option value="P">Perempuan (Putri)</option></select></div>
                 <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-tingkatan">Tingkatan *</label><select id="pd-tingkatan" required class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"><option value="Calon Penegak">Calon Penegak</option><option value="Bantara">Penegak Bantara</option><option value="Laksana">Penegak Laksana</option><option value="Garuda">Penegak Garuda</option></select></div>
             </div>
+            <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 space-y-2">
+                <p class="text-xs font-bold uppercase text-amber-900">Penempatan Ambalan dan Sangga</p>
+                <div><label class="block text-xs font-bold text-gray-700 mb-1" for="pd-ambalan">Ambalan otomatis dari pangkalan</label><input id="pd-ambalan" readonly placeholder="Masukkan kode gabung terlebih dahulu" class="w-full px-3 py-2 border rounded-lg bg-gray-100 text-sm"></div>
+                <div><label class="block text-xs font-bold text-gray-700 mb-1" for="pd-sangga">Pilih Sangga *</label><select id="pd-sangga" required disabled class="w-full px-3 py-2 border rounded-lg bg-white"><option value="">Periksa kode gabung untuk melihat sangga</option></select></div>
+                <p id="pd-pangkalan-info" class="text-xs text-amber-900">Nama Ambalan mengikuti jenis kelamin dan data yang diatur Pembina.</p>
+            </div>
+            <div class="rounded-lg border p-3 space-y-3">
+                <p class="text-xs font-bold uppercase text-gray-700">Data Sekolah</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1" for="pd-kelas">Kelas *</label><select id="pd-kelas" required class="w-full px-3 py-2 border rounded-lg bg-white"><option value="X">Kelas X</option><option value="XI">Kelas XI</option><option value="XII">Kelas XII</option></select></div>
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1" for="pd-tahun">Tahun Pelajaran *</label><select id="pd-tahun" required class="w-full px-3 py-2 border rounded-lg bg-white"></select></div>
+                </div>
+                <div><label class="block text-xs font-bold text-gray-700 mb-1" for="pd-jurusan">Jurusan *</label><input id="pd-jurusan" required maxlength="100" placeholder="Contoh: IPA, IPS, Teknik Komputer dan Jaringan" class="w-full px-3 py-2 border rounded-lg"></div>
+            </div>
             <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-email">Email Aktif *</label><input id="pd-email" type="email" required autocomplete="email" maxlength="254" placeholder="email@contoh.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
             <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-password">Password *</label><input id="pd-password" type="password" required minlength="8" autocomplete="new-password" placeholder="Minimal 8 karakter" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
             <button type="submit" id="btn-peserta" class="w-full bg-amber-800 hover:bg-amber-900 disabled:opacity-60 text-white font-bold py-3 rounded-lg shadow transition">Daftar Sebagai Peserta Didik</button>
@@ -69,6 +83,28 @@ function switchTab(role) {
     document.getElementById('tab-pembina').className = !peserta ? 'py-3.5 text-sm font-bold text-amber-900 border-b-2 border-amber-800 bg-white transition' : 'py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition';
     hideAlert();
 }
+function populateSchoolYears(){
+    const sel=document.getElementById('pd-tahun');const now=new Date();const start=now.getMonth()>=6?now.getFullYear():now.getFullYear()-1;
+    sel.innerHTML='';for(let y=start-1;y<=start+3;y++){const o=document.createElement('option');o.value=y+'/'+(y+1);o.textContent=y+'/'+(y+1);if(y===start)o.selected=true;sel.appendChild(o);}
+}
+async function loadPangkalanOptions(){
+    const code=document.getElementById('pd-kode').value.trim().toUpperCase(),gender=document.getElementById('pd-jk').value;
+    const amb=document.getElementById('pd-ambalan'),sel=document.getElementById('pd-sangga'),info=document.getElementById('pd-pangkalan-info');
+    amb.value='';sel.disabled=true;sel.innerHTML='<option value="">Memuat pilihan sangga...</option>';
+    if(!code){sel.innerHTML='<option value="">Masukkan kode gabung</option>';return;}
+    try{
+      const {data,error}=await supabaseClient.functions.invoke('pramuka-register',{body:{action:'registration_options',kode_gabung:code,jenis_kelamin:gender}});
+      if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Kode gabung tidak valid.');
+      amb.value=data.nama_ambalan||'';info.textContent='Pangkalan: '+data.nama_pangkalan+' · Ambalan: '+data.nama_ambalan;
+      const rows=data.sangga||[];
+      sel.innerHTML='<option value="">Pilih sangga</option>'+rows.map(x=>'<option value="'+x.id_sangga+'">'+escapeText(x.nama_sangga)+'</option>').join('');
+      sel.disabled=rows.length===0;
+      if(!rows.length)info.textContent+=' · Pembina belum menambahkan daftar sangga. Hubungi Pembina.';
+    }catch(err){sel.innerHTML='<option value="">'+escapeText(err.message||'Gagal memuat sangga')+'</option>';info.textContent='Kode gabung belum dapat diverifikasi.';}
+}
+function escapeText(value){const d=document.createElement('div');d.textContent=String(value??'');return d.innerHTML;}
+document.getElementById('pd-kode').addEventListener('blur',loadPangkalanOptions);
+document.getElementById('pd-jk').addEventListener('change',loadPangkalanOptions);
 function updatePembinaType() {
     const putera = document.getElementById('pb-jk').value === 'L';
     const jabatan = putera ? 'Pembina Satuan Putera' : 'Pembina Satuan Puteri';
@@ -130,6 +166,10 @@ document.getElementById('form-peserta').addEventListener('submit', async e => {
         nama_lengkap: document.getElementById('pd-nama').value.trim(),
         jenis_kelamin: document.getElementById('pd-jk').value,
         tingkatan: document.getElementById('pd-tingkatan').value,
+        id_sangga: document.getElementById('pd-sangga').value,
+        kelas_sekolah: document.getElementById('pd-kelas').value,
+        jurusan: document.getElementById('pd-jurusan').value.trim(),
+        tahun_pelajaran: document.getElementById('pd-tahun').value,
         email: document.getElementById('pd-email').value.trim(),
         password: document.getElementById('pd-password').value
     }, document.getElementById('btn-peserta'), 'Daftar Sebagai Peserta Didik');
@@ -158,6 +198,7 @@ document.getElementById('form-pembina').addEventListener('submit', async e => {
     if (ok) e.target.reset();
     toggleModePembina();
 });
+populateSchoolYears();
 updatePembinaType();
 toggleModePembina();
 </script>
