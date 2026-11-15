@@ -1006,6 +1006,8 @@ async function review(id,status){
 }
 sb.auth.getSession().then(async({data})=>{if(data.session){try{await boot(data.session.user);}catch(err){$('loginMsg').textContent=err.message;$('login').classList.remove('hidden');$('application').classList.add('hidden');}}});
 
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(err=>console.warn('Service worker Ruang Tegak gagal didaftarkan:',err)));}
+
 let ruangTegakInstallPrompt=null;
 const installButton=$('installAppBtn');
 const installMessage=document.createElement('div');
