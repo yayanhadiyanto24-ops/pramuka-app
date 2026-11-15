@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ruang Belajar Pramuka Penegak</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45309}.panel{background:#fff;border:1px solid #f3e8c8;border-radius:16px;box-shadow:0 4px 18px #78350f0c}.tab.active{background:#78350f;color:#fff}.muted{color:#64748b}.sku-card{border:1px solid #e7e5e4;border-radius:12px;background:#fff}.sku-card.selected{border-color:#b45309;box-shadow:0 0 0 2px #fef3c7}.pill{font-size:11px;padding:3px 8px;border-radius:999px;background:#fef3c7;color:#92400e}.lesson-text{white-space:pre-wrap;line-height:1.7}.status-lulus{background:#dcfce7;color:#166534}.status-menunggu{background:#dbeafe;color:#1d4ed8}.status-revisi{background:#ffedd5;color:#9a3412}
+</style>
+</head>
+<body class="min-h-screen">
+<header class="brand text-white px-4 py-5">
+ <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+  <div><div class="text-xl font-bold">⚜️ Ruang Belajar Pramuka Penegak</div><p class="text-amber-200 text-sm">Materi umum · SKU Bantara · SKU Laksana · Progres kecakapan</p></div>
+  <div class="flex items-center gap-3"><span id="who" class="text-sm text-amber-100"></span><button id="logout" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button></div>
+ </div>
+</header>
+<main class="max-w-6xl mx-auto p-4 md:p-6">
+ <section id="login" class="panel max-w-md mx-auto p-6 mt-8">
+  <h1 class="text-xl font-bold mb-1">Masuk ke Ruang Belajar</h1><p class="text-sm muted mb-4">Gunakan akun peserta didik, Pembina, atau Admin Utama yang sudah aktif.</p>
+  <form id="loginForm" class="space-y-3">
+   <input id="email" type="email" required autocomplete="username" placeholder="Email" class="w-full border rounded-lg p-3">
+   <input id="password" type="password" required autocomplete="current-password" placeholder="Password" class="w-full border rounded-lg p-3">
+   <button id="loginBtn" class="w-full rounded-lg bg-amber-800 text-white font-bold p-3">Masuk</button>
+  </form><p id="loginMsg" class="text-sm mt-3" role="status"></p>
+ </section>
+ <section id="application" class="hidden space-y-5">
+  <div id="accountNotice" class="hidden panel p-4 text-sm"></div>
+  <nav class="flex flex-wrap gap-2">
+   <button class="tab active rounded-lg px-4 py-2 text-sm font-semibold" data-tab="umum">Materi Umum</button>
+   <button class="tab rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="sku">Materi SKU</button>
+   <button id="monitorTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="pantau">Pantau Peserta</button>
+  </nav>
+  <section id="view-umum" class="space-y-4">
+   <div><h2 class="text-xl font-bold">Pengantar Pramuka Penegak</h2><p class="text-sm muted">Pelajari bagian umum terlebih dahulu sebelum masuk ke butir-butir SKU.</p></div>
+   <div id="generalList" class="grid md:grid-cols-2 gap-3"></div>
+   <article id="generalDetail" class="panel hidden p-5 space-y-3"></article>
+  </section>
+  <section id="view-sku" class="hidden space-y-4">
+   <div class="flex flex-wrap items-end justify-between gap-3">
+    <div><h2 class="text-xl font-bold">Materi Syarat Kecakapan Umum</h2><p class="text-sm muted">Setiap butir dipelajari dan diuji secara terpisah.</p></div>
+    <div class="flex flex-wrap gap-2">
+     <select id="levelFilter" class="border rounded-lg p-2 bg-white"><option value="Bantara">Penegak Bantara</option><option value="Laksana">Penegak Laksana</option></select>
+     <select id="areaFilter" class="border rounded-lg p-2 bg-white"><option value="">Semua area</option><option>Spiritual</option><option>Emosional</option><option>Sosial</option><option>Intelektual</option><option>Fisik</option></select>
+    </div>
+   </div>
+   <p class="text-xs text-slate-600 bg-amber-100 rounded-lg p-3">Pada butir Spiritual, pilih materi agama yang sesuai dengan keyakinanmu. Aplikasi tidak meminta atau menyimpan data agama peserta didik.</p>
+   <div class="grid lg:grid-cols-[minmax(260px,0.8fr)_minmax(0,1.5fr)] gap-4">
+    <div id="skuList" class="space-y-2"></div>
+    <article id="skuDetail" class="panel p-5 min-h-64"><p class="muted text-sm">Pilih satu butir SKU untuk membuka materi dan progresnya.</p></article>
+   </div>
+  </section>
+  <section id="view-pantau" class="hidden space-y-4">
+   <div><h2 class="text-xl font-bold">Perkembangan Peserta Didik</h2><p class="text-sm muted">Daftar peserta dan hasil belajar yang berada dalam cakupan pangkalan Pembina atau Admin Utama.</p></div>
+   <div id="monitorList" class="space-y-3"></div>
+  </section>
+  <p id="appMsg" class="text-sm muted" role="status"></p>
+ </section>
+</main>
+<script>
+'use strict';
+const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
+const SUPABASE_KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+let currentUser=null, account=null, participant=null, teacher=null, items=[], lessons=[], progress=[], general=[];
+let selectedItem=null;
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const statusLabel=s=>({dipelajari:'Sedang dipelajari',siap_diuji:'Menunggu ujian',perlu_perbaikan:'Perlu perbaikan',lulus:'Lulus'})[s]||'Belum mulai';
+function setMsg(t){$('appMsg').textContent=t||'';}
+function formatText(t){return esc(t||'').replace(/^## (.+)$/gm,'<strong class="block text-lg mt-4 mb-2">$1</strong>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}
+function showTab(name){
+ document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+ ['umum','sku','pantau'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==name));
+}
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+$('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('loginBtn').disabled=true;$('loginBtn').textContent='Memeriksa...';$('loginMsg').textContent='Menghubungkan...';
+ try{const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await boot(data.user);}
+ catch(err){$('loginMsg').textContent='Login belum berhasil: '+(err.message||'Periksa email dan password.');}
+ finally{$('loginBtn').disabled=false;$('loginBtn').textContent='Masuk';}
+});
+$('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
+async function boot(user){
+ currentUser=user;
+ const {data:u,error:ue}=await sb.from('users').select('role,status_akun').eq('id_user',user.id).maybeSingle();
+ if(ue)throw ue;if(!u)throw new Error('Profil akun belum tersedia. Hubungi Admin Utama.');
+ account=u;
+ $('login').classList.add('hidden');$('application').classList.remove('hidden');$('logout').classList.remove('hidden');
+ $('who').textContent=user.email+' · '+u.role.replace('_',' ');
+ if(u.status_akun!=='aktif'){
+  $('accountNotice').classList.remove('hidden');$('accountNotice').textContent='Akun masih '+u.status_akun+'. Akses belajar akan terbuka setelah disetujui Admin Utama.';return;
+ }
+ if(u.role==='peserta_didik'){
+  const {data,error}=await sb.from('profil_peserta_didik').select('*').eq('id_user',user.id).maybeSingle();if(error)throw error;participant=data;
+  if(!participant)throw new Error('Profil peserta didik belum ditemukan.');
+ }else if(u.role==='pembina'){
+  const {data,error}=await sb.from('profil_pembina').select('*').eq('id_user',user.id).maybeSingle();if(error)throw error;teacher=data;
+  if(!teacher)throw new Error('Profil Pembina belum ditemukan.');
+  $('monitorTab').classList.remove('hidden');
+ }else if(u.role==='admin_kwarcab'){$('monitorTab').classList.remove('hidden');}
+ else throw new Error('Peran akun tidak dikenali.');
+ await loadAll();
+}
+async function loadAll(){
+ setMsg('Memuat materi dan progres...');
+ const [g,i,l,p]=await Promise.all([
+  sb.from('sku_general_lessons').select('*').order('urutan'),
+  sb.from('sku_items').select('*').eq('aktif',true).order('urutan').order('kode_butir'),
+  sb.from('sku_lessons').select('*'),
+  sb.from('sku_learning_progress').select('*')
+ ]);
+ for(const r of [g,i,l,p])if(r.error)throw r.error;
+ general=g.data||[];items=i.data||[];lessons=l.data||[];progress=p.data||[];
+ renderGeneral();renderSkuList();if(account.role!=='peserta_didik')await loadMonitor();
+ setMsg('Materi berhasil dimuat.');
+}
+function renderGeneral(){
+ $('generalList').innerHTML=general.map(x=>'<button class="panel text-left p-4 hover:border-amber-500" data-general="'+x.id_materi_umum+'"><span class="pill">Materi umum '+x.urutan+'</span><h3 class="font-bold mt-2">'+esc(x.judul)+'</h3><p class="text-sm muted mt-1">'+esc(x.pengantar.slice(0,170))+'...</p></button>').join('')||'<div class="panel p-4 text-sm muted">Materi umum belum tersedia.</div>';
+ $('generalList').querySelectorAll('[data-general]').forEach(b=>b.onclick=()=>openGeneral(Number(b.dataset.general)));
+}
+function openGeneral(id){
+ const x=general.find(z=>z.id_materi_umum===id);if(!x)return;
+ $('generalDetail').classList.remove('hidden');
+ $('generalDetail').innerHTML='<div class="flex justify-between gap-3"><div><span class="pill">Materi umum</span><h3 class="text-xl font-bold mt-2">'+esc(x.judul)+'</h3></div><button id="closeGeneral" class="text-sm gold">Tutup</button></div><p class="text-sm muted">'+esc(x.pengantar)+'</p><div class="lesson-text">'+formatText(x.materi_markdown)+'</div><h4 class="font-bold">Contoh penerapan</h4><p>'+esc(x.contoh_penerapan)+'</p><h4 class="font-bold">Aktivitas belajar</h4><p class="lesson-text">'+esc(x.aktivitas_belajar)+'</p><h4 class="font-bold">Evaluasi diri</h4><ol class="list-decimal pl-5 space-y-2">'+(x.pertanyaan_evaluasi||[]).map(q=>'<li>'+esc(q.pertanyaan)+'</li>').join('')+'</ol>';
+ $('closeGeneral').onclick=()=>$('generalDetail').classList.add('hidden');
+ $('generalDetail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderSkuList(){
+ const level=$('levelFilter').value,area=$('areaFilter').value;
+ const rows=items.filter(x=>x.tingkat===level&&(!area||x.area_pengembangan===area));
+ $('skuList').innerHTML=rows.map(x=>{
+  const pr=progress.find(p=>p.id_sku_item===x.id_sku_item);
+  const l=lessons.find(z=>z.id_sku_item===x.id_sku_item);
+  const locked=account.role==='peserta_didik'&&(!l||l.status_publikasi!=='terbit');
+  return '<button class="sku-card w-full text-left p-3 '+(selectedItem?.id_sku_item===x.id_sku_item?'selected':'')+'" data-item="'+x.id_sku_item+'"><div class="flex justify-between gap-2"><span class="text-xs font-bold gold">'+esc(x.nomor_butir)+' · '+esc(x.area_pengembangan)+'</span><span class="pill">'+(locked?'Materi disiapkan':statusLabel(pr?.status))+'</span></div><div class="font-semibold text-sm mt-1">'+esc(x.judul_butir)+'</div></button>';
+ }).join('')||'<div class="panel p-4 text-sm muted">Tidak ada butir pada area ini.</div>';
+ $('skuList').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>openSku(Number(b.dataset.item)));
+}
+$('levelFilter').onchange=()=>{selectedItem=null;renderSkuList();$('skuDetail').innerHTML='<p class="muted text-sm">Pilih satu butir SKU.</p>';};
+$('areaFilter').onchange=()=>{selectedItem=null;renderSkuList();$('skuDetail').innerHTML='<p class="muted text-sm">Pilih satu butir SKU.</p>';};
+function openSku(id){
+ selectedItem=items.find(x=>x.id_sku_item===id);if(!selectedItem)return;
+ renderSkuList();
+ const x=selectedItem,l=lessons.find(z=>z.id_sku_item===id),pr=progress.find(z=>z.id_sku_item===id&&z.id_user===currentUser.id);
+ const canSeeDraft=account.role!=='peserta_didik';
+ let html='<div class="flex flex-wrap items-center justify-between gap-2"><div><span class="pill">'+esc(x.tingkat)+' · '+esc(x.area_pengembangan)+'</span><h3 class="text-xl font-bold mt-2">'+esc(x.nomor_butir)+' — '+esc(x.judul_butir)+'</h3></div><span class="pill">'+esc(statusLabel(pr?.status))+'</span></div>';
+ html+='<h4 class="font-bold mt-4">Persyaratan SKU</h4><p class="text-sm leading-7">'+esc(x.persyaratan)+'</p><h4 class="font-bold mt-4">Kriteria pencapaian</h4><p class="text-sm leading-7">'+esc(x.kriteria_pencapaian)+'</p>';
+ if(l&&(l.status_publikasi==='terbit'||canSeeDraft)){
+  html+='<div class="border-t mt-4 pt-4"><div class="flex justify-between items-center gap-2"><h4 class="font-bold">Materi pembelajaran</h4><span class="pill">'+(l.status_publikasi==='terbit'?'Sudah diterbitkan':'Pratinjau draf')+'</span></div><p class="text-sm muted mt-2">'+esc(l.pengantar)+'</p><div class="lesson-text text-sm mt-3">'+formatText(l.materi_markdown)+'</div><h4 class="font-bold mt-4">Contoh penerapan</h4><p class="text-sm">'+esc(l.contoh_penerapan)+'</p><h4 class="font-bold mt-4">Latihan praktik</h4><p class="lesson-text text-sm">'+esc(l.latihan_praktik)+'</p><h4 class="font-bold mt-4">Pertanyaan evaluasi</h4><ol class="list-decimal pl-5 text-sm space-y-2 mt-2">'+(l.pertanyaan_evaluasi||[]).map(q=>'<li>'+esc(q.pertanyaan)+'</li>').join('')+'</ol></div>';
+  if(account.role==='peserta_didik'&&l.status_publikasi==='terbit'){
+   html+='<div class="border-t mt-4 pt-4 space-y-3"><label class="block text-sm font-semibold">Catatan belajar<textarea id="learnerNotes" rows="3" class="w-full border rounded-lg p-2 mt-1" placeholder="Apa yang sudah kamu pahami?">'+esc(pr?.catatan_peserta||'')+'</textarea></label><label class="block text-sm font-semibold">Bukti atau pengalaman<textarea id="learnerEvidence" rows="3" class="w-full border rounded-lg p-2 mt-1" placeholder="Tuliskan pengalaman, hasil karya, atau bukti yang relevan.">'+esc(pr?.bukti_pencapaian||'')+'</textarea></label><div class="flex flex-wrap gap-2"><button id="saveStudy" class="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm font-semibold">Simpan progres</button><button id="submitTest" class="rounded-lg bg-emerald-700 text-white px-4 py-2 text-sm font-semibold">Ajukan ujian ke Pembina</button></div></div>';
+  }
+ }else{
+  html+='<div class="mt-4 rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm"><b>Materi terperinci belum diterbitkan.</b><p class="mt-1">Persyaratan dan kriteria dari panduan sudah tercatat. Penjelasan, contoh, latihan, serta evaluasi khusus butir ini masih perlu dilengkapi dan ditinjau sebelum dapat dipelajari peserta didik.</p></div>';
+ }
+ if(pr&&account.role!=='peserta_didik')html+='<div class="border-t mt-4 pt-3 text-sm"><b>Progres peserta:</b> '+esc(statusLabel(pr.status))+'<p class="mt-1">Catatan peserta: '+esc(pr.catatan_peserta||'-')+'</p><p>Bukti: '+esc(pr.bukti_pencapaian||'-')+'</p><p>Catatan Pembina: '+esc(pr.catatan_pembina||'-')+'</p></div>';
+ $('skuDetail').innerHTML=html;
+ if($('saveStudy'))$('saveStudy').onclick=()=>saveProgress('dipelajari');
+ if($('submitTest'))$('submitTest').onclick=()=>saveProgress('siap_diuji');
+}
+async function saveProgress(status){
+ const notes=$('learnerNotes')?.value||'',evidence=$('learnerEvidence')?.value||'';
+ const payload={id_user:currentUser.id,id_sku_item:selectedItem.id_sku_item,status,catatan_peserta:notes,bukti_pencapaian:evidence};
+ if(status==='siap_diuji'&&!evidence.trim()){setMsg('Tuliskan bukti atau pengalaman sebelum mengajukan ujian.');return;}
+ if(status==='siap_diuji')payload.diajukan_at=new Date().toISOString();
+ setMsg('Menyimpan progres...');
+ const {error}=await sb.from('sku_learning_progress').upsert(payload,{onConflict:'id_user,id_sku_item'});
+ if(error){setMsg('Progres belum tersimpan: '+error.message);return;}
+ const {data}=await sb.from('sku_learning_progress').select('*').eq('id_user',currentUser.id);
+ progress=(data||[]);openSku(selectedItem.id_sku_item);setMsg(status==='siap_diuji'?'Pengajuan ujian terkirim kepada Pembina.':'Progres belajar tersimpan.');
+}
+async function loadMonitor(){
+ const {data:students,error}=await sb.from('profil_peserta_didik').select('id_user,nama_lengkap,jenis_kelamin,tingkatan,sangga,id_pangkalan').order('nama_lengkap');
+ if(error)throw error;
+ const {data:rows,error:pe}=await sb.from('sku_learning_progress').select('*');if(pe)throw pe;
+ const allProgress=rows||[];
+ $('monitorList').innerHTML=(students||[]).map(s=>{
+  const ps=allProgress.filter(p=>p.id_user===s.id_user);
+  const counts={lulus:ps.filter(p=>p.status==='lulus').length,siap:ps.filter(p=>p.status==='siap_diuji').length,revisi:ps.filter(p=>p.status==='perlu_perbaikan').length};
+  const pending=ps.filter(p=>p.status==='siap_diuji');
+  return '<article class="panel p-4"><div class="flex flex-wrap justify-between gap-2"><div><b>'+esc(s.nama_lengkap)+'</b><p class="text-xs muted">'+(s.jenis_kelamin==='L'?'Putra':'Putri')+' · '+esc(s.tingkatan)+' · Sangga '+esc(s.sangga||'-')+'</p></div><div class="flex gap-2 text-xs"><span class="pill status-lulus">'+counts.lulus+' lulus</span><span class="pill status-menunggu">'+counts.siap+' menunggu</span><span class="pill status-revisi">'+counts.revisi+' perbaikan</span></div></div>'+(pending.length?'<div class="mt-3 space-y-3">'+pending.map(p=>{
+   const it=items.find(z=>z.id_sku_item===p.id_sku_item);
+   return '<div class="border-t pt-3"><b class="text-sm">'+esc(it?.tingkat||'SKU')+' · '+esc(it?.nomor_butir||'')+' '+esc(it?.judul_butir||'')+'</b><p class="text-sm mt-1">Bukti: '+esc(p.bukti_pencapaian||'-')+'</p><p class="text-sm">Catatan peserta: '+esc(p.catatan_peserta||'-')+'</p><textarea id="review-'+p.id_progress+'" class="w-full border rounded-lg p-2 mt-2 text-sm" rows="2" placeholder="Catatan hasil ujian / perbaikan"></textarea><div class="flex gap-2 mt-2"><button data-review="'+p.id_progress+'" data-result="lulus" class="review-btn rounded-lg bg-emerald-700 text-white px-3 py-2 text-xs">Nyatakan lulus</button><button data-review="'+p.id_progress+'" data-result="perlu_perbaikan" class="review-btn rounded-lg bg-amber-700 text-white px-3 py-2 text-xs">Perlu perbaikan</button></div></div>';
+  }).join('')+'</div>':'<p class="text-xs muted mt-3">Belum ada pengajuan ujian.</p>')+'</article>';
+ }).join('')||'<div class="panel p-4 text-sm muted">Belum ada peserta didik dalam cakupan akun ini.</div>';
+ $('monitorList').querySelectorAll('.review-btn').forEach(b=>b.onclick=()=>review(Number(b.dataset.review),b.dataset.result));
+}
+async function review(id,status){
+ const note=$('review-'+id)?.value.trim()||'';
+ if(!note){setMsg('Isi catatan hasil ujian terlebih dahulu.');return;}
+ const {error}=await sb.from('sku_learning_progress').update({status,catatan_pembina:note}).eq('id_progress',id);
+ if(error){setMsg('Penilaian gagal disimpan: '+error.message);return;}
+ const {data}=await sb.from('sku_learning_progress').select('*');progress=data||[];await loadMonitor();setMsg('Hasil ujian tersimpan.');
+}
+sb.auth.getSession().then(async({data})=>{if(data.session){try{await boot(data.session.user);}catch(err){$('loginMsg').textContent=err.message;$('login').classList.remove('hidden');$('application').classList.add('hidden');}}});
+</script>
+</body>
+</html>
