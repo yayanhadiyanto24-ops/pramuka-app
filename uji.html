@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ujian SKU Digital · Pramuka Penegak</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.panel{background:#fff;border:1px solid #f3e8c8;border-radius:16px;box-shadow:0 4px 18px #78350f0c}.muted{color:#64748b}.signature{width:100%;height:180px;touch-action:none;background:#fff;border:2px dashed #d6d3d1;border-radius:12px}.result-pass{background:#dcfce7;color:#166534}.result-fail{background:#ffedd5;color:#9a3412}
+</style>
+</head>
+<body class="min-h-screen">
+<header class="brand text-white px-4 py-5"><div class="max-w-3xl mx-auto"><div class="text-xl font-bold">⚜️ Ujian SKU Digital</div><p class="text-amber-200 text-sm">Surat pengantar dan pernyataan hasil ujian elektronik</p></div></header>
+<main class="max-w-3xl mx-auto p-4 md:p-6 space-y-4">
+<section id="loading" class="panel p-6 text-center">Memeriksa surat pengantar...</section>
+<section id="errorBox" class="hidden panel p-6"><h1 class="text-lg font-bold text-red-800">Surat tidak dapat dibuka</h1><p id="errorText" class="text-sm mt-2"></p></section>
+<section id="exam" class="hidden space-y-4">
+ <article class="panel p-5 space-y-3">
+  <div class="flex flex-wrap items-center justify-between gap-2"><span class="text-xs font-bold tracking-wide text-amber-800">SURAT PENGANTAR UJIAN SKU</span><span id="refNo" class="text-xs font-semibold"></span></div>
+  <h1 class="text-xl font-bold">Permohonan Pengujian Satu Butir SKU</h1>
+  <p class="text-sm muted">Pembina memohon kesediaan penguji untuk menilai kecakapan peserta pada butir yang tercantum berikut ini.</p>
+  <div class="grid sm:grid-cols-2 gap-3 text-sm">
+   <div class="rounded-lg bg-amber-50 p-3"><div class="text-xs muted">Nama peserta</div><b id="studentName"></b></div>
+   <div class="rounded-lg bg-amber-50 p-3"><div class="text-xs muted">Pangkalan / Ambalan</div><b id="studentUnit"></b></div>
+   <div class="rounded-lg bg-amber-50 p-3"><div class="text-xs muted">Tingkatan</div><b id="studentLevel"></b></div>
+   <div class="rounded-lg bg-amber-50 p-3"><div class="text-xs muted">Nomor surat</div><b id="refNo2"></b></div>
+  </div>
+  <div class="border-t pt-3"><div class="text-xs muted">Butir SKU yang diuji</div><h2 id="skuTitle" class="font-bold text-lg mt-1"></h2><div id="skuRequirement" class="text-sm leading-7 mt-2"></div><div class="mt-3"><div class="text-xs muted">Kriteria pencapaian</div><div id="skuCriteria" class="text-sm leading-7 mt-1"></div></div></div>
+  <p id="expiry" class="text-xs muted border-t pt-3"></p>
+ </article>
+ <form id="examForm" class="panel p-5 space-y-4">
+  <div><h2 class="text-lg font-bold">Pernyataan Hasil Pengujian</h2><p class="text-sm muted">Penguji mengisi hasil setelah melakukan pemeriksaan kecakapan secara langsung.</p></div>
+  <label class="block text-sm font-semibold">Nama lengkap penguji<input id="examinerName" required maxlength="150" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Nama penguji"></label>
+  <label class="block text-sm font-semibold">Instansi / jabatan penguji <span class="font-normal muted">(opsional)</span><input id="examinerInstitution" maxlength="150" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Contoh: Pembina, guru, ustaz/ustazah"></label>
+  <fieldset class="space-y-2"><legend class="text-sm font-semibold mb-2">Hasil pengujian</legend>
+   <label class="flex items-center gap-3 border rounded-lg p-3"><input type="radio" name="result" value="lulus" required><span><b class="text-green-800">LULUS</b><span class="block text-xs muted">Peserta telah memenuhi kriteria butir SKU ini.</span></span></label>
+   <label class="flex items-center gap-3 border rounded-lg p-3"><input type="radio" name="result" value="tidak_lulus" required><span><b class="text-amber-800">TIDAK LULUS</b><span class="block text-xs muted">Peserta perlu belajar atau berlatih kembali.</span></span></label>
+  </fieldset>
+  <label class="block text-sm font-semibold">Catatan / alasan hasil ujian<textarea id="examNotes" rows="3" maxlength="2000" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Tuliskan catatan penilaian atau hal yang perlu ditingkatkan."></textarea></label>
+  <div><div class="flex items-center justify-between gap-2"><label class="text-sm font-semibold">Tanda tangan penguji</label><button type="button" id="clearSignature" class="text-xs text-amber-800 underline">Hapus tanda tangan</button></div><canvas id="signature" class="signature mt-2" aria-label="Area tanda tangan penguji"></canvas><p class="text-xs muted mt-1">Bubuhkan tanda tangan dengan jari atau stylus pada area di atas.</p></div>
+  <p class="text-xs muted">Dengan mengirim formulir ini, penguji menyatakan bahwa hasil yang dipilih sesuai dengan pengujian yang telah dilakukan. Tanda tangan ini menjadi rekam pengesahan elektronik internal aplikasi, bukan tanda tangan elektronik tersertifikasi.</p>
+  <button id="submitExam" class="w-full rounded-lg bg-amber-800 text-white font-bold p-3">Kirim hasil dan tanda tangan</button>
+  <p id="formMsg" class="text-sm" role="status"></p>
+ </form>
+</section>
+<section id="certificate" class="hidden panel p-6 space-y-4">
+ <div class="text-center"><div class="text-3xl">⚜️</div><div class="text-xs font-bold tracking-widest text-amber-800 mt-2">ARSIP HASIL PENGUJIAN SKU</div><h1 class="text-2xl font-bold mt-2">Pernyataan Hasil Ujian</h1><p id="certRef" class="text-sm muted mt-1"></p></div>
+ <div class="rounded-xl p-4 text-center" id="resultBanner"><div class="text-xs">HASIL PENGUJIAN</div><div id="certResult" class="text-2xl font-extrabold mt-1"></div></div>
+ <div class="text-sm space-y-2"><p><b>Peserta:</b> <span id="certStudent"></span></p><p><b>Butir SKU:</b> <span id="certSku"></span></p><p><b>Penguji:</b> <span id="certExaminer"></span></p><p><b>Instansi/jabatan:</b> <span id="certInstitution"></span></p><p><b>Catatan:</b> <span id="certNotes"></span></p><p><b>Waktu pengesahan:</b> <span id="certTime"></span></p></div>
+ <div class="border-t pt-4"><div class="text-xs muted">Tanda tangan penguji tersimpan pada arsip aplikasi.</div><img id="certSignature" alt="Tanda tangan penguji" class="max-h-28 max-w-full object-contain mt-2"></div>
+ <button id="printCert" class="w-full rounded-lg bg-amber-800 text-white p-3 font-semibold">Cetak / Simpan sebagai PDF</button>
+ <p class="text-xs muted text-center">Arsip elektronik ini dapat diperlihatkan kepada peserta dan Pembina melalui akun masing-masing.</p>
+</section>
+</main>
+<script>
+'use strict';
+const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
+const SUPABASE_KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const params=new URLSearchParams(location.search);
+const token=params.get('t')||'';
+let examData=null, drawing=false, hasSignature=false;
+function showError(message){$('loading').classList.add('hidden');$('exam').classList.add('hidden');$('errorBox').classList.remove('hidden');$('errorText').textContent=message;}
+function invoke(body){return sb.functions.invoke('sku-digital-exam',{body});}
+function setupSignature(){
+ const canvas=$('signature'),ctx=canvas.getContext('2d');
+ const resize=()=>{const rect=canvas.getBoundingClientRect(),ratio=window.devicePixelRatio||1;const old=hasSignature?canvas.toDataURL():null;canvas.width=Math.round(rect.width*ratio);canvas.height=Math.round(180*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);ctx.lineWidth=2.4;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#1f2937';if(old){const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,rect.width,180);im.src=old;}};
+ resize();window.addEventListener('resize',()=>{if(!hasSignature)resize();});
+ const point=e=>{const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};};
+ canvas.addEventListener('pointerdown',e=>{e.preventDefault();drawing=true;canvas.setPointerCapture(e.pointerId);const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+0.1,p.y+0.1);ctx.stroke();hasSignature=true;});
+ canvas.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+ const stop=()=>{drawing=false;};canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);canvas.addEventListener('pointerleave',stop);
+ $('clearSignature').onclick=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);hasSignature=false;};
+}
+async function loadExam(){
+ if(!token){showError('Kode QR tidak memuat token ujian. Minta Pembina membuat surat pengantar baru.');return;}
+ try{
+  const {data,error}=await invoke({action:'get_exam',token});
+  if(error)throw new Error(data?.message||error.message);
+  if(!data?.ok)throw new Error(data?.message||'Surat tidak dapat dibuka.');
+  examData=data;
+  $('refNo').textContent=data.referral.referral_no;$('refNo2').textContent=data.referral.referral_no;
+  $('studentName').textContent=data.student.nama_lengkap||'-';
+  $('studentUnit').textContent=[data.student.nama_pangkalan,data.student.nama_ambalan].filter(Boolean).join(' · ')||'-';
+  $('studentLevel').textContent=data.student.tingkatan||data.sku.tingkat||'-';
+  $('skuTitle').textContent=[data.sku.tingkat,data.sku.nomor_butir,data.sku.judul_butir].filter(Boolean).join(' · ');
+  $('skuRequirement').textContent=data.sku.persyaratan||'-';$('skuCriteria').textContent=data.sku.kriteria_pencapaian||'-';
+  $('expiry').textContent='Berlaku sampai: '+new Date(data.referral.berlaku_sampai).toLocaleString('id-ID');
+  $('loading').classList.add('hidden');$('exam').classList.remove('hidden');setupSignature();
+ }catch(e){showError(e.message||'Terjadi kesalahan saat memeriksa surat.');}
+}
+$('examForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(!hasSignature){$('formMsg').textContent='Tanda tangan penguji belum dibubuhkan.';return;}
+ const result=document.querySelector('input[name="result"]:checked')?.value;
+ if(!result){$('formMsg').textContent='Pilih hasil pengujian.';return;}
+ $('submitExam').disabled=true;$('submitExam').textContent='Menyimpan hasil...';$('formMsg').textContent='Mengirim hasil dan tanda tangan secara aman...';
+ try{
+  const {data,error}=await invoke({action:'submit_exam',token,examiner_name:$('examinerName').value,examiner_institution:$('examinerInstitution').value,result,notes:$('examNotes').value,signature_data:$('signature').toDataURL('image/png')});
+  if(error)throw new Error(data?.message||error.message);if(!data?.ok)throw new Error(data?.message||'Hasil ujian gagal disimpan.');
+  $('exam').classList.add('hidden');$('certificate').classList.remove('hidden');
+  $('certRef').textContent='Nomor surat: '+data.certificate.referral_no;
+  $('certResult').textContent=result==='lulus'?'LULUS':'TIDAK LULUS';
+  $('resultBanner').className='rounded-xl p-4 text-center '+(result==='lulus'?'result-pass':'result-fail');
+  $('certStudent').textContent=examData.student.nama_lengkap;
+  $('certSku').textContent=[examData.sku.tingkat,examData.sku.nomor_butir,examData.sku.judul_butir].filter(Boolean).join(' · ');
+  $('certExaminer').textContent=data.certificate.examiner_name;
+  $('certInstitution').textContent=data.certificate.examiner_institution||'-';
+  $('certNotes').textContent=data.certificate.examiner_notes||'-';
+  $('certTime').textContent=new Date(data.certificate.signed_at).toLocaleString('id-ID');
+  $('certSignature').src=$('signature').toDataURL('image/png');
+ }catch(err){$('formMsg').textContent=err.message||'Gagal menyimpan hasil ujian.';$('submitExam').disabled=false;$('submitExam').textContent='Kirim hasil dan tanda tangan';}
+});
+$('printCert').onclick=()=>window.print();
+loadExam();
+</script>
+<style>@media print{header,#exam,#loading,#errorBox,#printCert{display:none!important}body{background:#fff}.panel{box-shadow:none;border:0}#certificate{display:block!important}}</style>
+</body>
+</html>
