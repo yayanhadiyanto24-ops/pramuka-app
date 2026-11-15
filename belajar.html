@@ -130,7 +130,7 @@ window.addEventListener('unhandledrejection',e=>{const m=$('loginMsg');if(m&&!cu
 const SUPABASE_KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
 const sb=window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 if(!sb){$('loginMsg').textContent='Layanan login belum termuat. Periksa koneksi internet, lalu muat ulang halaman.';}
-let currentUser=null, account=null, participant=null, teacher=null, items=[], lessons=[], progress=[], general=[], examRecords=[], monitorReportHtml='';
+let currentUser=null, account=null, participant=null, teacher=null, items=[], lessons=[], progress=[], general=[], examRecords=[], subpoints=[], subpointProgress=[], monitorReportHtml='';
 let selectedItem=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const statusLabel=s=>({dipelajari:'Sedang dipelajari',siap_diuji:'Menunggu ujian',perlu_perbaikan:'Perlu perbaikan',lulus:'Lulus'})[s]||'Belum mulai';
@@ -299,15 +299,17 @@ $('savePangkalan').addEventListener('click',async()=>{
 });
 async function loadAll(){
  setMsg('Memuat materi dan progres...');
- const [g,i,l,p,e]=await Promise.all([
+ const [g,i,l,p,e,sp,spp]=await Promise.all([
   sb.from('sku_general_lessons').select('*').order('urutan'),
   sb.from('sku_items').select('*').eq('aktif',true).order('urutan').order('kode_butir'),
   sb.from('sku_lessons').select('*'),
   sb.from('sku_learning_progress').select('*'),
-  sb.from('sku_exam_referrals').select('id,referral_no,id_user,id_sku_item,dibuat_at,berlaku_sampai,status,examiner_name,examiner_institution,result,examiner_notes,signature_data,signed_at').order('dibuat_at',{ascending:false})
+  sb.from('sku_exam_referrals').select('id,referral_no,id_user,id_sku_item,id_subpoint,dibuat_at,berlaku_sampai,status,examiner_name,examiner_institution,result,examiner_notes,signature_data,signed_at').order('dibuat_at',{ascending:false}),
+  sb.from('sku_subpoints').select('*').eq('id_sku_item',1).order('urutan'),
+  sb.from('sku_subpoint_progress').select('*')
  ]);
- for(const r of [g,i,l,p,e])if(r.error)throw r.error;
- general=g.data||[];items=i.data||[];lessons=l.data||[];progress=p.data||[];examRecords=e.data||[];
+ for(const r of [g,i,l,p,e,sp,spp])if(r.error)throw r.error;
+ general=g.data||[];items=i.data||[];lessons=l.data||[];progress=p.data||[];examRecords=e.data||[];subpoints=sp.data||[];subpointProgress=spp.data||[];
  renderGeneral();renderSkuList();if(account.role!=='peserta_didik')await loadMonitor();
  setMsg('Materi berhasil dimuat.');
 }
@@ -340,6 +342,7 @@ function openSku(id){
  renderSkuList();
  const x=selectedItem,l=lessons.find(z=>z.id_sku_item===id),pr=progress.find(z=>z.id_sku_item===id&&z.id_user===currentUser.id);
  const canSeeDraft=account.role!=='peserta_didik';
+ if(id===1&&subpoints.length){renderSubpointIndex();return;}
  let html='<div class="flex justify-end mb-3"><button id="backSkuList" class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">← Kembali ke daftar SKU</button></div><div class="flex flex-wrap items-center justify-between gap-2"><div><span class="pill">'+esc(x.tingkat)+' · '+esc(x.area_pengembangan)+'</span><h3 class="text-xl font-bold mt-2">'+esc(x.nomor_butir)+' — '+esc(x.judul_butir)+'</h3></div><span class="pill">'+esc(statusLabel(pr?.status))+'</span></div>';
  html+='<h4 class="font-bold mt-4">Persyaratan SKU</h4><p class="text-sm leading-7">'+esc(x.persyaratan)+'</p><h4 class="font-bold mt-4">Kriteria pencapaian</h4><p class="text-sm leading-7">'+esc(x.kriteria_pencapaian)+'</p>';
  if(l&&(l.status_publikasi==='terbit'||canSeeDraft)){
@@ -358,6 +361,44 @@ function openSku(id){
  if($('backSkuList'))$('backSkuList').onclick=()=>$('skuList').scrollIntoView({behavior:'smooth',block:'start'});
  if($('saveStudy'))$('saveStudy').onclick=()=>saveProgress('dipelajari');
  if($('submitTest'))$('submitTest').onclick=()=>saveProgress('siap_diuji');
+}
+function subpointStatus(userId,subId){return subpointProgress.find(p=>p.id_user===userId&&p.id_subpoint===subId);}
+function renderSubpointIndex(){
+ const x=selectedItem;
+ const own=subpointProgress.filter(p=>p.id_user===currentUser.id&&p.id_sku_item===1);
+ const counts={lulus:own.filter(p=>p.status==='lulus').length,siap:own.filter(p=>p.status==='siap_diuji').length};
+ let html='<div class="flex justify-end mb-3"><button id="backSkuList" class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">← Kembali ke daftar SKU</button></div><span class="pill">Bantara · Spiritual</span><h3 class="text-xl font-bold mt-2">1.a — '+esc(x.judul_butir)+'</h3><p class="text-sm mt-2">'+esc(x.persyaratan)+'</p><p class="text-xs muted mt-2">Enam persyaratan dipelajari, disimpan, dan diajukan ujian secara terpisah. Lulus satu subpoin tidak otomatis meluluskan subpoin lain.</p>';
+ if(account.role==='peserta_didik')html+='<div class="rounded-lg bg-amber-50 p-3 text-sm my-3">Progres pribadi: <b>'+counts.lulus+'/6 lulus</b> · '+counts.siap+' menunggu ujian</div>';
+ html+='<div class="space-y-2 mt-4">'+subpoints.map(s=>{const p=subpointStatus(currentUser.id,s.id_subpoint);return '<button data-subpoint="'+s.id_subpoint+'" class="sku-card w-full text-left p-3"><div class="flex justify-between gap-2"><b>'+esc(s.kode_subpoint)+'. '+esc(s.judul_subpoint)+'</b><span class="pill">'+esc(statusLabel(p?.status))+'</span></div><p class="text-xs muted mt-1">'+esc(s.persyaratan)+'</p></button>';}).join('')+'</div>';
+ $('skuDetail').innerHTML=html;$('skuDetail').scrollIntoView({behavior:'smooth',block:'start'});
+ $('backSkuList').onclick=()=>$('skuList').scrollIntoView({behavior:'smooth',block:'start'});
+ $('skuDetail').querySelectorAll('[data-subpoint]').forEach(b=>b.onclick=()=>openSubpoint(Number(b.dataset.subpoint)));
+}
+function openSubpoint(id){
+ const s=subpoints.find(x=>x.id_subpoint===id);if(!s)return;
+ const p=subpointStatus(currentUser.id,id),canEdit=account.role==='peserta_didik';
+ let html='<button id="backSubpoints" class="text-sm text-amber-800 font-semibold mb-3">← Kembali ke enam persyaratan</button><span class="pill">Subpoin '+esc(s.kode_subpoint)+'</span><h3 class="text-xl font-bold mt-2">'+esc(s.judul_subpoint)+'</h3><p class="text-sm mt-2">'+esc(s.persyaratan)+'</p><div class="border-t mt-4 pt-4"><h4 class="font-bold">Materi pembelajaran</h4><div class="lesson-text text-sm mt-2">'+formatText(s.materi_markdown)+'</div><h4 class="font-bold mt-4">Contoh penerapan</h4><p class="text-sm mt-1">'+esc(s.contoh_penerapan)+'</p><h4 class="font-bold mt-4">Latihan praktik</h4><p class="text-sm lesson-text mt-1">'+esc(s.latihan_praktik)+'</p><h4 class="font-bold mt-4">Evaluasi</h4><ol class="list-decimal pl-5 text-sm space-y-2 mt-2">'+(s.pertanyaan_evaluasi||[]).map(q=>'<li>'+esc(q.pertanyaan)+'</li>').join('')+'</ol></div>';
+ if(canEdit)html+='<div class="border-t mt-4 pt-4 space-y-3"><label class="block text-sm font-semibold">Catatan belajar<textarea id="subNotes" rows="3" class="w-full border rounded-lg p-2 mt-1">'+esc(p?.catatan_peserta||'')+'</textarea></label><label class="block text-sm font-semibold">Bukti/pengalaman<textarea id="subEvidence" rows="3" class="w-full border rounded-lg p-2 mt-1" placeholder="Tuliskan bukti atau pengalaman untuk persyaratan ini">'+esc(p?.bukti_pencapaian||'')+'</textarea></label><div class="flex flex-wrap gap-2"><button id="subSave" class="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm">Simpan progres</button><button id="subSubmit" class="rounded-lg bg-emerald-700 text-white px-4 py-2 text-sm">Ajukan ujian subpoin ini</button></div></div>';
+ else if(p)html+='<div class="border-t mt-4 pt-3 text-sm"><b>Status peserta:</b> '+esc(statusLabel(p.status))+'<p>Catatan: '+esc(p.catatan_peserta||'-')+'</p><p>Bukti: '+esc(p.bukti_pencapaian||'-')+'</p><p>Catatan Pembina: '+esc(p.catatan_pembina||'-')+'</p></div>';
+ const history=examRecords.filter(r=>r.id_user===currentUser.id&&r.id_subpoint===id&&r.status==='selesai');
+ if(history.length)html+='<div class="border-t mt-4 pt-3"><b>Riwayat ujian subpoin</b>'+history.map(r=>'<p class="text-sm mt-2">'+esc(r.referral_no)+' · '+(r.result==='lulus'?'LULUS':'TIDAK LULUS')+' · '+esc(r.examiner_name||'-')+'</p>').join('')+'</div>';
+ $('skuDetail').innerHTML=html;$('skuDetail').scrollIntoView({behavior:'smooth',block:'start'});
+ $('backSubpoints').onclick=renderSubpointIndex;
+ if(canEdit){$('subSave').onclick=()=>saveSubpointProgress(id,'dipelajari');$('subSubmit').onclick=()=>saveSubpointProgress(id,'siap_diuji');}
+}
+async function saveSubpointProgress(subId,status){
+ const notes=$('subNotes')?.value||'',evidence=$('subEvidence')?.value||'';
+ if(status==='siap_diuji'&&!participant?.nta){setMsg('Lengkapi NTA/KTA pada menu Profil sebelum mengajukan ujian.');showTab('profile');return;}
+ if(status==='siap_diuji'&&!evidence.trim()){setMsg('Isi bukti atau pengalaman khusus untuk subpoin ini.');return;}
+ const payload={id_user:currentUser.id,id_sku_item:1,id_subpoint:subId,status,catatan_peserta:notes,bukti_pencapaian:evidence};
+ if(status==='siap_diuji')payload.diajukan_at=new Date().toISOString();
+ setMsg('Menyimpan progres subpoin...');
+ const {error}=await sb.from('sku_subpoint_progress').upsert(payload,{onConflict:'id_user,id_subpoint'});
+ if(error){setMsg('Progres subpoin gagal disimpan: '+error.message);return;}
+ const {data,error:loadError}=await sb.from('sku_subpoint_progress').select('*').eq('id_user',currentUser.id);
+ if(loadError){setMsg('Tersimpan, tetapi tampilan progres belum dapat diperbarui: '+loadError.message);return;}
+ subpointProgress=(subpointProgress.filter(p=>p.id_user!==currentUser.id)).concat(data||[]);
+ openSubpoint(subId);setMsg(status==='siap_diuji'?'Pengajuan ujian subpoin terkirim kepada Pembina.':'Progres subpoin tersimpan.');
 }
 async function saveProgress(status){
  const notes=$('learnerNotes')?.value||'',evidence=$('learnerEvidence')?.value||'';
