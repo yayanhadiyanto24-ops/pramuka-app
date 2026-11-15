@@ -32,8 +32,8 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.panel{backgroun
  </article>
  <form id="examForm" class="panel p-5 space-y-4">
   <div><h2 class="text-lg font-bold">Pernyataan Hasil Pengujian</h2><p class="text-sm muted">Penguji mengisi hasil setelah melakukan pemeriksaan kecakapan secara langsung.</p></div>
-  <label class="block text-sm font-semibold">Nama lengkap penguji<input id="examinerName" required maxlength="150" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Nama penguji"></label>
-  <label class="block text-sm font-semibold">Instansi / jabatan penguji <span class="font-normal muted">(opsional)</span><input id="examinerInstitution" maxlength="150" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Contoh: Pembina, guru, ustaz/ustazah"></label>
+  <label class="block text-sm font-semibold">Nama penguji yang dituju<input id="examinerName" required maxlength="150" readonly class="w-full border rounded-lg p-3 mt-1 font-normal bg-slate-100" placeholder="Nama sesuai surat pengantar"><span class="block text-xs muted mt-1">Nama ini ditetapkan Pembina pada surat pengantar. Jika salah, minta Pembina menerbitkan surat baru.</span></label>
+  <label class="block text-sm font-semibold">Instansi / jabatan penguji<input id="examinerInstitution" maxlength="150" readonly class="w-full border rounded-lg p-3 mt-1 font-normal bg-slate-100" placeholder="Sesuai surat pengantar"></label>
   <fieldset class="space-y-2"><legend class="text-sm font-semibold mb-2">Hasil pengujian</legend>
    <label class="flex items-center gap-3 border rounded-lg p-3"><input type="radio" name="result" value="lulus" required><span><b class="text-green-800">LULUS</b><span class="block text-xs muted">Peserta telah memenuhi kriteria butir SKU ini.</span></span></label>
    <label class="flex items-center gap-3 border rounded-lg p-3"><input type="radio" name="result" value="tidak_lulus" required><span><b class="text-amber-800">TIDAK LULUS</b><span class="block text-xs muted">Peserta perlu belajar atau berlatih kembali.</span></span></label>
@@ -84,7 +84,7 @@ async function loadExam(){
   if(error)throw new Error(data?.message||error.message);
   if(!data?.ok)throw new Error(data?.message||'Surat tidak dapat dibuka.');
   examData=data;
-  $('refNo').textContent=data.referral.referral_no;$('refNo2').textContent=data.referral.referral_no;
+  $('refNo').textContent=data.referral.referral_no;$('refNo2').textContent=data.referral.referral_no;$('examinerName').value=data.referral.examiner_expected_name||'';$('examinerInstitution').value=data.referral.examiner_expected_institution||'';
   $('studentName').textContent=data.student.nama_lengkap||'-';
   $('studentUnit').textContent=[data.student.nama_pangkalan,data.student.nama_ambalan].filter(Boolean).join(' · ')||'-';
   $('studentLevel').textContent=data.student.tingkatan||data.sku.tingkat||'-';
