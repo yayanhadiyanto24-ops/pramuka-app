@@ -38,10 +38,10 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
   </nav>
   <section id="view-profile" class="hidden space-y-4">
    <div class="panel p-4 md:p-6 space-y-4">
-    <div><h2 class="text-xl font-bold">Lengkapi Profil</h2><p class="text-sm muted">Data profil digunakan untuk identitas kepramukaan dan administrasi SKU. Pastikan NTA/KTA benar.</p></div>
+    <div><h2 class="text-xl font-bold">Lengkapi Profil</h2><p class="text-sm muted">Data profil digunakan untuk identitas kepramukaan dan administrasi SKU. Isi NTA sesuai KTA Nasional.</p></div>
     <div class="grid md:grid-cols-[150px_1fr] gap-4 items-start">
      <div class="space-y-2"><img id="profilePhotoPreview" class="w-32 h-32 rounded-full object-cover border bg-slate-50" alt="Foto profil"><label class="block text-sm font-semibold">Foto profil<input id="profilePhotoInput" type="file" accept="image/*" class="block w-full text-xs mt-1"></label><p class="text-xs muted">Foto akan diperkecil otomatis.</p></div>
-     <div class="space-y-2"><label id="ntaProfileField" class="block text-sm font-semibold">NTA/KTA Pramuka Nasional<input id="profileNta" maxlength="80" class="w-full border rounded-lg p-2 mt-1" placeholder="Masukkan nomor NTA/KTA"></label><p class="text-xs muted">NTA/KTA diperlukan untuk pengajuan pengujian SKU dan melanjutkan jenjang.</p></div>
+     <div class="space-y-2"><label id="ntaProfileField" class="block text-sm font-semibold">NTA/KTA Pramuka Nasional<input id="profileNta" maxlength="80" class="w-full border rounded-lg p-2 mt-1" placeholder="Masukkan nomor NTA/KTA"></label><p class="text-xs muted">NTA diperlukan untuk persyaratan ujian SKU dan kenaikan tingkatan setelah validasi.</p><div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"><b>Belum memiliki KTA Pramuka Nasional?</b><p class="mt-1">Kamu tetap dapat belajar di aplikasi. Hubungi Pembina pangkalanmu dan sampaikan bahwa kamu belum memiliki KTA. Pembina akan membantu meneruskan permohonan kepada Sekretaris Kwarran untuk proses penerbitan KTA Nasional. Setelah KTA terbit, lengkapi nomor NTA dan bukti pendukung pada profil.</p></div></div>
     </div>
     <div id="teacherProfileFields" class="hidden space-y-4 border-t pt-4">
      <h3 class="font-bold">Pendidikan dan Pengesahan Pembina</h3><p id="teacherQuotaInfo" class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"></p><div class="flex flex-wrap gap-2"><input id="accessCodeInput" maxlength="40" class="flex-1 min-w-0 border rounded-lg p-2 text-sm uppercase" placeholder="Kode akses tambahan dari Admin Utama"><button id="activateAccessCode" type="button" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-sm font-semibold">Aktifkan kode</button></div><p id="accessCodeMsg" class="text-xs muted"></p>
@@ -337,7 +337,7 @@ function renderSkuList(){
  }).join('')||'<div class="panel p-4 text-sm muted">Tidak ada butir pada area ini.</div>';
  $('skuList').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>openSku(Number(b.dataset.item)));
 }
-$('levelFilter').onchange=()=>{if(account.role==='peserta_didik'&&participant&&!participant.nta&&$('levelFilter').value==='Laksana'){$('levelFilter').value='Bantara';setMsg('Lengkapi NTA/KTA pada menu Lengkapi Profil sebelum melanjutkan ke SKU Laksana.');showTab('profile');return;}selectedItem=null;renderSkuList();$('skuDetail').innerHTML='<p class="muted text-sm">Pilih satu butir SKU.</p>';};
+$('levelFilter').onchange=()=>{if(account.role==='peserta_didik'&&participant&&(!participant.nta)&&$('levelFilter').value==='Laksana'){$('levelFilter').value='Bantara';setMsg('Lengkapi NTA/KTA pada menu Lengkapi Profil sebelum melanjutkan ke SKU Laksana.');showTab('profile');return;}selectedItem=null;renderSkuList();$('skuDetail').innerHTML='<p class="muted text-sm">Pilih satu butir SKU.</p>';};
 $('areaFilter').onchange=()=>{selectedItem=null;renderSkuList();$('skuDetail').innerHTML='<p class="muted text-sm">Pilih satu butir SKU.</p>';};
 function openSku(id){
  selectedItem=items.find(x=>x.id_sku_item===id);if(!selectedItem)return;
