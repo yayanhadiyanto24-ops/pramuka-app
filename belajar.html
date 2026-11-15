@@ -930,7 +930,7 @@ function renderStudentSubpointProgress(rows,studentId){
   const item=group.item;
   const heading='Rincian subpoin '+(item?.nomor_butir||'SKU')+' · '+(item?.tingkat||'')+' '+(item?.judul_butir||'');
   return '<div class="mt-3 border-t pt-3 space-y-2"><b class="text-sm">'+esc(heading)+'</b>'+group.rows.map(({progress:p,sub})=>{
-   return '<div class="rounded-lg border p-3 text-xs"><div class="flex justify-between gap-2"><b>'+esc(sub?.kode_subpoint||'')+'. '+esc(sub?.judul_subpoint||'Subpoin')+'</b><span class="pill">'+esc(statusText(p.status))+'</span></div><p class="mt-1">Bukti/Pengalaman: '+esc(p.bukti_pencapaian||'-')+'</p><p>Jawaban: '+esc(p.catatan_peserta||'-')+'</p><div id="evidence_sub_'+studentId+'_'+p.id_subpoint+'" class="mt-2"></div><p>Catatan Pembina: '+esc(p.catatan_pembina||'-')+'</p>'+(p.status==='siap_diuji'?'<div class="flex flex-wrap gap-2 mt-2"><button data-subdirect="'+p.id_subpoint_progress+'" class="sub-direct-btn rounded-lg bg-emerald-700 text-white px-3 py-2">Uji langsung</button><button data-substudent="'+studentId+'" data-subsku="'+p.id_sku_item+'" data-subpoint="'+p.id_subpoint+'" class="sub-referral-btn rounded-lg bg-blue-800 text-white px-3 py-2">Buat surat ujian subpoin + QR</button></div>':'')+'</div>';
+   return '<div class="rounded-lg border p-3 text-xs"><div class="flex justify-between gap-2"><b>'+esc(sub?.kode_subpoint||'')+'. '+esc(sub?.judul_subpoint||'Subpoin')+'</b><span class="pill">'+esc(statusText(p.status))+'</span></div><p class="mt-1">Bukti/Pengalaman: '+esc(p.bukti_pencapaian||'-')+'</p><p>Jawaban: '+esc(p.catatan_peserta||'-')+'</p><div id="evidence_sub_'+studentId+'_'+p.id_subpoint+'" class="mt-2"></div><p>Catatan Pembina: '+esc(p.catatan_pembina||'-')+'</p>'+(p.status==='siap_diuji'?'<div class="flex flex-wrap gap-2 mt-2"><button data-subdirect="'+p.id_subpoint_progress+'" class="sub-direct-btn rounded-lg bg-emerald-700 text-white px-3 py-2">Uji langsung</button><button data-substudent="'+studentId+'" data-subsku="'+p.id_sku_item+'" data-subpoint="'+p.id_subpoint+'" class="sub-referral-btn rounded-lg bg-blue-800 text-white px-3 py-2">Buat akses ujian subpoin</button></div>':'')+'</div>';
   }).join('')+'</div>';
  }).join('');
 }
@@ -1057,7 +1057,7 @@ async function stampSkuProgress(progressId){
 let pendingReferralRequest=null;
 async function createExamReferral(studentId,skuItemId,subpointId=null){
  pendingReferralRequest={studentId,skuItemId,subpointId};
- $('examModalInfo').textContent='Isi identitas penguji yang akan menerima surat pengantar ini.';
+ $('examModalInfo').textContent='Isi identitas penguji yang akan melakukan penilaian dan tanda tangan pada HP peserta.';
  $('expectedExaminerName').value='';$('expectedExaminerInstitution').value='';
  $('createExamAccess').classList.remove('hidden');
  $('examModalMsg').textContent='';$('examModal').classList.remove('hidden');
@@ -1066,16 +1066,16 @@ $('createExamAccess').onclick=async()=>{
  if(!pendingReferralRequest)return;
  const examinerName=$('expectedExaminerName').value.trim(),examinerInstitution=$('expectedExaminerInstitution').value.trim();
  if(examinerName.length<2){$('examModalMsg').textContent='Nama penguji wajib diisi.';return;}
- const btn=$('createExamAccess');btn.disabled=true;btn.textContent='Membuat surat...';
+ const btn=$('createExamAccess');btn.disabled=true;btn.textContent='Membuat akses...';
  try{
   const q=pendingReferralRequest;
   const {data,error}=await sb.functions.invoke('sku-digital-exam',{body:{action:'create_referral',student_id:q.studentId,sku_item_id:q.skuItemId,subpoint_id:q.subpointId,examiner_name:examinerName,examiner_institution:examinerInstitution}});
-  if(error)throw new Error(data?.message||error.message);if(!data?.ok)throw new Error(data?.message||'Surat pengantar gagal dibuat.');
+  if(error)throw new Error(data?.message||error.message);if(!data?.ok)throw new Error(data?.message||'Akses penguji gagal dibuat.');
   $('examModalMsg').textContent='Akses penguji '+data.referral.referral_no+' berhasil dibuat. Peserta dapat membukanya dari akun di HP peserta.';
   $('examModal').classList.add('hidden');
   setMsg('Akses penguji berhasil dibuat. Peserta dapat membuka ujian langsung di HP-nya.');
- }catch(err){$('examModalMsg').textContent=err.message||'Gagal membuat surat.';}
- finally{btn.disabled=false;btn.textContent='Buat surat pengantar dan QR';}
+ }catch(err){$('examModalMsg').textContent=err.message||'Gagal membuat akses penguji.';}
+ finally{btn.disabled=false;btn.textContent='Buat akses penguji';}
 };
 $('closeExamModal').onclick=()=>$('examModal').classList.add('hidden');
 async function review(id,status){
