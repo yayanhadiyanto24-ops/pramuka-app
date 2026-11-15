@@ -129,7 +129,7 @@ async function boot(user){
  $('login').classList.add('hidden');$('application').classList.remove('hidden');$('logout').classList.remove('hidden');
  $('who').textContent=user.email+' · '+u.role.replace('_',' ');
  if(u.status_akun!=='aktif'){
-  $('accountNotice').classList.remove('hidden');$('accountNotice').textContent=u.role==='peserta_didik'?'Pendaftaran diterima. Akses belajar akan terbuka setelah disetujui Pembina Satuan '+(participant?.jenis_kelamin==='L'?'Putera':'Puteri')+'.':'Akun masih '+u.status_akun+'. Akses belajar akan terbuka setelah disetujui Admin Utama.';return;
+  $('accountNotice').classList.remove('hidden');$('accountNotice').textContent=u.role==='peserta_didik'?'Pendaftaran diterima. Akses belajar akan terbuka setelah disetujui Pembina sesuai satuan putera atau puteri.':'Akun masih '+u.status_akun+'. Akses belajar akan terbuka setelah disetujui Admin Utama.';return;
  }
  if(u.role==='peserta_didik'){
   const {data,error}=await sb.from('profil_peserta_didik').select('*').eq('id_user',user.id).maybeSingle();if(error)throw error;participant=data;
