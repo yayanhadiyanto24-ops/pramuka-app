@@ -413,7 +413,10 @@ function openSubpoint(id){
  else if(p)html+='<div class="border-t mt-4 pt-3 text-sm"><b>Status peserta:</b> '+esc(statusLabel(p.status))+'<p>Jawaban: '+esc(p.catatan_peserta||'-')+'</p><p>Bukti/Pengalaman: '+esc(p.bukti_pencapaian||'-')+'</p><div id="subEvidenceList" class="mt-2"></div><p>Catatan Pembina: '+esc(p.catatan_pembina||'-')+'</p></div>';
  const history=examRecords.filter(r=>r.id_user===currentUser.id&&r.id_subpoint===id&&r.status==='selesai');
  if(history.length)html+='<div class="border-t mt-4 pt-3"><b>Riwayat ujian subpoin</b>'+history.map(r=>'<p class="text-sm mt-2">'+esc(r.referral_no)+' · '+(r.result==='lulus'?'LULUS':'TIDAK LULUS')+' · '+esc(r.examiner_name||'-')+'</p>').join('')+'</div>';
- $('skuDetail').innerHTML=html;$('skuDetail').scrollIntoView({behavior:'smooth',block:'start'});
+ const ownSubLetters=examRecords.filter(r=>r.id_user===currentUser.id&&r.id_subpoint===id&&r.status==='menunggu');
+ if(canEdit&&ownSubLetters.length)html+='<div class="border-t mt-4 pt-3"><b class="text-sm">Surat pengantar untuk penguji</b>'+ownSubLetters.map(r=>'<button data-student-letter="'+r.id+'" class="student-letter-btn block mt-2 rounded-lg bg-blue-800 text-white px-3 py-2 text-sm">Tampilkan surat & QR</button>').join('')+'</div>';
+ $('skuDetail').innerHTML=html;
+ $('skuDetail').querySelectorAll('.student-letter-btn').forEach(btn=>btn.onclick=()=>showStudentExamLetter(btn.dataset.studentLetter));$('skuDetail').scrollIntoView({behavior:'smooth',block:'start'});
  $('backSubpoints').onclick=renderSubpointIndex;
  if($('subEvidenceList'))renderEvidenceAttachments('subEvidenceList',p?.bukti_lampiran||[]);
  if(canEdit){$('subSave').onclick=()=>saveSubpointProgress(id,'dipelajari');$('subSubmit').onclick=()=>saveSubpointProgress(id,'siap_diuji');}
