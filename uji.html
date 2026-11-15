@@ -9,6 +9,17 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.panel{background:#fff;border:1px solid #f3e8c8;border-radius:16px;box-shadow:0 4px 18px #78350f0c}.muted{color:#64748b}.signature{width:100%;height:180px;touch-action:none;background:#fff;border:2px dashed #d6d3d1;border-radius:12px}.result-pass{background:#dcfce7;color:#166534}.result-fail{background:#ffedd5;color:#9a3412}
+
+/* Penegasan warna kuning khas Penegak dan hasduk merah-putih */
+:root{--penegak-yellow:#ffd400;--penegak-yellow-deep:#e8b900;--hasduk-red:#c62828;--hasduk-white:#ffffff}
+[class~="bg-yellow-100"]{background-color:#fff4b8!important;color:#302516!important}
+[class~="bg-yellow-400"],[class~="bg-yellow-500"],[class~="bg-amber-400"],[class~="bg-amber-500"]{background-color:#ffd400!important;color:#302516!important}
+[class~="text-yellow-800"]{color:#4a3510!important}
+[class~="border-yellow-400"],[class~="border-yellow-500"]{border-color:#d6a900!important}
+header{position:relative!important;padding-bottom:28px!important;background-image:linear-gradient(110deg,#2b1b12 0%,#563923 100%)!important}
+header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;background:linear-gradient(to bottom,#c62828 0 50%,#ffffff 50% 100%);display:block;z-index:20;pointer-events:none}
+header .text-amber-200,header .text-amber-300{color:#ffe27a!important}
+
 </style>
 <style>
 
