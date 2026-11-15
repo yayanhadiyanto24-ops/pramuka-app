@@ -358,7 +358,7 @@ main{padding:10px!important}
      <select id="areaFilter" class="border rounded-lg p-2 bg-white"><option value="">Semua area</option><option>Spiritual</option><option>Emosional</option><option>Sosial</option><option>Intelektual</option><option>Fisik</option></select>
     </div>
    </div>
-   <p class="text-xs text-slate-600 bg-amber-100 rounded-lg p-3">Materi pada butir Spiritual yang tersedia di ruang belajar ini khusus membahas agama Islam untuk SKU Penegak Bantara dan Laksana.</p>
+   <p class="text-xs text-slate-600 bg-amber-100 rounded-lg p-3">Materi rinci butir Spiritual harus mengikuti agama atau kepercayaan masing-masing. Saat ini materi cabang agama yang tersedia di ruang belajar baru mencakup Islam; cabang lainnya perlu dilengkapi dan diverifikasi sebelum diterbitkan.</p>
    <div class="grid lg:grid-cols-[minmax(260px,0.8fr)_minmax(0,1.5fr)] gap-4">
     <div id="skuList" class="space-y-2"></div>
     <article id="skuDetail" class="panel p-5 min-h-64"><p class="muted text-sm">Pilih satu butir SKU untuk membuka materi dan progresnya.</p></article>
@@ -603,7 +603,7 @@ async function loadAll(){
   sb.from('sku_lessons').select('*'),
   sb.from('sku_learning_progress').select('*'),
   sb.from('sku_exam_referrals').select('id,referral_no,id_user,id_sku_item,id_subpoint,dibuat_oleh,dibuat_at,berlaku_sampai,status,examiner_name,examiner_institution,examiner_expected_name,examiner_expected_institution,result,examiner_notes,signature_data,signed_at,pembina_review_status,pembina_review_note,pembina_paraf_data,pembina_reviewed_at').order('dibuat_at',{ascending:false}),
-  sb.from('sku_subpoints').select('*').eq('id_sku_item',1).order('urutan'),
+  sb.from('sku_subpoints').select('*').order('id_sku_item').order('urutan'),
   sb.from('sku_subpoint_progress').select('*')
  ]);
  for(const r of [g,i,l,p,e,sp,spp])if(r.error)throw r.error;
@@ -634,8 +634,9 @@ function renderSkuList(){
   const pr=progress.find(p=>p.id_sku_item===x.id_sku_item&&p.id_user===currentUser.id);
   const l=lessons.find(z=>z.id_sku_item===x.id_sku_item);
   const locked=account.role==='peserta_didik'&&(!l||l.status_publikasi!=='terbit')&&x.id_sku_item!==1;
-  const subRows=x.id_sku_item===1?subpointProgress.filter(p=>p.id_user===currentUser.id&&p.id_sku_item===1):[];
-  const subStatus=x.id_sku_item===1?(subRows.filter(p=>p.status==='lulus').length+'/6 lulus · '+subRows.filter(p=>p.status==='siap_diuji').length+' menunggu'):statusLabel(pr?.status);
+  const itemSubpoints=subpoints.filter(s=>s.id_sku_item===x.id_sku_item);
+  const subRows=subpointProgress.filter(p=>p.id_user===currentUser.id&&p.id_sku_item===x.id_sku_item);
+  const subStatus=itemSubpoints.length?(subRows.filter(p=>p.status==='lulus').length+'/'+itemSubpoints.length+' subpoin lulus · '+subRows.filter(p=>p.status==='siap_diuji').length+' menunggu'):statusLabel(pr?.status);
   return '<button class="sku-card w-full text-left p-3 '+(selectedItem?.id_sku_item===x.id_sku_item?'selected':'')+'" data-item="'+x.id_sku_item+'"><div class="flex justify-between gap-2"><span class="text-xs font-bold gold">'+esc(x.nomor_butir)+' · '+esc(x.area_pengembangan)+'</span><span class="pill">'+(locked?'Materi disiapkan':subStatus)+'</span></div><div class="font-semibold text-sm mt-1">'+esc(x.judul_butir)+'</div></button>';
  }).join('')||'<div class="panel p-4 text-sm muted">Tidak ada butir pada area ini.</div>';
  $('skuList').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>openSku(Number(b.dataset.item)));
@@ -647,7 +648,7 @@ function openSku(id){
  renderSkuList();
  const x=selectedItem,l=lessons.find(z=>z.id_sku_item===id),pr=progress.find(z=>z.id_sku_item===id&&z.id_user===currentUser.id);
  const canSeeDraft=account.role!=='peserta_didik';
- if(id===1&&subpoints.length){renderSubpointIndex();return;}
+ if(subpoints.some(s=>s.id_sku_item===id)){renderSubpointIndex();return;}
  let html='<div class="flex justify-end mb-3"><button id="backSkuList" class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">← Kembali ke daftar SKU</button></div><div class="flex flex-wrap items-center justify-between gap-2"><div><span class="pill">'+esc(x.tingkat)+' · '+esc(x.area_pengembangan)+'</span><h3 class="text-xl font-bold mt-2">'+esc(x.nomor_butir)+' — '+esc(x.judul_butir)+'</h3></div><span class="pill">'+esc(statusLabel(pr?.status))+'</span></div>';
  html+='<h4 class="font-bold mt-4">Persyaratan SKU</h4><p class="text-sm leading-7">'+esc(x.persyaratan)+'</p><h4 class="font-bold mt-4">Kriteria pencapaian</h4><p class="text-sm leading-7">'+esc(x.kriteria_pencapaian)+'</p>';
  if(l&&(l.status_publikasi==='terbit'||canSeeDraft)){
