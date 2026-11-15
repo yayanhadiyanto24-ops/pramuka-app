@@ -412,7 +412,7 @@ async function saveProgress(status){
  let uploaded=[];try{uploaded=await uploadEvidenceFiles($('learnerEvidenceFiles')?.files,currentUser.id+'/sku-'+selectedItem.id_sku_item);}catch(err){setMsg('Unggah bukti gagal: '+err.message);return;}
  const payload={id_user:currentUser.id,id_sku_item:selectedItem.id_sku_item,status,catatan_peserta:notes,bukti_pencapaian:evidence,bukti_lampiran:(existing?.bukti_lampiran||[]).concat(uploaded)};
  if(status==='siap_diuji'&&account.role==='peserta_didik'&&!participant?.nta){setMsg('Pengujian SKU belum dapat diajukan. Lengkapi NTA/KTA terlebih dahulu.');showTab('profile');return;}
- if(status==='siap_diuji'&&!evidence.trim()){setMsg('Tuliskan bukti atau pengalaman sebelum mengajukan ujian.');return;}
+ if(status==='siap_diuji'&&!evidence.trim()&&!payload.bukti_lampiran.length){setMsg('Tambahkan bukti/pengalaman atau unggah lampiran sebelum mengajukan ujian.');return;}
  if(status==='siap_diuji')payload.diajukan_at=new Date().toISOString();
  setMsg('Menyimpan progres...');
  const {error}=await sb.from('sku_learning_progress').upsert(payload,{onConflict:'id_user,id_sku_item'});
