@@ -350,7 +350,7 @@ function openSku(id){
  if(l&&(l.status_publikasi==='terbit'||canSeeDraft)){
   html+='<div class="border-t mt-4 pt-4"><div class="flex justify-between items-center gap-2"><h4 class="font-bold">Materi pembelajaran</h4><span class="pill">'+(l.status_publikasi==='terbit'?'Sudah diterbitkan':'Pratinjau draf')+'</span></div><p class="text-sm muted mt-2">'+esc(l.pengantar)+'</p><div class="lesson-text text-sm mt-3">'+formatText(l.materi_markdown)+'</div><h4 class="font-bold mt-4">Contoh penerapan</h4><p class="text-sm">'+esc(l.contoh_penerapan)+'</p><h4 class="font-bold mt-4">Latihan praktik</h4><p class="lesson-text text-sm">'+esc(l.latihan_praktik)+'</p><h4 class="font-bold mt-4">Pertanyaan evaluasi</h4><ol class="list-decimal pl-5 text-sm space-y-2 mt-2">'+(l.pertanyaan_evaluasi||[]).map(q=>'<li>'+esc(q.pertanyaan)+'</li>').join('')+'</ol></div>';
   if(account.role==='peserta_didik'&&l.status_publikasi==='terbit'){
-   html+='<div class="border-t mt-4 pt-4 space-y-3"><label class="block text-sm font-semibold">Jawaban<textarea id="learnerNotes" rows="5" class="w-full border rounded-lg p-2 mt-1" placeholder="Ketik jawaban untuk pertanyaan evaluasi di atas...">'+esc(pr?.catatan_peserta||'')+'</textarea></label><label class="block text-sm font-semibold">Bukti/Pengalaman<textarea id="learnerEvidence" rows="2" class="w-full border rounded-lg p-2 mt-1" placeholder="Keterangan pengalaman atau penjelasan bukti (opsional)">'+esc(pr?.bukti_pencapaian||'')+'</textarea></label><div><label class="block text-sm font-semibold">Unggah foto, video (maksimal 10 detik), atau file<input id="learnerEvidenceFiles" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" class="block w-full text-sm mt-2"></label><p class="text-xs muted mt-1">Maksimal 25 MB per file. Video dibatasi 10 detik.</p><div id="learnerEvidenceList" class="text-sm mt-2"></div></div><div class="flex flex-wrap gap-2"><button id="saveStudy" class="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm font-semibold">Simpan progres</button><button id="submitTest" class="rounded-lg bg-emerald-700 text-white px-4 py-2 text-sm font-semibold">Ajukan ujian ke Pembina</button></div></div>';
+   html+='<div class="border-t mt-4 pt-4 space-y-3"><label class="block text-sm font-semibold">Jawaban<textarea id="learnerNotes" rows="5" class="w-full border rounded-lg p-2 mt-1" placeholder="Ketik jawaban untuk pertanyaan evaluasi di atas...">'+esc(pr?.catatan_peserta||'')+'</textarea></label><label class="block text-sm font-semibold">Bukti/Pengalaman<textarea id="learnerEvidence" rows="2" class="w-full border rounded-lg p-2 mt-1" placeholder="Keterangan pengalaman atau penjelasan bukti (opsional)">'+esc(pr?.bukti_pencapaian||'')+'</textarea></label><div><label class="block text-sm font-semibold">Unggah foto, video (maksimal 10 detik), atau file<input id="learnerEvidenceFiles" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" class="block w-full text-sm mt-2"></label><p class="text-xs muted mt-1">Foto dan video otomatis diperkecil/dikompres; video otomatis dipotong menjadi maksimal 10 detik. Dokumen maksimal 25 MB.</p><div id="learnerEvidenceList" class="text-sm mt-2"></div></div><div class="flex flex-wrap gap-2"><button id="saveStudy" class="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm font-semibold">Simpan progres</button><button id="submitTest" class="rounded-lg bg-emerald-700 text-white px-4 py-2 text-sm font-semibold">Ajukan ujian ke Pembina</button></div></div>';
   }
  }else{
   html+='<div class="mt-4 rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm"><b>Materi terperinci belum diterbitkan.</b><p class="mt-1">Persyaratan dan kriteria dari panduan sudah tercatat. Penjelasan, contoh, latihan, serta evaluasi khusus butir ini masih perlu dilengkapi dan ditinjau sebelum dapat dipelajari peserta didik.</p></div>';
@@ -380,7 +380,7 @@ function openSubpoint(id){
  const s=subpoints.find(x=>x.id_subpoint===id);if(!s)return;
  const p=subpointStatus(currentUser.id,id),canEdit=account.role==='peserta_didik';
  let html='<button id="backSubpoints" class="text-sm text-amber-800 font-semibold mb-3">← Kembali ke enam persyaratan</button><span class="pill">Subpoin '+esc(s.kode_subpoint)+'</span><h3 class="text-xl font-bold mt-2">'+esc(s.judul_subpoint)+'</h3><p class="text-sm mt-2">'+esc(s.persyaratan)+'</p><div class="border-t mt-4 pt-4"><h4 class="font-bold">Materi pembelajaran</h4><div class="lesson-text text-sm mt-2">'+formatText(s.materi_markdown)+'</div><h4 class="font-bold mt-4">Contoh penerapan</h4><p class="text-sm mt-1">'+esc(s.contoh_penerapan)+'</p><h4 class="font-bold mt-4">Latihan praktik</h4><p class="text-sm lesson-text mt-1">'+esc(s.latihan_praktik)+'</p><h4 class="font-bold mt-4">Evaluasi</h4><ol class="list-decimal pl-5 text-sm space-y-2 mt-2">'+(s.pertanyaan_evaluasi||[]).map(q=>'<li>'+esc(q.pertanyaan)+'</li>').join('')+'</ol></div>';
- if(canEdit)html+='<div class="border-t mt-4 pt-4 space-y-3"><label class="block text-sm font-semibold">Jawaban<textarea id="subNotes" rows="5" class="w-full border rounded-lg p-2 mt-1" placeholder="Ketik jawaban untuk evaluasi subpoin ini...">'+esc(p?.catatan_peserta||'')+'</textarea></label><label class="block text-sm font-semibold">Bukti/Pengalaman<textarea id="subEvidence" rows="2" class="w-full border rounded-lg p-2 mt-1" placeholder="Keterangan pengalaman atau penjelasan bukti (opsional)">'+esc(p?.bukti_pencapaian||'')+'</textarea></label><div><label class="block text-sm font-semibold">Unggah foto, video (maksimal 10 detik), atau file<input id="subEvidenceFiles" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" class="block w-full text-sm mt-2"></label><p class="text-xs muted mt-1">Maksimal 25 MB per file. Video dibatasi 10 detik.</p><div id="subEvidenceList" class="text-sm mt-2"></div></div><div class="flex flex-wrap gap-2"><button id="subSave" class="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm">Simpan progres</button><button id="subSubmit" class="rounded-lg bg-emerald-700 text-white px-4 py-2 text-sm">Ajukan ujian subpoin ini</button></div></div>';
+ if(canEdit)html+='<div class="border-t mt-4 pt-4 space-y-3"><label class="block text-sm font-semibold">Jawaban<textarea id="subNotes" rows="5" class="w-full border rounded-lg p-2 mt-1" placeholder="Ketik jawaban untuk evaluasi subpoin ini...">'+esc(p?.catatan_peserta||'')+'</textarea></label><label class="block text-sm font-semibold">Bukti/Pengalaman<textarea id="subEvidence" rows="2" class="w-full border rounded-lg p-2 mt-1" placeholder="Keterangan pengalaman atau penjelasan bukti (opsional)">'+esc(p?.bukti_pencapaian||'')+'</textarea></label><div><label class="block text-sm font-semibold">Unggah foto, video (maksimal 10 detik), atau file<input id="subEvidenceFiles" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" class="block w-full text-sm mt-2"></label><p class="text-xs muted mt-1">Foto/video otomatis dioptimalkan sebelum diunggah; video dipotong maksimal 10 detik. Dokumen maksimal 25 MB.</p><div id="subEvidenceList" class="text-sm mt-2"></div></div><div class="flex flex-wrap gap-2"><button id="subSave" class="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm">Simpan progres</button><button id="subSubmit" class="rounded-lg bg-emerald-700 text-white px-4 py-2 text-sm">Ajukan ujian subpoin ini</button></div></div>';
  else if(p)html+='<div class="border-t mt-4 pt-3 text-sm"><b>Status peserta:</b> '+esc(statusLabel(p.status))+'<p>Jawaban: '+esc(p.catatan_peserta||'-')+'</p><p>Bukti/Pengalaman: '+esc(p.bukti_pencapaian||'-')+'</p><div id="subEvidenceList" class="mt-2"></div><p>Catatan Pembina: '+esc(p.catatan_pembina||'-')+'</p></div>';
  const history=examRecords.filter(r=>r.id_user===currentUser.id&&r.id_subpoint===id&&r.status==='selesai');
  if(history.length)html+='<div class="border-t mt-4 pt-3"><b>Riwayat ujian subpoin</b>'+history.map(r=>'<p class="text-sm mt-2">'+esc(r.referral_no)+' · '+(r.result==='lulus'?'LULUS':'TIDAK LULUS')+' · '+esc(r.examiner_name||'-')+'</p>').join('')+'</div>';
@@ -420,19 +420,76 @@ async function saveProgress(status){
  const {data}=await sb.from('sku_learning_progress').select('*').eq('id_user',currentUser.id);
  progress=(data||[]);openSku(selectedItem.id_sku_item);setMsg(status==='siap_diuji'?'Pengajuan ujian terkirim kepada Pembina.':'Progres belajar tersimpan.');
 }
-async function validateEvidenceFile(file){
- if(file.size>25*1024*1024)throw new Error('Ukuran file maksimal 25 MB: '+file.name);
- if(file.type.startsWith('video/')){
-  const url=URL.createObjectURL(file);
-  try{const duration=await new Promise((resolve,reject)=>{const v=document.createElement('video');v.preload='metadata';v.onloadedmetadata=()=>resolve(v.duration);v.onerror=()=>reject(new Error('Video tidak dapat dibaca: '+file.name));v.src=url;});if(!Number.isFinite(duration)||duration>10.05)throw new Error('Durasi video maksimal 10 detik: '+file.name);}
-  finally{URL.revokeObjectURL(url);}
- }
+async function optimizeEvidenceImage(file){
+ const url=URL.createObjectURL(file);
+ try{
+  const img=await new Promise((resolve,reject)=>{const el=new Image();el.onload=()=>resolve(el);el.onerror=()=>reject(new Error('Foto tidak dapat dibaca oleh browser. Jika format HEIC, ubah ke JPG terlebih dahulu.'));el.src=url;});
+  const scale=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight));
+  let width=Math.max(1,Math.round(img.naturalWidth*scale)),height=Math.max(1,Math.round(img.naturalHeight*scale));
+  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+  const ctx=canvas.getContext('2d',{alpha:false});ctx.fillStyle='#fff';ctx.fillRect(0,0,width,height);ctx.drawImage(img,0,0,width,height);
+  let blob;
+  for(const quality of [.84,.76,.68,.60,.52]){
+   blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));
+   if(blob&&blob.size<=1024*1024)break;
+  }
+  if(!blob)throw new Error('Foto gagal dikompres.');
+  if(blob.size>1024*1024){
+   const factor=Math.sqrt((1024*1024)/blob.size)*.88;
+   width=Math.max(640,Math.round(width*factor));height=Math.max(640,Math.round(height*factor));
+   canvas.width=width;canvas.height=height;ctx.drawImage(img,0,0,width,height);
+   blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.55));
+  }
+  if(!blob)throw new Error('Foto gagal dikompres.');
+  return new File([blob],file.name.replace(/\.[^.]+$/,'')+'_ringan.jpg',{type:'image/jpeg',lastModified:Date.now()});
+ }finally{URL.revokeObjectURL(url);}
+}
+async function optimizeEvidenceVideo(file){
+ if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)throw new Error('Browser ini belum mendukung pemrosesan video otomatis. Gunakan Chrome versi terbaru.');
+ const url=URL.createObjectURL(file);
+ try{
+  const video=document.createElement('video');video.preload='auto';video.playsInline=true;video.muted=false;video.src=url;
+  await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=()=>reject(new Error('Video tidak dapat dibaca.'));});
+  if(!Number.isFinite(video.duration)||video.duration<=0)throw new Error('Durasi video tidak valid.');
+  const sourceW=video.videoWidth||1280,sourceH=video.videoHeight||720,scale=Math.min(1,1280/Math.max(sourceW,sourceH));
+  const width=Math.max(2,Math.round(sourceW*scale/2)*2),height=Math.max(2,Math.round(sourceH*scale/2)*2);
+  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+  const ctx=canvas.getContext('2d');const stream=canvas.captureStream(20);
+  let sourceStream=null;
+  if(typeof video.captureStream==='function'||typeof video.mozCaptureStream==='function'){
+   sourceStream=(video.captureStream||video.mozCaptureStream).call(video);
+   sourceStream.getAudioTracks().forEach(track=>stream.addTrack(track));
+  }
+  const mime=['video/webm;codecs=vp8,opus','video/webm;codecs=vp8','video/webm'].find(x=>MediaRecorder.isTypeSupported(x));
+  if(!mime)throw new Error('Format video otomatis belum didukung browser ini.');
+  const recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:850000,audioBitsPerSecond:64000});
+  const chunks=[];
+  const finished=new Promise((resolve,reject)=>{recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};recorder.onerror=()=>reject(new Error('Gagal memproses video.'));recorder.onstop=()=>resolve(new Blob(chunks,{type:mime}));});
+  await video.play();
+  recorder.start(250);
+  await new Promise(resolve=>{
+   const draw=()=>{if(video.readyState>=2)ctx.drawImage(video,0,0,width,height);if(video.currentTime>=Math.min(10,video.duration)||video.ended){if(recorder.state!=='inactive')recorder.stop();resolve();}else requestAnimationFrame(draw);};
+   requestAnimationFrame(draw);
+  });
+  const blob=await finished;
+  stream.getTracks().forEach(t=>t.stop());if(sourceStream)sourceStream.getTracks().forEach(t=>t.stop());
+  if(!blob.size)throw new Error('Hasil kompresi video kosong.');
+  return new File([blob],file.name.replace(/\.[^.]+$/,'')+'_10detik.webm',{type:'video/webm',lastModified:Date.now()});
+ }finally{URL.revokeObjectURL(url);}
+}
+async function optimizeEvidenceFile(file){
+ if(file.type.startsWith('image/'))return optimizeEvidenceImage(file);
+ if(file.type.startsWith('video/'))return optimizeEvidenceVideo(file);
+ if(file.size>25*1024*1024)throw new Error('Ukuran dokumen maksimal 25 MB: '+file.name);
+ return file;
 }
 async function uploadEvidenceFiles(fileList,folder){
  const files=Array.from(fileList||[]);if(!files.length)return [];
  const out=[];
- for(const file of files){
-  await validateEvidenceFile(file);
+ for(const original of files){
+  setMsg('Mengoptimalkan '+original.name+'...');
+  const file=await optimizeEvidenceFile(original);
+  if(file.size>25*1024*1024)throw new Error('Ukuran hasil masih melebihi 25 MB: '+file.name);
   const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').slice(-100);
   const path=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'_'+safe;
   const {data,error}=await sb.storage.from('sku-bukti').upload(path,file,{contentType:file.type||'application/octet-stream',upsert:false});
