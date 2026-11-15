@@ -49,6 +49,17 @@ button:focus-visible,a:focus-visible{outline:3px solid #f2c94c;outline-offset:2p
 .pill{background:#fff1bd!important;color:#5a3b12!important;border:1px solid #e6c45a}
 .tab.active{background:#3b2619!important;color:#fff!important;border-bottom:3px solid #f2c94c}
 
+
+/* Penegasan warna kuning khas Penegak dan hasduk merah-putih */
+:root{--penegak-yellow:#ffd400;--penegak-yellow-deep:#e8b900;--hasduk-red:#c62828;--hasduk-white:#ffffff}
+[class~="bg-yellow-100"]{background-color:#fff4b8!important;color:#302516!important}
+[class~="bg-yellow-400"],[class~="bg-yellow-500"],[class~="bg-amber-400"],[class~="bg-amber-500"]{background-color:#ffd400!important;color:#302516!important}
+[class~="text-yellow-800"]{color:#4a3510!important}
+[class~="border-yellow-400"],[class~="border-yellow-500"]{border-color:#d6a900!important}
+header{position:relative!important;padding-bottom:28px!important;background-image:linear-gradient(110deg,#2b1b12 0%,#563923 100%)!important}
+header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;background:linear-gradient(to bottom,#c62828 0 50%,#ffffff 50% 100%);display:block;z-index:20;pointer-events:none}
+header .text-amber-200,header .text-amber-300{color:#ffe27a!important}
+
 </style>
 </head>
 <body class="bg-amber-50 min-h-screen flex items-center justify-center p-4 font-sans">
