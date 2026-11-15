@@ -673,11 +673,13 @@ function openSku(id){
 function subpointStatus(userId,subId){return subpointProgress.find(p=>p.id_user===userId&&p.id_subpoint===subId);}
 function renderSubpointIndex(){
  const x=selectedItem;
- const own=subpointProgress.filter(p=>p.id_user===currentUser.id&&p.id_sku_item===1);
+ const itemSubs=subpoints.filter(s=>s.id_sku_item===x.id_sku_item);
+ const own=subpointProgress.filter(p=>p.id_user===currentUser.id&&p.id_sku_item===x.id_sku_item);
  const counts={lulus:own.filter(p=>p.status==='lulus').length,siap:own.filter(p=>p.status==='siap_diuji').length};
- let html='<div class="flex justify-end mb-3"><button id="backSkuList" class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">← Kembali ke daftar SKU</button></div><span class="pill">Bantara · Spiritual</span><h3 class="text-xl font-bold mt-2">1.a — '+esc(x.judul_butir)+'</h3><p class="text-sm mt-2">'+esc(x.persyaratan)+'</p><p class="text-xs muted mt-2">Enam persyaratan dipelajari, disimpan, dan diajukan ujian secara terpisah. Lulus satu subpoin tidak otomatis meluluskan subpoin lain.</p>';
- if(account.role==='peserta_didik')html+='<div class="rounded-lg bg-amber-50 p-3 text-sm my-3">Progres pribadi: <b>'+counts.lulus+'/6 lulus</b> · '+counts.siap+' menunggu ujian</div>';
- html+='<div class="space-y-2 mt-4">'+subpoints.map(s=>{const p=subpointStatus(currentUser.id,s.id_subpoint);return '<button data-subpoint="'+s.id_subpoint+'" class="sku-card w-full text-left p-3"><div class="flex justify-between gap-2"><b>'+esc(s.kode_subpoint)+'. '+esc(s.judul_subpoint)+'</b><span class="pill">'+esc(statusLabel(p?.status))+'</span></div><p class="text-xs muted mt-1">'+esc(s.persyaratan)+'</p></button>';}).join('')+'</div>';
+ const total=itemSubs.length;
+ let html='<div class="flex justify-end mb-3"><button id="backSkuList" class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">← Kembali ke daftar SKU</button></div><span class="pill">'+esc(x.tingkat)+' · '+esc(x.area_pengembangan)+'</span><h3 class="text-xl font-bold mt-2">'+esc(x.nomor_butir)+' — '+esc(x.judul_butir)+'</h3><p class="text-sm mt-2">'+esc(x.persyaratan)+'</p><p class="text-xs muted mt-2">Setiap persyaratan dipelajari, disimpan, dan diajukan ujian secara terpisah. Kelulusan satu subpoin tidak otomatis meluluskan subpoin lainnya.</p>';
+ if(account.role==='peserta_didik')html+='<div class="rounded-lg bg-amber-50 p-3 text-sm my-3">Progres pribadi: <b>'+counts.lulus+'/'+total+' subpoin lulus</b> · '+counts.siap+' menunggu ujian</div>';
+ html+='<div class="space-y-2 mt-4">'+itemSubs.map(s=>{const p=subpointStatus(currentUser.id,s.id_subpoint);return '<button data-subpoint="'+s.id_subpoint+'" class="sku-card w-full text-left p-3"><div class="flex justify-between gap-2"><b>'+esc(s.kode_subpoint)+'. '+esc(s.judul_subpoint)+'</b><span class="pill">'+esc(statusLabel(p?.status))+'</span></div><p class="text-xs muted mt-1">'+esc(s.persyaratan)+'</p></button>';}).join('')+'</div>';
  $('skuDetail').innerHTML=html;$('skuDetail').scrollIntoView({behavior:'smooth',block:'start'});
  $('backSkuList').onclick=()=>$('skuList').scrollIntoView({behavior:'smooth',block:'start'});
  $('skuDetail').querySelectorAll('[data-subpoint]').forEach(b=>b.onclick=()=>openSubpoint(Number(b.dataset.subpoint)));
@@ -704,7 +706,7 @@ async function saveSubpointProgress(subId,status){
  if(status==='siap_diuji'&&!evidence.trim()&&!($('subEvidenceFiles')?.files?.length)&&!subpointStatus(currentUser.id,subId)?.bukti_lampiran?.length){setMsg('Tambahkan bukti/pengalaman atau unggah lampiran sebelum mengajukan ujian.');return;}
  let uploaded=[];try{uploaded=await uploadEvidenceFiles($('subEvidenceFiles')?.files,currentUser.id+'/subpoint-'+subId);}catch(err){setMsg('Unggah bukti gagal: '+err.message);return;}
  const previous=subpointStatus(currentUser.id,subId)?.bukti_lampiran||[];
- const payload={id_user:currentUser.id,id_sku_item:1,id_subpoint:subId,status,catatan_peserta:notes,bukti_pencapaian:evidence,bukti_lampiran:previous.concat(uploaded)};
+ const subpoint=subpoints.find(s=>s.id_subpoint===subId);if(!subpoint){setMsg('Subpoin tidak ditemukan.');return;}const payload={id_user:currentUser.id,id_sku_item:subpoint.id_sku_item,id_subpoint:subId,status,catatan_peserta:notes,bukti_pencapaian:evidence,bukti_lampiran:previous.concat(uploaded)};
  if(status==='siap_diuji')payload.diajukan_at=new Date().toISOString();
  setMsg('Menyimpan progres subpoin...');
  const {error}=await sb.from('sku_subpoint_progress').upsert(payload,{onConflict:'id_user,id_subpoint'});
