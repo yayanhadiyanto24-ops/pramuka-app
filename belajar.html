@@ -106,6 +106,7 @@ function formatText(t){return esc(t||'').replace(/^## (.+)$/gm,'<strong class="b
 function showTab(name){
  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
  ['umum','sku','pantau','administrasi'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==name));
+ if(name==='administrasi'&&account?.role==='pembina')loadPangkalanAdmin();
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
 $('loginForm').addEventListener('submit',async e=>{
