@@ -31,10 +31,40 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
   <div id="accountNotice" class="hidden panel p-4 text-sm"></div>
   <nav class="flex flex-wrap gap-2">
    <button class="tab active rounded-lg px-4 py-2 text-sm font-semibold" data-tab="umum">Materi Umum</button>
+   <button class="tab rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="profile">Lengkapi Profil</button>
    <button class="tab rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="sku">Materi SKU</button>
    <button id="monitorTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="pantau">Pantau Peserta</button>
    <button id="adminPangkalanTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="administrasi">Administrasi Pangkalan</button>
   </nav>
+  <section id="view-profile" class="hidden space-y-4">
+   <div class="panel p-4 md:p-6 space-y-4">
+    <div><h2 class="text-xl font-bold">Lengkapi Profil</h2><p class="text-sm muted">Data profil digunakan untuk identitas kepramukaan dan administrasi SKU. Pastikan NTA/KTA benar.</p></div>
+    <div class="grid md:grid-cols-[150px_1fr] gap-4 items-start">
+     <div class="space-y-2"><img id="profilePhotoPreview" class="w-32 h-32 rounded-full object-cover border bg-slate-50" alt="Foto profil"><label class="block text-sm font-semibold">Foto profil<input id="profilePhotoInput" type="file" accept="image/*" class="block w-full text-xs mt-1"></label><p class="text-xs muted">Foto akan diperkecil otomatis.</p></div>
+     <div class="space-y-2"><label class="block text-sm font-semibold">NTA/KTA Pramuka Nasional<input id="profileNta" maxlength="80" class="w-full border rounded-lg p-2 mt-1" placeholder="Masukkan nomor NTA/KTA"></label><p class="text-xs muted">NTA/KTA diperlukan untuk pengajuan pengujian SKU dan melanjutkan jenjang.</p></div>
+    </div>
+    <div id="teacherProfileFields" class="hidden space-y-4 border-t pt-4">
+     <h3 class="font-bold">Pendidikan dan Pengesahan Pembina</h3>
+     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <label class="text-sm">Tahun KMD<input id="yearKmd" type="number" min="1950" max="2100" class="w-full border rounded-lg p-2 mt-1"></label>
+      <label class="text-sm">Tahun KML<input id="yearKml" type="number" min="1950" max="2100" class="w-full border rounded-lg p-2 mt-1"></label>
+      <label class="text-sm">Tahun KPD<input id="yearKpd" type="number" min="1950" max="2100" class="w-full border rounded-lg p-2 mt-1"></label>
+      <label class="text-sm">Tahun KPL<input id="yearKpl" type="number" min="1950" max="2100" class="w-full border rounded-lg p-2 mt-1"></label>
+     </div>
+     <div class="grid md:grid-cols-2 gap-4">
+      <div class="border rounded-xl p-3 space-y-2"><div class="flex items-center justify-between gap-2"><b>Tanda tangan Pembina</b><button id="openTeacherSignature" type="button" class="text-xs font-semibold text-amber-800">Buka / perbaiki</button></div><img id="teacherSignaturePreview" class="h-20 w-full object-contain bg-white border rounded-lg" alt="Tanda tangan tersimpan"><div id="teacherSignatureEditor" class="hidden space-y-2"><canvas id="teacherSignatureCanvas" width="900" height="320" class="w-full border rounded-lg bg-white touch-none" style="height:220px;touch-action:none"></canvas><div class="flex gap-2"><button id="clearTeacherSignature" type="button" class="border rounded-lg px-3 py-2 text-sm">Bersihkan</button><button id="saveTeacherSignature" type="button" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Simpan tanda tangan</button></div></div></div>
+      <div class="border rounded-xl p-3 space-y-2"><div class="flex items-center justify-between gap-2"><b>Paraf Pembina</b><button id="openTeacherParaf" type="button" class="text-xs font-semibold text-amber-800">Buka / perbaiki</button></div><img id="teacherParafPreview" class="h-20 w-full object-contain bg-white border rounded-lg" alt="Paraf tersimpan"><div id="teacherParafEditor" class="hidden space-y-2"><canvas id="teacherParafCanvas" width="900" height="320" class="w-full border rounded-lg bg-white touch-none" style="height:220px;touch-action:none"></canvas><div class="flex gap-2"><button id="clearTeacherParaf" type="button" class="border rounded-lg px-3 py-2 text-sm">Bersihkan</button><button id="saveTeacherParaf" type="button" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Simpan paraf</button></div></div></div>
+     </div><p class="text-xs muted">Setelah disimpan, area tanda tangan/paraf menutup otomatis. Buka kembali jika perlu memperbaiki.</p>
+    </div>
+    <div id="studentProfileFields" class="hidden border-t pt-4 space-y-4">
+     <div><h3 class="font-bold">Pengalaman Kegiatan Kepramukaan</h3><p class="text-xs muted">Catat kegiatan selama menjadi Penegak beserta peran dan keterangannya.</p></div>
+     <div class="grid md:grid-cols-3 gap-2"><input id="experienceName" class="border rounded-lg p-2 text-sm" placeholder="Nama kegiatan"><select id="experienceRole" class="border rounded-lg p-2 text-sm"><option value="peserta">Sebagai peserta</option><option value="panitia">Sebagai panitia</option><option value="pemateri">Sebagai pemateri</option></select><input id="experienceDesc" class="border rounded-lg p-2 text-sm" placeholder="Keterangan / tahun"></div>
+     <button id="addExperience" type="button" class="rounded-lg border px-3 py-2 text-sm">Tambah pengalaman</button><div id="experienceList" class="space-y-2 text-sm"></div>
+     <div class="border-t pt-4 space-y-2"><h3 class="font-bold">Keaktifan Organisasi</h3><p class="text-xs muted">Masukkan nama organisasi secara manual, misalnya OSIS, DKR, DKC, atau lainnya.</p><div class="flex gap-2"><input id="organizationName" class="min-w-0 flex-1 border rounded-lg p-2 text-sm" placeholder="Nama organisasi"><button id="addOrganization" type="button" class="rounded-lg border px-3 py-2 text-sm">Tambah</button></div><div id="organizationList" class="flex flex-wrap gap-2 text-sm"></div></div>
+    </div>
+    <div class="flex flex-wrap gap-2"><button id="saveProfile" type="button" class="rounded-lg bg-amber-800 text-white px-5 py-3 font-semibold">Simpan Profil</button><span id="profileMsg" class="text-sm muted self-center" role="status"></span></div>
+   </div>
+  </section>
   <section id="view-umum" class="space-y-4">
    <div id="studentIdentity" class="panel hidden p-4 text-sm space-y-1"></div>
    <div><h2 class="text-xl font-bold">Pengantar Pramuka Penegak</h2><p class="text-sm muted">Pelajari bagian umum terlebih dahulu sebelum masuk ke butir-butir SKU.</p></div>
@@ -70,7 +100,7 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
     <button id="savePangkalan" class="rounded-lg bg-amber-800 text-white px-4 py-3 font-semibold">Simpan data pangkalan</button><p id="pangkalanMsg" class="text-sm muted"></p>
    </div>
    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Persetujuan Peserta Didik</h3><p class="text-xs muted">Daftar hanya menampilkan peserta dari satuan yang sesuai dengan jabatan Pembina ini.</p></div><div id="pendingStudentList" class="space-y-2 text-sm muted">Memuat daftar peserta...</div></div>
-    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Pengaturan Sangga</h3><p class="text-xs muted">Atur nama sangga untuk Ambalan sesuai satuan Pembina. Peserta dapat dipindahkan sangga dari daftar di bawah.</p></div><div class="flex flex-wrap gap-2"><input id="newSanggaName" maxlength="80" placeholder="Nama sangga baru" class="flex-1 min-w-0 border rounded-lg p-2 text-sm"><button id="addSanggaBtn" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Tambah sangga</button></div><div id="sanggaNameList" class="flex flex-wrap gap-2 text-xs"></div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="sanggaStudentList" class="space-y-2 text-sm muted">Memuat data peserta...</div></div><p id="sanggaMsg" class="text-xs muted"></p></div>
+    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Penempatan Sangga</h3><p class="text-xs muted">Sangga baku Penegak: Perintis, Pencoba, Pendobrak, Penegas, dan Pelaksana. Peserta dapat dipindahkan ke Sangga lain sesuai kebutuhan.</p></div><div id="sanggaNameList" class="flex flex-wrap gap-2 text-xs"></div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="sanggaStudentList" class="space-y-2 text-sm muted">Memuat data peserta...</div></div><p id="sanggaMsg" class="text-xs muted"></p></div>
   </section>
   <section id="view-pantau" class="hidden space-y-4">
    <div><h2 class="text-xl font-bold">Perkembangan Peserta Didik</h2><p class="text-sm muted">Daftar peserta dan hasil belajar yang berada dalam cakupan pangkalan Pembina atau Admin Utama.</p></div>
@@ -81,8 +111,8 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
    <div class="panel p-4 space-y-3">
     <div><h3 class="font-bold">Pengesahan laporan (opsional)</h3><p class="text-xs muted">Jika diperlukan, minta Ketua Gudep dan/atau Ketua Mabigus membubuhkan tanda tangan langsung pada layar HP Pembina. Mereka tidak perlu memiliki akun aplikasi.</p></div>
     <div class="grid md:grid-cols-2 gap-4">
-     <div class="space-y-2"><label class="text-sm font-semibold" for="reportKetuaGudep">Nama Ketua Gudep</label><input id="reportKetuaGudep" class="w-full border rounded-lg p-2" placeholder="Nama Ketua Gudep"><canvas id="sigKetuaGudep" width="520" height="140" class="w-full border rounded-lg bg-white touch-none" style="touch-action:none"></canvas><button type="button" id="clearSigGudep" class="text-xs text-amber-800 font-semibold">Hapus tanda tangan</button></div>
-     <div class="space-y-2"><label class="text-sm font-semibold" for="reportMabigus">Nama Ketua Mabigus</label><input id="reportMabigus" class="w-full border rounded-lg p-2" placeholder="Nama Ketua Mabigus"><canvas id="sigMabigus" width="520" height="140" class="w-full border rounded-lg bg-white touch-none" style="touch-action:none"></canvas><button type="button" id="clearSigMabigus" class="text-xs text-amber-800 font-semibold">Hapus tanda tangan</button></div>
+     <div class="space-y-2"><label class="text-sm font-semibold" for="reportKetuaGudep">Nama Ketua Gudep</label><input id="reportKetuaGudep" class="w-full border rounded-lg p-2" placeholder="Nama Ketua Gudep"><canvas id="sigKetuaGudep" width="900" height="320" class="w-full border rounded-lg bg-white touch-none" style="height:220px;touch-action:none"></canvas><button type="button" id="clearSigGudep" class="text-xs text-amber-800 font-semibold">Hapus tanda tangan</button></div>
+     <div class="space-y-2"><label class="text-sm font-semibold" for="reportMabigus">Nama Ketua Mabigus</label><input id="reportMabigus" class="w-full border rounded-lg p-2" placeholder="Nama Ketua Mabigus"><canvas id="sigMabigus" width="900" height="320" class="w-full border rounded-lg bg-white touch-none" style="height:220px;touch-action:none"></canvas><button type="button" id="clearSigMabigus" class="text-xs text-amber-800 font-semibold">Hapus tanda tangan</button></div>
     </div>
    </div>
    <div id="monitorSummary" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div><div id="monitorList" class="space-y-5"></div>
@@ -108,7 +138,7 @@ function setMsg(t){$('appMsg').textContent=t||'';}
 function formatText(t){return esc(t||'').replace(/^## (.+)$/gm,'<strong class="block text-lg mt-4 mb-2">$1</strong>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}
 function showTab(name){
  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
- ['umum','sku','pantau','administrasi'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==name));
+ ['umum','profile','sku','pantau','administrasi'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==name));
  if(name==='administrasi'&&account?.role==='pembina')loadPangkalanAdmin();
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
@@ -148,7 +178,8 @@ async function boot(user){
   $('roleSubtitle').textContent='Ruang Pembina · Pantau peserta · Administrasi pangkalan';
  }else if(u.role==='admin_kwarcab'){$('monitorTab').classList.remove('hidden');}
  else throw new Error('Peran akun tidak dikenali.');
- await loadAll();
+ renderProfile();
+  await loadAll();
 }
 async function loadPangkalanPending(){
   const box=$('pendingStudentList');box.textContent='Memuat daftar peserta...';
@@ -235,7 +266,7 @@ function renderSkuList(){
  }).join('')||'<div class="panel p-4 text-sm muted">Tidak ada butir pada area ini.</div>';
  $('skuList').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>openSku(Number(b.dataset.item)));
 }
-$('levelFilter').onchange=()=>{selectedItem=null;renderSkuList();$('skuDetail').innerHTML='<p class="muted text-sm">Pilih satu butir SKU.</p>';};
+$('levelFilter').onchange=()=>{if(account.role==='peserta_didik'&&participant&&!participant.nta&&$('levelFilter').value==='Laksana'){$('levelFilter').value='Bantara';setMsg('Lengkapi NTA/KTA pada menu Lengkapi Profil sebelum melanjutkan ke SKU Laksana.');showTab('profile');return;}selectedItem=null;renderSkuList();$('skuDetail').innerHTML='<p class="muted text-sm">Pilih satu butir SKU.</p>';};
 $('areaFilter').onchange=()=>{selectedItem=null;renderSkuList();$('skuDetail').innerHTML='<p class="muted text-sm">Pilih satu butir SKU.</p>';};
 function openSku(id){
  selectedItem=items.find(x=>x.id_sku_item===id);if(!selectedItem)return;
@@ -264,6 +295,7 @@ function openSku(id){
 async function saveProgress(status){
  const notes=$('learnerNotes')?.value||'',evidence=$('learnerEvidence')?.value||'';
  const payload={id_user:currentUser.id,id_sku_item:selectedItem.id_sku_item,status,catatan_peserta:notes,bukti_pencapaian:evidence};
+ if(status==='siap_diuji'&&account.role==='peserta_didik'&&!participant?.nta){setMsg('Pengujian SKU belum dapat diajukan. Lengkapi NTA/KTA terlebih dahulu.');showTab('profile');return;}
  if(status==='siap_diuji'&&!evidence.trim()){setMsg('Tuliskan bukti atau pengalaman sebelum mengajukan ujian.');return;}
  if(status==='siap_diuji')payload.diajukan_at=new Date().toISOString();
  setMsg('Menyimpan progres...');
