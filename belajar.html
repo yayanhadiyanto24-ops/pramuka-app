@@ -111,8 +111,8 @@ body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45
    <div class="panel p-4 space-y-3">
     <div><h3 class="font-bold">Pengesahan laporan (opsional)</h3><p class="text-xs muted">Jika diperlukan, minta Ketua Gudep dan/atau Ketua Mabigus membubuhkan tanda tangan langsung pada layar HP Pembina. Mereka tidak perlu memiliki akun aplikasi.</p></div>
     <div class="grid md:grid-cols-2 gap-4">
-     <div class="space-y-2"><label class="text-sm font-semibold" for="reportKetuaGudep">Nama Ketua Gudep</label><input id="reportKetuaGudep" class="w-full border rounded-lg p-2" placeholder="Nama Ketua Gudep"><canvas id="sigKetuaGudep" width="900" height="320" class="w-full border rounded-lg bg-white touch-none" style="height:220px;touch-action:none"></canvas><button type="button" id="clearSigGudep" class="text-xs text-amber-800 font-semibold">Hapus tanda tangan</button></div>
-     <div class="space-y-2"><label class="text-sm font-semibold" for="reportMabigus">Nama Ketua Mabigus</label><input id="reportMabigus" class="w-full border rounded-lg p-2" placeholder="Nama Ketua Mabigus"><canvas id="sigMabigus" width="900" height="320" class="w-full border rounded-lg bg-white touch-none" style="height:220px;touch-action:none"></canvas><button type="button" id="clearSigMabigus" class="text-xs text-amber-800 font-semibold">Hapus tanda tangan</button></div>
+     <div class="space-y-2 border rounded-xl p-3"><label class="text-sm font-semibold" for="reportKetuaGudep">Nama Ketua Gudep</label><input id="reportKetuaGudep" class="w-full border rounded-lg p-2" placeholder="Nama Ketua Gudep"><img id="previewSigGudep" class="w-full h-20 object-contain border rounded-lg bg-white" alt="Tanda tangan Ketua Gudep tersimpan"><button type="button" id="openSigGudep" class="text-xs text-amber-800 font-semibold">Buka / perbaiki tanda tangan</button><div id="editorSigGudep" class="hidden space-y-2"><canvas id="sigKetuaGudep" width="900" height="320" class="w-full border rounded-lg bg-white touch-none" style="height:220px;touch-action:none"></canvas><div class="flex gap-2"><button type="button" id="clearSigGudep" class="border rounded-lg px-3 py-2 text-sm">Bersihkan</button><button type="button" id="saveSigGudep" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Simpan tanda tangan</button></div></div></div>
+     <div class="space-y-2 border rounded-xl p-3"><label class="text-sm font-semibold" for="reportMabigus">Nama Ketua Mabigus</label><input id="reportMabigus" class="w-full border rounded-lg p-2" placeholder="Nama Ketua Mabigus"><img id="previewSigMabigus" class="w-full h-20 object-contain border rounded-lg bg-white" alt="Tanda tangan Ketua Mabigus tersimpan"><button type="button" id="openSigMabigus" class="text-xs text-amber-800 font-semibold">Buka / perbaiki tanda tangan</button><div id="editorSigMabigus" class="hidden space-y-2"><canvas id="sigMabigus" width="900" height="320" class="w-full border rounded-lg bg-white touch-none" style="height:220px;touch-action:none"></canvas><div class="flex gap-2"><button type="button" id="clearSigMabigus" class="border rounded-lg px-3 py-2 text-sm">Bersihkan</button><button type="button" id="saveSigMabigus" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Simpan tanda tangan</button></div></div></div>
     </div>
    </div>
    <div id="monitorSummary" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div><div id="monitorList" class="space-y-5"></div>
@@ -377,8 +377,13 @@ function signatureImage(canvasId){
  for(let i=3;i<pixels.length;i+=4)if(pixels[i]>0)return canvas.toDataURL('image/png');
  return '';
 }
+const reportSignatureData={gudep:'',mabigus:''};
+function setReportSignaturePreview(which,data){
+ const preview=$(which==='gudep'?'previewSigGudep':'previewSigMabigus');
+ if(preview)preview.src=data||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="500" height="90"%3E%3Crect width="100%25" height="100%25" fill="white"/%3E%3Ctext x="50%25" y="55%25" text-anchor="middle" fill="%2394a3b8" font-size="16"%3EBelum tersimpan%3C/text%3E%3C/svg%3E';
+}
 function reportApprovalHtml(){
- const gudep=signatureImage('sigKetuaGudep'),mabigus=signatureImage('sigMabigus');
+ const gudep=reportSignatureData.gudep,mabigus=reportSignatureData.mabigus;
  const n1=esc($('reportKetuaGudep').value.trim()),n2=esc($('reportMabigus').value.trim());
  if(!n1&&!n2&&!gudep&&!mabigus)return '';
  return '<h2>Pengesahan</h2><table><thead><tr><th>Ketua Gudep</th><th>Ketua Mabigus</th></tr></thead><tbody><tr><td>'+n1+'<br>'+(gudep?'<img alt="Tanda tangan Ketua Gudep" src="'+gudep+'" style="max-width:220px;max-height:90px">':'<br><br><br>')+'</td><td>'+n2+'<br>'+(mabigus?'<img alt="Tanda tangan Ketua Mabigus" src="'+mabigus+'" style="max-width:220px;max-height:90px">':'<br><br><br>')+'</td></tr></tbody></table>';
@@ -394,6 +399,30 @@ function setupReportSignature(canvasId,clearId){
 }
 setupReportSignature('sigKetuaGudep','clearSigGudep');
 setupReportSignature('sigMabigus','clearSigMabigus');
+function signatureCanvasHasInk(canvas){
+ const data=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+ for(let i=3;i<data.length;i+=4)if(data[i]>0)return true;
+ return false;
+}
+function setupSavedReportSignature(which){
+ const gudep=which==='gudep',canvasId=gudep?'sigKetuaGudep':'sigMabigus';
+ const canvas=$(canvasId),ctx=canvas.getContext('2d'),editor=$(gudep?'editorSigGudep':'editorSigMabigus');
+ const open=$(gudep?'openSigGudep':'openSigMabigus'),save=$(gudep?'saveSigGudep':'saveSigMabigus');
+ open.onclick=()=>{editor.classList.remove('hidden');ctx.clearRect(0,0,canvas.width,canvas.height);};
+ save.onclick=async()=>{
+  if(!signatureCanvasHasInk(canvas)){setMsg('Bubuhkan tanda tangan terlebih dahulu sebelum menyimpan.');return;}
+  const data=canvas.toDataURL('image/png');save.disabled=true;save.textContent='Menyimpan...';
+  try{
+   const {data:result,error}=await sb.functions.invoke('pramuka-register',{body:{action:'simpan_tanda_tangan_pangkalan',jenis_tanda_tangan:which==='gudep'?'ketua_gudep':'mabigus',tanda_tangan_data:data}});
+   if(error)throw error;if(!result?.ok)throw new Error(result?.message||'Tanda tangan gagal disimpan.');
+   reportSignatureData[which]=data;setReportSignaturePreview(which,data);editor.classList.add('hidden');setMsg('Tanda tangan '+(gudep?'Ketua Gudep':'Ketua Mabigus')+' berhasil disimpan.');
+  }catch(err){setMsg('Gagal menyimpan tanda tangan: '+(err.message||'Kesalahan'));}
+  finally{save.disabled=false;save.textContent='Simpan tanda tangan';}
+ };
+}
+setupSavedReportSignature('gudep');
+setupSavedReportSignature('mabigus');
+
 function exportMonitorReport(kind){
  if(!monitorReportHtml){setMsg('Data laporan belum tersedia. Muat ulang halaman pantau.');return;}
  const full='<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Perkembangan SKU</title><style>body{font-family:Arial,sans-serif;color:#222;padding:24px}h1,h2{color:#78350f}table{width:100%;border-collapse:collapse;margin:12px 0 24px;font-size:12px}th,td{border:1px solid #bbb;padding:6px;text-align:left;vertical-align:top}th{background:#fef3c7}.muted{color:#555}.group{page-break-inside:avoid;margin-bottom:24px}img{object-fit:contain}@media print{body{padding:0}h2{page-break-after:avoid}}</style></head><body>'+monitorReportHtml+reportApprovalHtml()+'</body></html>';
@@ -413,7 +442,7 @@ async function loadMonitor(){
  const [{data:students,error},{data:rows,error:pe},{data:pangkalan,error:ge}]=await Promise.all([
   sb.from('profil_peserta_didik').select('id_user,nama_lengkap,jenis_kelamin,tingkatan,sangga,id_pangkalan,kelas_sekolah,jurusan,tahun_pelajaran,status_keanggotaan').order('id_pangkalan').order('jenis_kelamin').order('nama_lengkap'),
   sb.from('sku_learning_progress').select('*'),
-  sb.from('pangkalan').select('id_pangkalan,nama_pangkalan,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus')
+  sb.from('pangkalan').select('id_pangkalan,nama_pangkalan,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,tanda_tangan_ketua_gudep_data,tanda_tangan_mabigus_data')
  ]);
  if(error)throw error;if(pe)throw pe;if(ge)throw ge;
  const allProgress=rows||[],groups=new Map();
@@ -422,7 +451,7 @@ async function loadMonitor(){
   ['Peserta didik',totals.peserta],['Sedang belajar',totals.belajar],['Menunggu ujian',totals.menunggu],['Butir lulus',totals.lulus]
  ].map(([label,value])=>'<div class="panel p-4"><p class="text-xs muted">'+label+'</p><b class="text-2xl">'+value+'</b></div>').join('');
  const pMap=new Map((pangkalan||[]).map(p=>[p.id_pangkalan,p]));
- if((pangkalan||[]).length===1){const p=pangkalan[0];if(!$('reportKetuaGudep').value)$('reportKetuaGudep').value=p.nama_ketua_gudep||'';if(!$('reportMabigus').value)$('reportMabigus').value=p.nama_ketua_mabigus||'';}
+ if((pangkalan||[]).length){const p=pangkalan[0];if(!$('reportKetuaGudep').value)$('reportKetuaGudep').value=p.nama_ketua_gudep||'';if(!$('reportMabigus').value)$('reportMabigus').value=p.nama_ketua_mabigus||'';reportSignatureData.gudep=p.tanda_tangan_ketua_gudep_data||'';reportSignatureData.mabigus=p.tanda_tangan_mabigus_data||'';setReportSignaturePreview('gudep',reportSignatureData.gudep);setReportSignaturePreview('mabigus',reportSignatureData.mabigus);}
  for(const s of (students||[])){
   const key=String(s.id_pangkalan)+'-'+s.jenis_kelamin;
   if(!groups.has(key))groups.set(key,{p:pMap.get(s.id_pangkalan),jk:s.jenis_kelamin,students:[]});
