@@ -658,15 +658,33 @@ async function loadMonitor(){
  $('monitorList').querySelectorAll('.referral-btn').forEach(b=>b.onclick=()=>createExamReferral(b.dataset.student,Number(b.dataset.sku)));
  $('monitorList').querySelectorAll('.sub-referral-btn').forEach(b=>b.onclick=()=>createExamReferral(b.dataset.substudent,Number(b.dataset.subsku),Number(b.dataset.subpoint)));
  $('monitorList').querySelectorAll('.review-ref-btn').forEach(btn=>btn.onclick=()=>reviewExamReferral(btn.dataset.reviewRef,btn.dataset.decision));
+ $('monitorList').querySelectorAll('.stamp-btn').forEach(btn=>btn.onclick=()=>openDirectExam(Number(btn.dataset.stamp)));
 }
 
 async function reviewExamReferral(referralId,decision){
- if(!teacher?.paraf_data){setMsg('Simpan paraf Pembina terlebih dahulu pada menu Lengkapi Profil.');showTab('profile');return;}
- const note=window.prompt('Catatan pemeriksaan Pembina (boleh dikosongkan):')||'';
- const {data,error}=await sb.functions.invoke('sku-digital-exam',{body:{action:'review_exam',referral_id:referralId,decision,paraf_data:teacher.paraf_data,note}});
+ if(decision==='selesai'&&!teacher?.paraf_data){setMsg('Simpan paraf Pembina terlebih dahulu pada menu Lengkapi Profil.');showTab('profile');return;}
+ const note='';
+ const {data,error}=await sb.functions.invoke('sku-digital-exam',{body:{action:'review_exam',referral_id:referralId,decision,paraf_data:decision==='selesai'?teacher.paraf_data:'',note}});
  if(error||!data?.ok){setMsg('Pemeriksaan belum tersimpan: '+(data?.message||error?.message||'Kesalahan'));return;}
  await loadAll();setMsg(data.message);
 }
+let directProgressTarget=null;
+function openDirectExam(progressId){
+ directProgressTarget=progressId;$('directExamNote').value='';$('directExamMsg').textContent='';
+ $('directExamModal').classList.remove('hidden');
+}
+async function saveDirectExam(result){
+ if(!teacher?.paraf_data){setMsg('Simpan paraf Pembina terlebih dahulu pada menu Lengkapi Profil.');showTab('profile');return;}
+ if(!directProgressTarget)return;
+ const status=result==='lulus'?'lulus':'perlu_perbaikan';
+ const patch={status,catatan_pembina:$('directExamNote').value.trim()||(result==='lulus'?'Dinyatakan lulus melalui pengujian langsung oleh Pembina.':'Belum lulus; perlu perbaikan.'),paraf_pembina_data:teacher.paraf_data,nama_pembina_pengesah:teacher.nama_lengkap,diperiksa_oleh:currentUser.id,diperiksa_at:new Date().toISOString()};
+ const {error}=await sb.from('sku_learning_progress').update(patch).eq('id_progress',directProgressTarget);
+ if(error){$('directExamMsg').textContent='Gagal menyimpan: '+error.message;return;}
+ $('directExamModal').classList.add('hidden');directProgressTarget=null;await loadAll();setMsg('Hasil pengujian langsung berhasil disahkan.');
+}
+$('closeDirectExam').onclick=()=>$('directExamModal').classList.add('hidden');
+$('directExamPass').onclick=()=>saveDirectExam('lulus');
+$('directExamFail').onclick=()=>saveDirectExam('belum_lulus');
 
 async function stampSkuProgress(progressId){
  if(!teacher?.paraf_data){setMsg('Simpan paraf terlebih dahulu pada menu Lengkapi Profil.');showTab('profile');return;}
