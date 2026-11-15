@@ -83,6 +83,7 @@ function switchTab(role) {
     document.getElementById('tab-pembina').className = !peserta ? 'py-3.5 text-sm font-bold text-amber-900 border-b-2 border-amber-800 bg-white transition' : 'py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition';
     hideAlert();
 }
+let loadedPangkalanKey='';
 function populateSchoolYears(){
     const sel=document.getElementById('pd-tahun');const now=new Date();const start=now.getMonth()>=6?now.getFullYear():now.getFullYear()-1;
     sel.innerHTML='';for(let y=start-1;y<=start+3;y++){const o=document.createElement('option');o.value=y+'/'+(y+1);o.textContent=y+'/'+(y+1);if(y===start)o.selected=true;sel.appendChild(o);}
@@ -90,12 +91,12 @@ function populateSchoolYears(){
 async function loadPangkalanOptions(){
     const code=document.getElementById('pd-kode').value.trim().toUpperCase(),gender=document.getElementById('pd-jk').value;
     const amb=document.getElementById('pd-ambalan'),sel=document.getElementById('pd-sangga'),info=document.getElementById('pd-pangkalan-info');
-    amb.value='';sel.disabled=true;sel.innerHTML='<option value="">Memuat pilihan sangga...</option>';
+    amb.value='';loadedPangkalanKey='';sel.disabled=true;sel.innerHTML='<option value="">Memuat pilihan sangga...</option>';
     if(!code){sel.innerHTML='<option value="">Masukkan kode gabung</option>';return;}
     try{
       const {data,error}=await supabaseClient.functions.invoke('pramuka-register',{body:{action:'registration_options',kode_gabung:code,jenis_kelamin:gender}});
       if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Kode gabung tidak valid.');
-      amb.value=data.nama_ambalan||'';info.textContent='Pangkalan: '+data.nama_pangkalan+' · Ambalan: '+data.nama_ambalan;
+      amb.value=data.nama_ambalan||'';loadedPangkalanKey=code+'|'+gender;info.textContent='Pangkalan: '+data.nama_pangkalan+' · Ambalan: '+data.nama_ambalan;
       const rows=data.sangga||[];
       sel.innerHTML='<option value="">Pilih sangga</option>'+rows.map(x=>'<option value="'+x.id_sangga+'">'+escapeText(x.nama_sangga)+'</option>').join('');
       sel.disabled=rows.length===0;
@@ -160,6 +161,9 @@ async function submitRegistration(payload, button, label) {
 }
 document.getElementById('form-peserta').addEventListener('submit', async e => {
     e.preventDefault();
+    const currentKey=document.getElementById('pd-kode').value.trim().toUpperCase()+'|'+document.getElementById('pd-jk').value;
+    if(loadedPangkalanKey!==currentKey){await loadPangkalanOptions();showAlert('Pangkalan sudah diperiksa. Silakan pilih sangga yang tersedia, lalu kirim pendaftaran.');return;}
+    if(!document.getElementById('pd-sangga').value){showAlert('Pilih sangga terlebih dahulu.',true);return;}
     const ok = await submitRegistration({
         role: 'peserta_didik',
         kode_gabung: document.getElementById('pd-kode').value.trim().toUpperCase(),
