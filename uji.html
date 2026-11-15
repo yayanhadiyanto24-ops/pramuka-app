@@ -201,7 +201,7 @@ button.bg-amber-800:hover,button.bg-amber-900:hover{filter:brightness(1.08);box-
    <div class="rounded-lg bg-amber-50 p-3"><div class="text-xs muted">Nomor surat</div><b id="refNo2"></b></div>
   </div>
   <div class="border-t pt-3"><div class="text-xs muted">Butir SKU yang diuji</div><h2 id="skuTitle" class="font-bold text-lg mt-1"></h2><div id="skuRequirement" class="text-sm leading-7 mt-2"></div><div class="mt-3"><div class="text-xs muted">Kriteria pencapaian</div><div id="skuCriteria" class="text-sm leading-7 mt-1"></div></div></div>
-  <p id="expiry" class="text-xs muted border-t pt-3"></p>
+  <div class="border-t pt-3"><div class="text-xs muted">Jadwal pengujian</div><b id="examSchedule" class="text-sm"></b><p id="examScheduleNote" class="text-xs muted mt-1"></p></div><p id="expiry" class="text-xs muted border-t pt-3"></p>
  </article>
  <form id="examForm" class="panel p-5 space-y-4">
   <div><h2 class="text-lg font-bold">Pernyataan Hasil Pengujian</h2><p class="text-sm muted">Penguji mengisi hasil setelah melakukan pemeriksaan kecakapan secara langsung.</p></div>
@@ -263,7 +263,7 @@ async function loadExam(){
   $('studentLevel').textContent=data.student.tingkatan||data.sku.tingkat||'-';
   $('skuTitle').textContent=[data.sku.tingkat,data.sku.nomor_butir,data.sku.judul_butir,data.subpoint?('Subpoin '+data.subpoint.kode_subpoint+' — '+data.subpoint.judul_subpoint):null].filter(Boolean).join(' · ');
   $('skuRequirement').textContent=data.subpoint?data.subpoint.persyaratan:(data.sku.persyaratan||'-');$('skuCriteria').textContent=data.subpoint?'Penilaian dilakukan khusus untuk subpoin ini. '+(data.sku.kriteria_pencapaian||''):(data.sku.kriteria_pencapaian||'-');
-  $('expiry').textContent='Akses berlaku sampai: '+new Date(data.referral.berlaku_sampai).toLocaleString('id-ID');
+  $('examSchedule').textContent=data.referral.scheduled_at?new Date(data.referral.scheduled_at).toLocaleString('id-ID'):'Belum ditentukan';$('examScheduleNote').textContent=data.referral.schedule_note||'';$('expiry').textContent='Akses berlaku sampai: '+new Date(data.referral.berlaku_sampai).toLocaleString('id-ID');
   $('loading').classList.add('hidden');$('exam').classList.remove('hidden');setupSignature();
  }catch(e){showError(e.message||'Terjadi kesalahan saat memeriksa surat.');}
 }
