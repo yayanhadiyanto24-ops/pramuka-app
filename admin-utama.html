@@ -192,7 +192,17 @@ button.bg-amber-800:hover,button.bg-amber-900:hover{filter:brightness(1.08);box-
 <header class="bg-amber-950 text-white px-5 py-5"><div class="max-w-6xl mx-auto flex items-center justify-between"><div class="rt-admin-brand"><img class="rt-admin-logo" src="assets/ruang-tegak-icon.svg" alt="Logo Ruang Tegak"><div><div class="rt-admin-name text-xl">RUANG TEGAK</div><h1 class="text-lg font-bold">Admin Utama</h1><p class="text-amber-200 text-sm">Pemantauan pangkalan dan perkembangan ambalan</p></div></div><a href="belajar.html" class="rounded-lg bg-amber-700 hover:bg-amber-600 px-3 py-2 text-sm font-semibold">Ruang Belajar &amp; Progres SKU</a><button id="logout" class="hidden rounded-lg bg-amber-800 px-4 py-2">Keluar</button></div></header>
 <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
 <section id="login-box" class="max-w-md mx-auto bg-white rounded-2xl shadow p-6 mt-8"><h2 class="text-xl font-bold mb-1">Masuk Admin</h2><p class="text-sm text-slate-500 mb-4">Hanya akun Admin Utama yang telah didaftarkan dapat masuk.</p><form id="login-form" class="space-y-3"><input id="email" type="email" required autocomplete="username" placeholder="Email admin" class="w-full border rounded-lg p-3"><input id="password" type="password" required autocomplete="current-password" placeholder="Password" class="w-full border rounded-lg p-3"><button class="w-full bg-amber-800 text-white font-bold rounded-lg p-3">Masuk</button></form><p id="login-msg" class="text-sm mt-3"></p></section>
-<section id="dashboard" class="hidden space-y-6">
+<section id="dashboard" class="hidden space-y-6"><section id="brand-logo-settings" class="bg-white rounded-2xl shadow-sm p-4 space-y-3">
+ <div><h2 class="font-bold text-lg">Logo Aplikasi Ruang Tegak</h2><p class="text-sm text-slate-600">Unggah logo pilihanmu. Logo akan digunakan di halaman utama, belajar, admin, dan pengujian SKU. Gunakan gambar persegi PNG, JPG, atau WebP maksimal 5 MB.</p></div>
+ <div class="flex flex-wrap items-center gap-4">
+  <img id="brand-logo-preview" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Pratinjau logo" class="w-28 h-28 object-contain rounded-xl border border-amber-200 bg-amber-50 p-1">
+  <div class="flex-1 min-w-0 space-y-2">
+   <input id="brand-logo-file" type="file" accept="image/png,image/jpeg,image/webp" class="block w-full text-sm">
+   <button id="brand-logo-upload" type="button" class="rounded-xl bg-amber-400 text-stone-950 font-bold px-4 py-2">Unggah Logo</button>
+   <p id="brand-logo-status" class="text-sm text-slate-600" aria-live="polite">Logo aktif akan tampil di semua halaman aplikasi.</p>
+  </div>
+ </div>
+</section>
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3"><div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-xs text-slate-500">Pangkalan</p><b id="total-pangkalan" class="text-2xl">0</b></div><div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-xs text-slate-500">Ambalan</p><b id="total-ambalan" class="text-2xl">0</b></div><div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-xs text-slate-500">Menunggu persetujuan</p><b id="total-pending" class="text-2xl">0</b></div><div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-xs text-slate-500">Peserta terdaftar</p><b id="total-peserta" class="text-2xl">0</b></div></div>
 <div class="bg-white rounded-2xl shadow-sm p-4"><div class="flex justify-between items-center mb-3"><h2 class="font-bold text-lg">Perkembangan Tiap Ambalan</h2><button id="refresh" class="text-sm text-amber-900 font-semibold">Muat ulang</button></div><div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-amber-50"><tr><th class="p-2 text-left">Pangkalan / Ambalan</th><th class="p-2">Putra/Putri</th><th class="p-2">Total</th><th class="p-2">Aktif</th><th class="p-2">Menunggu</th><th class="p-2">Calon</th><th class="p-2">Bantara</th><th class="p-2">Laksana</th><th class="p-2">Garuda</th><th class="p-2">Sangga</th><th class="p-2">Alumni</th><th class="p-2">Peserta Tamu</th></tr></thead><tbody id="rekap-body"></tbody></table></div></div>
 <div class="bg-white rounded-2xl shadow-sm p-4"><div class="flex flex-wrap items-center justify-between gap-3 mb-3"><h2 class="font-bold text-lg">Detail Perkembangan Peserta Didik</h2><input id="peserta-search" type="search" placeholder="Cari nama, pangkalan, ambalan, atau sangga..." class="w-full md:w-80 border rounded-lg px-3 py-2 text-sm"></div><div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-amber-50"><tr><th class="p-2 text-left">Peserta</th><th class="p-2 text-left">Pangkalan / Ambalan</th><th class="p-2">Tingkatan</th><th class="p-2">Sangga</th><th class="p-2 text-left">Progres Bantara</th><th class="p-2 text-left">Progres Laksana</th></tr></thead><tbody id="peserta-detail-body"></tbody></table></div><p id="peserta-detail-count" class="text-xs text-slate-500 mt-3"></p></div><div class="bg-white rounded-2xl shadow-sm p-4"><h2 class="font-bold text-lg mb-3">Persetujuan Akun</h2><div id="pending-list" class="space-y-2"></div></div>
@@ -262,4 +272,26 @@ $('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
     if(data.session){try{await callApi({action:'bootstrap_admin'});await showDashboard();}catch{await sb.auth.signOut();}}
   }catch(err){$('login-msg').textContent=err?.message||'Layanan login belum dapat dimuat.';}
 })();
+
+$('brand-logo-upload').addEventListener('click',async()=>{
+ const file=$('brand-logo-file').files?.[0];
+ const status=$('brand-logo-status');
+ const button=$('brand-logo-upload');
+ if(!file){status.textContent='Pilih berkas logo terlebih dahulu.';return;}
+ if(!['image/png','image/jpeg','image/webp'].includes(file.type)){status.textContent='Format harus PNG, JPG, atau WebP.';return;}
+ if(file.size>5*1024*1024){status.textContent='Ukuran logo maksimal 5 MB.';return;}
+ button.disabled=true;status.textContent='Mengunggah logo...';
+ try{
+  await ensureSb();
+  const {data:{user},error:authError}=await sb.auth.getUser();
+  if(authError||!user)throw new Error('Sesi admin berakhir. Silakan masuk kembali.');
+  const {error}=await sb.storage.from('ruang-tegak-brand').upload('brand/logo.png',file,{upsert:true,contentType:file.type,cacheControl:'0'});
+  if(error)throw error;
+  const url='https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png?v='+Date.now();
+  $('brand-logo-preview').src=url;
+  document.querySelectorAll('img[data-ruang-tegak-logo]').forEach(img=>{img.src=url;});
+  status.textContent='Logo berhasil diperbarui dan akan tampil di seluruh halaman Ruang Tegak.';
+ }catch(err){status.textContent='Gagal mengunggah: '+(err?.message||'Periksa koneksi dan hak akses admin.');}
+ finally{button.disabled=false;}
+});
 </script></body></html>
