@@ -190,6 +190,7 @@ function renderProfile(){
  const p=isTeacher?teacher:(isStudent?participant:account);
  $('ntaProfileField').classList.toggle('hidden',!isTeacher&&!isStudent);
  if(isTeacher)$('teacherQuotaInfo').textContent='Kuota penerimaan saat ini: '+((teacher.nta?10:5)+Number(teacher.kuota_tambahan||0))+' peserta. '+(!teacher.nta?'Lengkapi NTA/KTA untuk membuka kuota dasar 10 peserta. ':'')+'Jika kuota habis, transfer nominal seikhlasnya ke DANA 085624189461 dan konfirmasi WhatsApp 081322578732 kepada Admin Utama untuk mendapatkan kode akses tambahan.';
+ if(isTeacher){$('accessCodeInput').disabled=!teacher.nta;$('activateAccessCode').disabled=!teacher.nta;}
  profilePhotoData=p?.foto_profil_data||'';
  $('profilePhotoPreview').src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect width="100%25" height="100%25" fill="%23f1f5f9"/%3E%3Ctext x="50%25" y="54%25" text-anchor="middle" fill="%2364758b" font-size="12"%3EFoto%3C/text%3E%3C/svg%3E';
  $('profileNta').value=p?.nta||'';
