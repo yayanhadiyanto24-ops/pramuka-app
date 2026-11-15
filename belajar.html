@@ -648,7 +648,6 @@ function openSku(id){
  renderSkuList();
  const x=selectedItem,l=lessons.find(z=>z.id_sku_item===id),pr=progress.find(z=>z.id_sku_item===id&&z.id_user===currentUser.id);
  const canSeeDraft=account.role!=='peserta_didik';
- if(subpoints.some(s=>s.id_sku_item===id)){renderSubpointIndex();return;}
  let html='<div class="flex justify-end mb-3"><button id="backSkuList" class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">← Kembali ke daftar SKU</button></div><div class="flex flex-wrap items-center justify-between gap-2"><div><span class="pill">'+esc(x.tingkat)+' · '+esc(x.area_pengembangan)+'</span><h3 class="text-xl font-bold mt-2">'+esc(x.nomor_butir)+' — '+esc(x.judul_butir)+'</h3></div><span class="pill">'+esc(statusLabel(pr?.status))+'</span></div>';
  html+='<h4 class="font-bold mt-4">Persyaratan SKU</h4><p class="text-sm leading-7">'+esc(x.persyaratan)+'</p><h4 class="font-bold mt-4">Kriteria pencapaian</h4><p class="text-sm leading-7">'+esc(x.kriteria_pencapaian)+'</p>';
  if(l&&(l.status_publikasi==='terbit'||canSeeDraft)){
@@ -664,11 +663,21 @@ function openSku(id){
  const completedOwnExams=ownExams.filter(r=>r.status==='selesai');
  if(completedOwnExams.length)html+='<div class="border-t mt-4 pt-4"><h4 class="font-bold">Surat pengantar & hasil ujian digital</h4>'+completedOwnExams.map(r=>'<div class="rounded-lg bg-slate-50 border p-3 mt-2 text-sm"><div class="flex flex-wrap justify-between gap-2"><b>'+esc(r.referral_no)+'</b><span class="pill '+(r.result==='lulus'?'status-lulus':'status-revisi')+'">'+(r.result==='lulus'?'LULUS':'TIDAK LULUS')+'</span></div><p class="mt-1">Penguji: '+esc(r.examiner_name||'-')+' · '+esc(r.examiner_institution||'-')+'</p><p>Waktu: '+esc(r.signed_at?new Date(r.signed_at).toLocaleString('id-ID'):'-')+'</p><p>Catatan: '+esc(r.examiner_notes||'-')+'</p><img src="'+esc(r.signature_data||'')+'" alt="Tanda tangan penguji" class="max-h-16 max-w-40 object-contain mt-2 bg-white border rounded"></div>').join('')+'</div>';
  html+=ownExams.filter(r=>r.status==='menunggu').map(r=>'<button data-student-letter="'+r.id+'" class="student-letter-btn mt-2 rounded-lg bg-blue-800 text-white px-3 py-2 text-sm">Tampilkan surat & QR untuk penguji</button>').join('');
+ const itemSubs=subpoints.filter(s=>s.id_sku_item===id);
+ if(itemSubs.length){
+  const ownSubs=subpointProgress.filter(p=>p.id_user===currentUser.id&&p.id_sku_item===id);
+  const passed=ownSubs.filter(p=>p.status==='lulus').length;
+  const waiting=ownSubs.filter(p=>p.status==='siap_diuji').length;
+  html+='<div class="border-t mt-5 pt-4"><h4 class="font-bold text-lg">Rincian persyaratan per subpoin</h4><p class="text-sm muted mt-1">Formulir jawaban, unggah bukti, simpan progres, dan pengajuan ujian untuk setiap subpoin tersedia setelah tombol subpoin dibuka. Formulir butir SKU di atas tetap tersedia.</p>';
+  if(account.role==='peserta_didik')html+='<div class="rounded-lg bg-amber-50 p-3 text-sm my-3">Progres subpoin: <b>'+passed+'/'+itemSubs.length+' lulus</b> · '+waiting+' menunggu ujian</div>';
+  html+='<div class="space-y-2 mt-3">'+itemSubs.map(s=>{const p=subpointStatus(currentUser.id,s.id_subpoint);return '<button data-subpoint="'+s.id_subpoint+'" class="sku-card w-full text-left p-3"><div class="flex justify-between gap-2"><b>'+esc(s.kode_subpoint)+'. '+esc(s.judul_subpoint)+'</b><span class="pill">'+esc(statusLabel(p?.status))+'</span></div><p class="text-xs muted mt-1">'+esc(s.persyaratan)+'</p><p class="text-xs font-semibold text-amber-800 mt-2">Buka materi, isi jawaban, unggah bukti & ajukan ujian →</p></button>';}).join('')+'</div></div>';
+ }
  $('skuDetail').innerHTML=html;
  $('skuDetail').scrollIntoView({behavior:'smooth',block:'start'});
  if($('backSkuList'))$('backSkuList').onclick=()=>$('skuList').scrollIntoView({behavior:'smooth',block:'start'});
  if($('learnerEvidenceList'))renderEvidenceAttachments('learnerEvidenceList',pr?.bukti_lampiran||[]);$('skuDetail').querySelectorAll('.student-letter-btn').forEach(btn=>btn.onclick=()=>showStudentExamLetter(btn.dataset.studentLetter));if($('saveStudy'))$('saveStudy').onclick=()=>saveProgress('dipelajari');
  if($('submitTest'))$('submitTest').onclick=()=>saveProgress('siap_diuji');
+ $('skuDetail').querySelectorAll('[data-subpoint]').forEach(b=>b.onclick=()=>openSubpoint(Number(b.dataset.subpoint)));
 }
 function subpointStatus(userId,subId){return subpointProgress.find(p=>p.id_user===userId&&p.id_subpoint===subId);}
 function renderSubpointIndex(){
@@ -696,7 +705,7 @@ function openSubpoint(id){
  if(canEdit&&ownSubLetters.length)html+='<div class="border-t mt-4 pt-3"><b class="text-sm">Surat pengantar untuk penguji</b>'+ownSubLetters.map(r=>'<button data-student-letter="'+r.id+'" class="student-letter-btn block mt-2 rounded-lg bg-blue-800 text-white px-3 py-2 text-sm">Tampilkan surat & QR</button>').join('')+'</div>';
  $('skuDetail').innerHTML=html;
  $('skuDetail').querySelectorAll('.student-letter-btn').forEach(btn=>btn.onclick=()=>showStudentExamLetter(btn.dataset.studentLetter));$('skuDetail').scrollIntoView({behavior:'smooth',block:'start'});
- $('backSubpoints').onclick=renderSubpointIndex;
+ $('backSubpoints').onclick=()=>openSku(s.id_sku_item);
  if($('subEvidenceList'))renderEvidenceAttachments('subEvidenceList',p?.bukti_lampiran||[]);
  if(canEdit){$('subSave').onclick=()=>saveSubpointProgress(id,'dipelajari');$('subSubmit').onclick=()=>saveSubpointProgress(id,'siap_diuji');}
 }
