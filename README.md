@@ -1,25 +1,27 @@
 # Sistem Informasi Pramuka Penegak
 
-Aplikasi pendaftaran Pramuka untuk dua peran:
-- Peserta Didik: bergabung menggunakan kode pangkalan.
-- Pembina: mendaftarkan pangkalan baru atau bergabung ke pangkalan yang sudah ada.
+Aplikasi pendaftaran dan pemantauan perkembangan Pramuka Penegak.
 
-## Proyek Supabase
-- Project: PRAMUKA
+## Fitur
+- Pendaftaran Peserta Didik memakai kode gabung pangkalan.
+- Pendaftaran Pembina untuk pangkalan baru atau pangkalan terdaftar.
+- Satu Admin Utama pemilik aplikasi; tidak ada admin pangkalan.
+- Persetujuan dan penonaktifan akun.
+- Rekap tiap ambalan Putra/Putri: jumlah peserta, aktif, menunggu, tingkatan Calon Penegak/Bantara/Laksana/Garuda, dan jumlah sangga.
+- Daftar pangkalan dan kode gabung.
+
+## Supabase
 - Project ref: `bopxmtxfrlrnywwhywne`
-- Region: `ap-southeast-1`
+- Edge Function: `pramuka-register` (ACTIVE, version 2)
+- RPC: `public.pramuka_register_profile`
+- View rekap: `public.v_admin_ambalan_rekap`
 
-## Status implementasi
-- [x] Antarmuka pendaftaran awal dipindahkan ke `index.html`.
-- [x] Formulir peserta didik dan pembina dipisahkan.
-- [x] Browser tidak lagi melakukan INSERT langsung ke tabel sensitif.
-- [x] Browser hanya memanggil Edge Function `pramuka-register`.
-- [ ] Edge Function `pramuka-register` belum dibuat.
-- [ ] Validasi kode gabung, pembuatan akun Auth, dan penyimpanan profil server-side belum diaktifkan.
-- [ ] Konfigurasi anon/publishable key belum diisi.
+## Halaman
+- Pendaftaran: `index.html`
+- Admin Utama: `admin.html`
 
-## Konfigurasi frontend
-Di `index.html`, isi `SUPABASE_ANON_KEY` dengan anon/publishable key proyek PRAMUKA. Key ini boleh digunakan di browser dengan RLS dan backend yang benar. **Jangan pernah memasukkan service_role key ke file frontend.**
+## Satu konfigurasi yang masih diperlukan
+Email Admin Utama belum ditetapkan pada `public.app_admin_config.admin_email`. Login admin akan ditolak sampai email pemilik aplikasi dikonfigurasi.
 
-## Catatan keamanan
-Jangan membuka akses INSERT publik ke tabel `users`, `pangkalan`, `profil_pembina`, atau `profil_peserta_didik` hanya agar formulir bekerja. Pendaftaran harus diproses melalui Edge Function tepercaya dan operasi database yang tervalidasi.
+## Keamanan
+Frontend hanya menggunakan publishable key. Service-role key berada di Edge Function. Pendaftaran profil diproses server-side. Tabel inti tetap RLS aktif tanpa akses publik langsung. Akun pendaftar berstatus `pending` sampai disetujui Admin Utama.
