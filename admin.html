@@ -26,14 +26,14 @@ window.__sbReady = new Promise(resolve => {
 <div class="bg-white rounded-2xl shadow-sm p-4"><h2 class="font-bold text-lg mb-3">Daftar Pangkalan & Kode Gabung</h2><div id="pangkalan-list" class="grid md:grid-cols-2 gap-3"></div></div>
 <div id="status" class="text-sm text-slate-500"></div></section></main>
 <script>
-const URL='https://bopxmtxfrlrnywwhywne.supabase.co';
+const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
 const KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
 let sb;
 async function ensureSb(){
   if(sb) return sb;
   const loaded = await window.__sbReady;
   if(!loaded || !window.supabase?.createClient) throw new Error('Komponen login belum termuat. Periksa koneksi internet lalu muat ulang halaman.');
-  sb = window.supabase.createClient(URL,KEY);
+  sb = window.supabase.createClient(SUPABASE_URL,KEY);
   return sb;
 }
 const $=id=>document.getElementById(id);
