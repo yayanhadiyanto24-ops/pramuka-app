@@ -69,6 +69,69 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;b
 header .text-amber-200,header .text-amber-300{color:#ffe27a!important}
 
 </style>
+
+<style id="premium-penegak-theme">
+
+/* PREMIUM PENEGAK: emas-kuning dominan, cokelat Pramuka, hasduk merah-putih */
+:root{
+ --penegak-gold:#ffd400;--penegak-gold-light:#fff2a6;--penegak-gold-deep:#d99c00;
+ --pramuka-dark:#392316;--pramuka-brown:#765235;--pramuka-tan:#c6a477;
+ --hasduk-red:#c62828;--hasduk-white:#fff;
+}
+html{background:#f7f2e9}
+body{
+ color:#28221d!important;
+ background:
+  radial-gradient(ellipse at 0% 0%,rgba(255,212,0,.19),transparent 34%),
+  radial-gradient(ellipse at 100% 100%,rgba(198,164,119,.20),transparent 32%),
+  #f7f2e9!important;
+}
+/* Header menjadi bidang emas utama dengan kilau lembut */
+header,.brand{
+ position:relative!important;
+ color:#302313!important;
+ background:linear-gradient(112deg,#d99c00 0%,#ffd400 28%,#fff0a0 48%,#f5c400 68%,#c98a00 100%)!important;
+ box-shadow:0 8px 24px rgba(111,73,0,.22),inset 0 1px 0 rgba(255,255,255,.8)!important;
+}
+header::before,.brand::before{
+ content:"";position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(125deg,transparent 0 30%,rgba(255,255,255,.34) 43%,transparent 56% 100%);
+}
+header::after{
+ content:"";position:absolute;left:0;right:0;bottom:0;height:12px;
+ background:linear-gradient(to bottom,#c62828 0 50%,#fff 50% 100%)!important;
+ display:block;z-index:30;pointer-events:none;
+}
+/* Tombol dan elemen aksi: emas mengilap, teks kontras */
+button,[role="button"],a[class*="rounded"]{
+ transition:filter .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+button:not(.secondary):not(.danger),.btn-primary,
+[class~="bg-yellow-400"],[class~="bg-yellow-500"],[class~="bg-amber-400"],[class~="bg-amber-500"]{
+ background-image:linear-gradient(115deg,#d99c00 0%,#ffd400 32%,#fff1a3 50%,#ffd400 68%,#d99c00 100%)!important;
+ color:#302313!important;border-color:#d6a300!important;
+ box-shadow:0 3px 10px rgba(164,116,0,.19),inset 0 1px 0 rgba(255,255,255,.72);
+}
+button:hover,a[class*="rounded"]:hover{filter:brightness(1.04)}
+button:focus-visible,a:focus-visible{outline:3px solid #c62828!important;outline-offset:2px}
+/* Bidang kartu memakai gradasi halus; isi bacaan tetap datar */
+.panel,.sku-card,.bg-white,[class*="rounded-xl"],[class*="rounded-2xl"]{
+ border-color:rgba(190,145,35,.25);
+ box-shadow:0 7px 22px rgba(67,45,19,.075),inset 0 1px 0 rgba(255,255,255,.85);
+}
+.panel,.sku-card{
+ background:linear-gradient(135deg,#fffdf5 0%,#fff 58%,#fff8df 100%)!important;
+}
+.lesson-text,.prose,.signature,textarea,input,select,
+#certificate,.exam-content,.reading-content{
+ background:#fff!important;
+}
+.pill{background:linear-gradient(110deg,#fff4bd,#ffe17a)!important;color:#50370b!important;border:1px solid #dfb72d!important}
+.tab.active{background:linear-gradient(110deg,#e5aa00,#ffd83d,#fff0a0)!important;color:#302313!important;border-bottom:3px solid #c62828!important}
+[class~="bg-amber-900"],[class~="bg-amber-950"]{background:linear-gradient(120deg,#2b1b12,#765235)!important;color:#fff!important}
+[class~="text-amber-200"],[class~="text-amber-300"]{color:#684600!important}
+
+</style>
 </head>
 <body class="min-h-screen bg-amber-50 text-slate-800">
 <header class="bg-amber-950 text-white px-5 py-5"><div class="max-w-6xl mx-auto flex items-center justify-between"><div><h1 class="text-2xl font-bold">⚜️ Admin Utama Pramuka</h1><p class="text-amber-200 text-sm">Pemantauan pangkalan dan perkembangan ambalan</p></div><a href="belajar.html" class="rounded-lg bg-amber-700 hover:bg-amber-600 px-3 py-2 text-sm font-semibold">Ruang Belajar &amp; Progres SKU</a><button id="logout" class="hidden rounded-lg bg-amber-800 px-4 py-2">Keluar</button></div></header>
