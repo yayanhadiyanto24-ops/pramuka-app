@@ -326,12 +326,12 @@ a[class*="rounded"]{
 
 
 <style id="ruang-tegak-header-refresh-button">
-/* Susunan header konsisten: Keluar, Perbarui, Unduh Aplikasi di sisi kanan */
+/* Semua tombol akun berada dalam satu kolom di kanan */
 header .max-w-6xl{
  display:grid!important;
  grid-template-columns:minmax(0,1fr) 150px!important;
  grid-template-rows:auto auto!important;
- grid-template-areas:"brand logout" "identity install"!important;
+ grid-template-areas:"brand actions" "identity actions"!important;
  align-items:center!important;
  column-gap:12px!important;
  row-gap:7px!important;
@@ -339,15 +339,17 @@ header .max-w-6xl{
 }
 header .rt-header-brand{grid-area:brand!important;min-width:0!important}
 #headerActions{display:contents!important}
-#profileIdentity{grid-area:identity!important;min-width:0!important}
-#logout{grid-area:logout!important;justify-self:end!important;align-self:center!important}
+#profileIdentity{grid-area:identity!important;display:flex!important;align-items:center!important;min-width:0!important;gap:6px!important}
+#headerProfileAvatar{width:30px!important;height:30px!important;flex:0 0 30px!important}
+#who{font-size:11px!important;line-height:1.15!important;max-width:none!important;overflow-wrap:anywhere}
 #headerButtons{
- grid-area:install!important;
+ grid-area:actions!important;
  display:flex!important;
  flex-direction:column!important;
  align-items:stretch!important;
  justify-self:end!important;
- justify-content:flex-start!important;
+ align-self:center!important;
+ justify-content:center!important;
  gap:6px!important;
  width:150px!important;
  min-width:0!important;
@@ -367,8 +369,9 @@ header .rt-header-brand{grid-area:brand!important;min-width:0!important}
  font-weight:800!important;
  border-radius:8px!important;
  white-space:nowrap!important;
+ position:static!important;
 }
-#logout:not(.hidden){width:76px!important}
+#logout:not(.hidden){width:76px!important;background:linear-gradient(120deg,#3d281b,#67472d)!important;color:#fff!important;border:1px solid #9b7956!important}
 #refreshAppBtn{
  width:100px!important;
  color:#302313!important;
@@ -383,21 +386,17 @@ header .rt-header-brand{grid-area:brand!important;min-width:0!important}
  background:linear-gradient(115deg,#d99c00,#ffd94c 48%,#fff0a0 65%,#e0a719)!important;
  box-shadow:0 2px 7px #21130755,inset 0 1px 0 #fff9!important;
 }
-#logout:not(.hidden){background:linear-gradient(120deg,#3d281b,#67472d)!important;color:#fff!important;border:1px solid #9b7956!important}
 #refreshAppBtn:active,#installAppBtn:active,#logout:not(.hidden):active{transform:translateY(1px)!important}
+#appCreatorCredit{position:absolute!important;right:0!important;bottom:-8px!important;display:block!important;margin:0!important;padding:0!important;text-align:right!important;white-space:nowrap!important;font-size:8px!important;line-height:1!important;font-style:italic!important;color:#fff2a6!important;letter-spacing:0!important}
 @media(max-width:640px){
  header{padding:8px 10px 14px!important}
- header .max-w-6xl{
-  grid-template-columns:minmax(0,1fr) 150px!important;
-  column-gap:7px!important;
-  row-gap:6px!important;
- }
+ header .max-w-6xl{grid-template-columns:minmax(0,1fr) 150px!important;column-gap:7px!important;row-gap:6px!important}
  header .rt-header-brand{gap:7px!important}
  header .rt-header-logo{width:44px!important;height:44px!important;flex-basis:44px!important}
  header .rt-header-name{font-size:15px!important}
  header .rt-header-sub{font-size:10px!important}
  #roleSubtitle{font-size:8px!important}
- #who{font-size:10px!important;max-width:none!important}
+ #who{font-size:10px!important}
  #headerButtons{width:150px!important}
  #logout:not(.hidden),#refreshAppBtn,#installAppBtn{height:32px!important;min-height:32px!important;max-height:32px!important;font-size:11px!important}
 }
@@ -415,7 +414,7 @@ header .rt-header-brand{grid-area:brand!important;min-width:0!important}
 <header class="brand text-white px-4 py-5">
  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 relative">
   <div class="rt-header-brand"><img class="rt-header-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div><div class="rt-header-name text-xl">RUANG TEGAK</div><p class="rt-header-sub text-sm">Ruang Belajar Pramuka Penegak</p><p id="roleSubtitle" class="text-amber-200 text-xs">Materi umum · SKU Bantara · SKU Laksana · Progres kecakapan</p></div></div>
-  <div id="headerActions" class="rt-account-actions"><div id="profileIdentity"><img id="headerProfileAvatar" class="rt-profile-mark" alt="Foto profil"><span id="who" class="text-sm text-amber-100"></span></div><div id="headerButtons"><button id="refreshAppBtn" type="button" class="rounded-lg font-bold" aria-label="Perbarui halaman">↻ Perbarui</button><button id="installAppBtn" type="button" class="rounded-xl bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 border border-yellow-200 px-3 py-2 text-xs font-extrabold text-stone-950 shadow-md"><span aria-hidden="true">⬇</span> Unduh Aplikasi</button></div></div><button id="logout" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button>
+  <div id="headerActions" class="rt-account-actions"><div id="profileIdentity"><img id="headerProfileAvatar" class="rt-profile-mark" alt="Foto profil"><span id="who" class="text-sm text-amber-100"></span></div><div id="headerButtons"><button id="logout" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button><button id="refreshAppBtn" type="button" class="rounded-lg font-bold" aria-label="Perbarui halaman">↻ Perbarui</button><button id="installAppBtn" type="button" class="rounded-xl bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 border border-yellow-200 px-3 py-2 text-xs font-extrabold text-stone-950 shadow-md"><span aria-hidden="true">⬇</span> Unduh Aplikasi</button></div></div>
   <p id="appCreatorCredit">Pembuat &amp; Pengembang Aplikasi: Yayan Hadiyanto, S.Pd.-MT.</p>
  </div>
 </header>
