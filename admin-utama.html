@@ -352,14 +352,8 @@ header nav button{
 <div class="bg-white rounded-2xl shadow-sm p-4 space-y-3"><h2 class="font-bold text-lg">Aktivasi Ambalan Pembina</h2><p class="text-sm text-slate-600">Setelah transfer seikhlasnya dikonfirmasi, terbitkan kode untuk membuka satu ambalan tambahan dengan kuota 32 peserta didik. Setiap kode menambah satu ambalan.</p><div id="pembina-access-list" class="space-y-2"></div><p id="access-code-status" class="text-sm" role="status"></p></div>
 
 <section id="kwarran-manager" class="bg-white rounded-2xl shadow-sm p-4 space-y-4">
- <div><h2 class="font-bold text-lg">Manajemen Kwarran</h2><p class="text-sm text-slate-600">Buat wilayah, terbitkan undangan Admin Kwarran, dan petakan pangkalan. Pangkalan lama tidak dipetakan otomatis agar tidak salah wilayah.</p></div>
- <div class="grid md:grid-cols-2 gap-4">
-  <form id="kwarran-create-form" class="border rounded-xl p-3 space-y-2">
-   <h3 class="font-semibold">Tambah Kwarran</h3>
-   <input id="kwarran-new-name" class="w-full border rounded-lg p-2" maxlength="120" required placeholder="Nama Kwarran">
-   <button class="bg-amber-400 text-stone-950 font-bold rounded-lg px-4 py-2" type="submit">Tambah Kwarran</button>
-  </form>
-  <form id="kwarran-invite-form" class="border rounded-xl p-3 space-y-2">
+ <div><h2 class="font-bold text-lg">Undangan Admin Kwarran</h2><p class="text-sm text-slate-600">Pilih salah satu dari 32 Kwarran Kwarcab Cianjur, lalu terbitkan kode undangan untuk calon Admin Kwarran.</p></div>
+ <form id="kwarran-invite-form" class="border rounded-xl p-3 space-y-2">
    <h3 class="font-semibold">Buat Undangan Admin Kwarran</h3>
    <select id="kwarran-invite-region" class="w-full border rounded-lg p-2" required><option value="">Pilih Kwarran</option></select>
    <button class="bg-amber-400 text-stone-950 font-bold rounded-lg px-4 py-2" type="submit">Terbitkan Undangan</button>
@@ -367,7 +361,6 @@ header nav button{
   </form>
  </div>
  <div><h3 class="font-semibold mb-2">Undangan Admin Kwarran</h3><div id="kwarran-invite-list" class="space-y-2"></div></div>
- <div><h3 class="font-semibold mb-2">Pemetaan Pangkalan ke Kwarran</h3><div id="kwarran-pangkalan-map" class="grid md:grid-cols-2 gap-2"></div></div>
  <div><h3 class="font-semibold mb-2">Akun Admin Kwarran Terdaftar</h3><div id="kwarran-admin-list" class="space-y-2"></div></div>
  <p id="kwarran-manager-status" class="text-sm text-slate-500" role="status"></p>
 </section>
@@ -435,17 +428,10 @@ async function loadKwarranManager(){
    const active=!i.revoked_at&&!i.used_at;
    return '<div class="border rounded-lg p-3 flex flex-wrap items-center justify-between gap-2"><div class="min-w-0"><b>'+esc(i.kwarran?.nama_kwarran||'-')+'</b><div class="font-mono text-sm break-all mt-1">'+(active?esc(i.invite_code):'Kode disembunyikan')+'</div><div class="text-xs text-slate-500">'+state+'</div></div>'+(active?'<button type="button" data-copy-invite="'+esc(i.invite_code)+'" class="rounded-lg bg-amber-100 px-3 py-2 text-sm font-semibold">Salin kode</button>':'')+'</div>';
   }).join('')||'<p class="text-sm text-slate-500">Belum ada undangan.</p>';
-  $('kwarran-pangkalan-map').innerHTML=(d.pangkalan||[]).map(p=>'<div class="border rounded-lg p-3 flex flex-wrap items-center justify-between gap-2"><div class="min-w-0"><b>'+esc(p.nama_pangkalan)+'</b><div class="text-xs text-slate-500">Gudep '+esc(p.no_gudep||'-')+'</div></div><select data-pangkalan-region="'+esc(p.id_pangkalan)+'" class="border rounded-lg p-2 text-sm min-w-40"><option value="">Belum ditetapkan</option>'+(d.kwarran||[]).map(k=>'<option value="'+esc(k.id_kwarran)+'" '+(Number(p.id_kwarran)===Number(k.id_kwarran)?'selected':'')+'>'+esc(k.nama_kwarran)+'</option>').join('')+'</select></div>').join('')||'<p class="text-sm text-slate-500">Belum ada pangkalan.</p>';
   $('kwarran-admin-list').innerHTML=(d.admins||[]).map(a=>'<div class="border rounded-lg p-3 flex flex-wrap justify-between gap-2"><div><b>'+esc(a.nama_lengkap||'Admin Kwarran')+'</b><div class="text-xs text-slate-500">'+esc(a.users?.email||'-')+'</div></div><span class="text-sm font-semibold">'+esc(a.kwarran?.nama_kwarran||'-')+'</span></div>').join('')||'<p class="text-sm text-slate-500">Belum ada akun Admin Kwarran.</p>';
   status.textContent='Pengaturan Kwarran berhasil dimuat.';
  }catch(err){status.textContent='Gagal memuat pengaturan Kwarran: '+err.message;}
 }
-$('kwarran-create-form').addEventListener('submit',async e=>{
- e.preventDefault();const b=e.submitter;b.disabled=true;$('kwarran-manager-status').textContent='Menambahkan Kwarran...';
- try{await callApi({action:'kwarran_create',nama_kwarran:$('kwarran-new-name').value.trim()});$('kwarran-new-name').value='';await loadKwarranManager();$('kwarran-manager-status').textContent='Kwarran berhasil ditambahkan.';}
- catch(err){$('kwarran-manager-status').textContent='Gagal menambahkan Kwarran: '+err.message;}
- finally{b.disabled=false;}
-});
 $('kwarran-invite-form').addEventListener('submit',async e=>{
  e.preventDefault();const b=e.submitter;b.disabled=true;$('kwarran-manager-status').textContent='Menerbitkan undangan...';
  try{const result=await callApi({action:'kwarran_create_invite',id_kwarran:$('kwarran-invite-region').value});await loadKwarranManager();$('kwarran-manager-status').textContent='Undangan untuk '+result.invite.nama_kwarran+' berhasil dibuat. Kode aktivasi: '+result.invite.invite_code+' — bagikan kode ini kepada calon Admin Kwarran.';}
@@ -456,11 +442,6 @@ $('kwarran-invite-list').addEventListener('click',async e=>{
  const b=e.target.closest('[data-copy-invite]');if(!b)return;
  try{await navigator.clipboard.writeText(b.dataset.copyInvite);$('kwarran-manager-status').textContent='Kode aktivasi berhasil disalin.';}
  catch(err){$('kwarran-manager-status').textContent='Tidak dapat menyalin otomatis. Salin kode yang tampil secara manual.';}
-});
-$('kwarran-pangkalan-map').addEventListener('change',async e=>{
- const sel=e.target.closest('[data-pangkalan-region]');if(!sel)return;sel.disabled=true;$('kwarran-manager-status').textContent='Menyimpan pemetaan pangkalan...';
- try{await callApi({action:'kwarran_assign_pangkalan',id_pangkalan:sel.dataset.pangkalanRegion,id_kwarran:sel.value||null});await loadKwarranManager();$('kwarran-manager-status').textContent='Pemetaan pangkalan berhasil disimpan.';}
- catch(err){$('kwarran-manager-status').textContent='Gagal menyimpan pemetaan: '+err.message;sel.disabled=false;}
 });
 
 $('refresh').type='button';$('refresh').onclick=async()=>{const b=$('refresh');b.disabled=true;const old=b.textContent;b.textContent='Memuat...';try{await loadDashboard();}finally{b.disabled=false;b.textContent=old;}};
