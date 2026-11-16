@@ -1164,7 +1164,7 @@ const installMessage=document.getElementById('installAppMsg')||document.createEl
 installMessage.id='installAppMsg';
 installMessage.setAttribute('role','status');
 installMessage.style.cssText='display:none;max-width:230px;padding:7px 9px;margin-top:5px;border-radius:9px;background:#fff4c2;color:#432b13;font-size:11px;line-height:1.35;text-align:left;white-space:normal';
-if(!installMessage.parentElement) installButton?.parentElement?.insertAdjacentElement('afterend',installMessage);
+if(!installMessage.parentElement) installButton?.parentElement?.appendChild(installMessage);
 function showInstallMessage(message){
  if(!installMessage)return;
  installMessage.textContent=message;
