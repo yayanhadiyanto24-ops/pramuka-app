@@ -409,11 +409,27 @@ function renderPesertaDetail(rows){
 }
 $('peserta-search')?.addEventListener('input',()=>renderPesertaDetail(pesertaAdminCache));
 async function showDashboard(){$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');await loadDashboard();await loadPosterGallery();await loadKwarranManager();}
+let pembinaAccessCache=[];
+function renderPembinaAccess(){
+ const q=($('pembina-access-search')?.value||'').trim().toLowerCase();
+ const rows=pembinaAccessCache.filter(p=>[p.nama_lengkap,p.users?.email,p.jabatan,p.nta].some(v=>String(v||'').toLowerCase().includes(q)));
+ $('pembina-access-list').innerHTML=rows.map(p=>{
+  const ambalan=Math.max(0,Number(p.jumlah_ambalan_berbayar||0));
+  const kuota=ambalan>0?ambalan*32:10;
+  return '<div class="flex flex-wrap items-center justify-between gap-3 border rounded-lg p-3"><div><b>'+esc(p.nama_lengkap)+'</b><p class="text-xs text-slate-500">'+esc(p.users?.email||'')+' · '+esc(p.jabatan)+' · NTA '+(p.nta?'sudah diisi':'belum diisi')+' · '+ambalan+' ambalan berbayar · Kuota '+kuota+' peserta</p></div><button data-issue-access="'+esc(p.id_user)+'" '+(!p.nta?'disabled title="Pembina harus melengkapi NTA/KTA"':'')+' class="rounded-lg bg-amber-800 text-white px-3 py-2 text-xs font-semibold">Terbitkan kode +1 ambalan</button></div>';
+ }).join('')||'<p class="text-sm text-slate-500">'+(pembinaAccessCache.length?'Tidak ada akun yang cocok.':'Belum ada Pembina.')+'</p>';
+ $('pembina-access-count').textContent='Menampilkan '+rows.length+' dari '+pembinaAccessCache.length+' akun Pembina.';
+ $('pembina-access-list').querySelectorAll('[data-issue-access]').forEach(b=>b.onclick=async()=>{
+  b.disabled=true;$('access-code-status').textContent='Membuat kode penambahan ambalan...';
+  try{const r=await callApi({action:'buat_kode_akses',id_pembina:b.dataset.issueAccess});$('access-code-status').textContent='Kode untuk '+b.parentElement.querySelector('b').textContent+': '+r.kode_akses+' (1 ambalan / 32 peserta). Kirim kode ini kepada Pembina.';}
+  catch(err){$('access-code-status').textContent='Gagal membuat kode: '+err.message;b.disabled=false;}
+ });
+}
+$('pembina-access-search')?.addEventListener('input',renderPembinaAccess);
 async function loadDashboard(){$('status').textContent='Memuat rekap...';try{const d=await callApi({action:'dashboard'});$('total-pangkalan').textContent=d.pangkalan.length;$('total-ambalan').textContent=d.rekap.length;$('total-peserta').textContent=d.rekap.reduce((n,x)=>n+Number(x.jumlah_peserta||0),0);
 $('rekap-body').innerHTML=d.rekap.map(x=>'<tr class="border-t"><td class="px-2 py-1 align-top font-semibold whitespace-nowrap">'+esc(x.nama_pangkalan)+'<div class="text-xs font-normal text-slate-500">Gudep '+esc(x.no_gudep||'-')+'</div></td><td class="px-2 py-1 align-top font-medium whitespace-nowrap">'+esc(x.nama_ambalan)+'</td><td class="p-2 text-center">'+(x.jenis_kelamin==='L'?'Putra':'Putri')+'</td>'+['peserta_tamu','calon_penegak','bantara','laksana','garuda','jumlah_sangga','peserta_aktif','jumlah_alumni','jumlah_peserta'].map(k=>'<td class="px-2 py-1 text-center whitespace-nowrap">'+x[k]+'</td>').join('')+'</tr>').join('')||'<tr><td colspan="12" class="p-4 text-center">Belum ada data ambalan.</td></tr>';
 $('pangkalan-list').innerHTML=d.pangkalan.map(x=>'<div class="border rounded-xl p-3 space-y-1"><b>'+esc(x.nama_pangkalan)+'</b><p class="text-xs text-slate-500">Gudep: '+esc(x.no_gudep||'-')+'</p><p class="text-xs">Kode gabung pangkalan: <b class="font-mono">'+esc(x.kode_gabung_peserta)+'</b></p><p class="text-xs text-slate-500">Ambalan: '+esc(x.nama_ambalan_putra)+' / '+esc(x.nama_ambalan_putri)+'</p><p class="text-xs">Ketua Gudep: '+esc(x.nama_ketua_gudep||'Belum diisi')+'</p><p class="text-xs">Ketua Mabigus: '+esc(x.nama_ketua_mabigus||'Belum diisi')+'</p><p class="text-xs text-slate-400">Data administrasi dikelola Pembina pangkalan.</p></div>').join('')||'<p class="text-sm text-slate-500">Belum ada pangkalan.</p>';
-$('pembina-access-list').innerHTML=(d.pembina||[]).map(p=>{const ambalan=Math.max(0,Number(p.jumlah_ambalan_berbayar||0));const kuota=ambalan>0?ambalan*32:10;return '<div class="flex flex-wrap items-center justify-between gap-3 border rounded-lg p-3"><div><b>'+esc(p.nama_lengkap)+'</b><p class="text-xs text-slate-500">'+esc(p.users?.email||'')+' · '+esc(p.jabatan)+' · NTA '+(p.nta?'sudah diisi':'belum diisi')+' · '+ambalan+' ambalan berbayar · Kuota '+kuota+' peserta</p></div><button data-issue-access="'+esc(p.id_user)+'" '+(!p.nta?'disabled title="Pembina harus melengkapi NTA/KTA"':'')+' class="rounded-lg bg-amber-800 text-white px-3 py-2 text-xs font-semibold">Terbitkan kode +1 ambalan</button></div>';}).join('')||'<p class="text-sm text-slate-500">Belum ada Pembina.</p>';
-$('pembina-access-list').querySelectorAll('[data-issue-access]').forEach(b=>b.onclick=async()=>{b.disabled=true;$('access-code-status').textContent='Membuat kode penambahan ambalan...';try{const r=await callApi({action:'buat_kode_akses',id_pembina:b.dataset.issueAccess});$('access-code-status').textContent='Kode untuk '+b.parentElement.querySelector('b').textContent+': '+r.kode_akses+' (1 ambalan / 32 peserta). Kirim kode ini kepada Pembina.';}catch(err){$('access-code-status').textContent='Gagal membuat kode: '+err.message;b.disabled=false;}});
+pembinaAccessCache=d.pembina||[];renderPembinaAccess();
 
 renderPesertaDetail(d.peserta||[]);$('status').textContent='Data berhasil diperbarui.';}catch(err){$('status').textContent='Gagal memuat: '+err.message;}}
 
