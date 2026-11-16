@@ -305,7 +305,7 @@ main{padding:10px!important}
    <button class="tab rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="profile">Lengkapi Profil</button>
    <button class="tab rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="sku">Materi SKU</button>
    <button id="monitorTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="pantau">Pantau Peserta</button>
-   <button id="adminPangkalanTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="administrasi">Administrasi Pangkalan</button>
+   <button id="adminPangkalanTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="administrasi">Administrasi Pangkalan</button><a href="dokumen.html" class="tab rounded-lg bg-white px-4 py-2 text-sm font-semibold inline-flex items-center justify-center">Pusat Dokumen</a>
   </nav>
   <section id="view-profile" class="hidden space-y-4">
    <div class="panel p-4 md:p-6 space-y-4">
@@ -345,6 +345,16 @@ main{padding:10px!important}
    </div>
   </section>
   <section id="view-umum" class="space-y-4">
+   <div class="panel border border-amber-200 bg-amber-50 p-4 space-y-2">
+    <h3 class="font-bold">Dokumen rujukan materi umum</h3>
+    <p class="text-xs muted">Baca dokumen resmi yang menjadi dasar pengenalan organisasi, pembinaan, tata kelola Gudep, dan seragam Pramuka.</p>
+    <div class="flex flex-wrap gap-2 text-sm font-semibold">
+     <a href="dokumen.html#ad-art-2023" class="rounded-lg border border-amber-300 bg-white px-3 py-2 text-amber-900">AD/ART 2023</a>
+     <a href="dokumen.html#jukran-gudep-05-2026" class="rounded-lg border border-amber-300 bg-white px-3 py-2 text-amber-900">Jukran Gudep 05/2026</a>
+     <a href="dokumen.html#polmekbin-176-2013" class="rounded-lg border border-amber-300 bg-white px-3 py-2 text-amber-900">Polmekbin 176/2013</a>
+     <a href="dokumen.html#seragam-174-2012" class="rounded-lg border border-amber-300 bg-white px-3 py-2 text-amber-900">Seragam 174/2012</a>
+    </div>
+   </div>
    <div id="studentIdentity" class="panel hidden p-4 text-sm space-y-1"></div>
    <div><h2 class="text-xl font-bold">Pengantar Pramuka Penegak</h2><p class="text-sm muted">Pelajari bagian umum terlebih dahulu sebelum masuk ke butir-butir SKU.</p></div>
    <div id="generalList" class="grid md:grid-cols-2 gap-3"></div>
@@ -678,6 +688,12 @@ function openSku(id){
   if(account.role==='peserta_didik')html+='<div class="rounded-lg bg-amber-50 p-3 text-sm my-3">Progres subpoin: <b>'+passed+'/'+itemSubs.length+' lulus</b> · '+waiting+' menunggu ujian</div>';
   html+='<div class="space-y-2 mt-3">'+itemSubs.map(s=>{const p=subpointStatus(currentUser.id,s.id_subpoint);return '<button data-subpoint="'+s.id_subpoint+'" class="sku-card w-full text-left p-3"><div class="flex justify-between gap-2"><b>'+esc(s.kode_subpoint)+' — '+esc(s.judul_subpoint)+'</b><span class="pill">'+esc(statusLabel(p?.status))+'</span></div><p class="text-xs muted mt-1">'+esc(s.persyaratan)+'</p><p class="text-xs font-semibold text-amber-800 mt-2">Buka materi, isi jawaban, unggah bukti & ajukan ujian →</p></button>';}).join('')+'</div></div>';
  }
+
+ const docRefs=[{key:'sku-penegak-2011',label:'Panduan Penyelesaian SKU Penegak — SK 119 Tahun 2011'}];
+ if((x.tingkat==='Bantara'&&['5','6','8'].includes(x.nomor_butir))||(x.tingkat==='Laksana'&&['5','6','8'].includes(x.nomor_butir)))docRefs.push({key:'jukran-gudep-05-2026',label:'Jukran 05 Tahun 2026 — Peraturan Gugus Depan'});
+ if((x.tingkat==='Bantara'&&['5','8'].includes(x.nomor_butir))||(x.tingkat==='Laksana'&&['3','5','8'].includes(x.nomor_butir)))docRefs.push({key:'polmekbin-176-2013',label:'SK 176 Tahun 2013 — Pola dan Mekanisme Pembinaan Penegak dan Pandega'});
+ if(x.tingkat==='Laksana'&&x.nomor_butir==='11')docRefs.push({key:'ad-art-2023',label:'AD/ART Gerakan Pramuka — Munas XI 2023'});
+ html+='<section class="mt-5 border-t pt-4"><h4 class="font-bold">Dokumen rujukan butir ini</h4><div class="mt-2 flex flex-col gap-2">'+docRefs.map(d=>'<a href="dokumen.html#'+d.key+'" class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">📄 '+d.label+' <span class="float-right">Buka →</span></a>').join('')+'</div></section>';
  $('skuDetail').innerHTML=html;
  $('skuDetail').scrollIntoView({behavior:'smooth',block:'start'});
  if($('backSkuList'))$('backSkuList').onclick=()=>$('skuList').scrollIntoView({behavior:'smooth',block:'start'});
