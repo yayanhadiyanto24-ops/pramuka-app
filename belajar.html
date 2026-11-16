@@ -413,7 +413,7 @@ a[class*="rounded"]{
       <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"><b>Belum memiliki KTA Pramuka Nasional?</b><p class="mt-1">Kamu tetap dapat belajar di aplikasi. Hubungi Pembina pangkalanmu dan sampaikan bahwa kamu belum memiliki KTA. Pembina akan membantu meneruskan permohonan kepada Sekretaris Kwarran untuk proses penerbitan KTA Nasional. Setelah KTA terbit, lengkapi nomor NTA dan bukti pendukung pada profil.</p></div></div>
     </div>
     <div id="teacherProfileFields" class="hidden space-y-4 border-t pt-4">
-     <h3 class="font-bold">Pendidikan dan Pengesahan Pembina</h3><p id="teacherQuotaInfo" class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"></p><div class="flex flex-wrap gap-2"><input id="accessCodeInput" maxlength="40" class="flex-1 min-w-0 border rounded-lg p-2 text-sm uppercase" placeholder="Kode aktivasi ambalan dari Admin Utama"><button id="activateAccessCode" type="button" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-sm font-semibold">Aktifkan kode</button></div><p id="accessCodeMsg" class="text-xs muted"></p>
+     <h3 class="font-bold">Pendidikan dan Pengesahan Pembina</h3><div><label for="teacherKwarran" class="block text-sm font-semibold">Kwarran</label><select id="teacherKwarran" required class="w-full border rounded-lg p-2 mt-1"><option value="">Memuat daftar Kwarran...</option></select><p class="text-xs muted mt-1">Pilih Kwarran tempat pangkalan Anda berada.</p></div><p id="teacherQuotaInfo" class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"></p><div class="flex flex-wrap gap-2"><input id="accessCodeInput" maxlength="40" class="flex-1 min-w-0 border rounded-lg p-2 text-sm uppercase" placeholder="Kode aktivasi ambalan dari Admin Utama"><button id="activateAccessCode" type="button" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-sm font-semibold">Aktifkan kode</button></div><p id="accessCodeMsg" class="text-xs muted"></p>
      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
       <label class="text-sm">Tahun KMD<input id="yearKmd" type="number" min="1950" max="2100" class="w-full border rounded-lg p-2 mt-1"></label>
       <label class="text-sm">Tahun KML<input id="yearKml" type="number" min="1950" max="2100" class="w-full border rounded-lg p-2 mt-1"></label>
@@ -555,6 +555,7 @@ async function boot(user){
   $('monitorTab').classList.remove('hidden');
   $('adminPangkalanTab').classList.remove('hidden');
   $('roleSubtitle').textContent='Ruang Pembina · Pantau peserta\nAdministrasi pangkalan';
+  await loadKwarranOptions();
  }else if(u.role==='admin_kwarcab'){$('monitorTab').classList.remove('hidden');}
  else throw new Error('Peran akun tidak dikenali.');
  const accountName=participant?.nama_lengkap||teacher?.nama_lengkap||user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_kwarcab'?'Admin Utama':'Pengguna');
@@ -564,14 +565,21 @@ async function boot(user){
   await loadAll();
 }
 
-let profilePhotoData='',experienceRows=[],organizationRows=[];
+let profilePhotoData='',experienceRows=[],organizationRows=[],kwarranOptions=[];
+async function loadKwarranOptions(){
+ const sel=$('teacherKwarran');if(!sel)return;
+ sel.innerHTML='<option value="">Memuat daftar Kwarran...</option>';
+ try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'kwarran_options'}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Daftar Kwarran tidak dapat dimuat.');
+  kwarranOptions=data.kwarran||[];sel.innerHTML='<option value="">Pilih Kwarran</option>'+kwarranOptions.map(x=>'<option value="'+Number(x.id_kwarran)+'">'+esc(x.nama_kwarran)+'</option>').join('');
+ }catch(err){sel.innerHTML='<option value="">Daftar Kwarran gagal dimuat</option>';console.error(err);}
+}
 function renderProfile(){
  const isTeacher=account?.role==='pembina',isStudent=account?.role==='peserta_didik';
  $('teacherProfileFields').classList.toggle('hidden',!isTeacher);
  $('studentProfileFields').classList.toggle('hidden',!isStudent);
  const p=isTeacher?teacher:(isStudent?participant:account);
  $('ntaProfileField').classList.toggle('hidden',!isTeacher&&!isStudent);
- if(isTeacher){const ambalan=Math.max(0,Number(teacher.jumlah_ambalan_berbayar||0));const kuota=ambalan>0?ambalan*32:10;$('teacherQuotaInfo').textContent='Kuota penerimaan saat ini: '+kuota+' peserta. '+(ambalan>0?'Anda memiliki '+ambalan+' ambalan aktif. Setiap penambahan ambalan membuka 32 peserta didik. ':'Kuota awal 10 peserta didik. Transfer seikhlasnya dan konfirmasi kepada Admin Utama untuk membuka ambalan pertama (32 peserta). ')+(!teacher.nta?'Lengkapi NTA/KTA terlebih dahulu agar Admin dapat menerbitkan kode aktivasi.':'Setiap kode aktivasi menambah satu ambalan dengan kuota 32 peserta.');$('accessCodeInput').disabled=!teacher.nta;$('activateAccessCode').disabled=!teacher.nta;}
+ if(isTeacher){$('teacherKwarran').value=teacher.id_kwarran?String(teacher.id_kwarran):'';const ambalan=Math.max(0,Number(teacher.jumlah_ambalan_berbayar||0));const kuota=ambalan>0?ambalan*32:10;$('teacherQuotaInfo').textContent='Kuota penerimaan saat ini: '+kuota+' peserta. '+(ambalan>0?'Anda memiliki '+ambalan+' ambalan aktif. Setiap penambahan ambalan membuka 32 peserta didik. ':'Kuota awal 10 peserta didik. Transfer seikhlasnya dan konfirmasi kepada Admin Utama untuk membuka ambalan pertama (32 peserta). ')+(!teacher.nta?'Lengkapi NTA/KTA terlebih dahulu agar Admin dapat menerbitkan kode aktivasi.':'Setiap kode aktivasi menambah satu ambalan dengan kuota 32 peserta.');$('accessCodeInput').disabled=!teacher.nta;$('activateAccessCode').disabled=!teacher.nta;}
  profilePhotoData=p?.foto_profil_data||'';
  const headerAvatar=$('headerProfileAvatar');if(headerAvatar){headerAvatar.src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"%3E%3Ccircle cx="40" cy="40" r="39" fill="%23f5c52b"/%3E%3Ccircle cx="40" cy="29" r="13" fill="%23704a1d"/%3E%3Cpath d="M15 70c2-17 12-25 25-25s23 8 25 25" fill="%23704a1d"/%3E%3C/svg%3E';}
  $('profilePhotoPreview').src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect width="100%25" height="100%25" fill="%23f1f5f9"/%3E%3Ctext x="50%25" y="54%25" text-anchor="middle" fill="%2364758b" font-size="12"%3EFoto%3C/text%3E%3C/svg%3E';
@@ -613,7 +621,9 @@ $('profilePhotoInput').addEventListener('change',async e=>{
 });
 async function saveProfile(extra={}){
  const isTeacher=account.role==='pembina',isStudent=account.role==='peserta_didik';
+ if(isTeacher&&!$('teacherKwarran').value){$('profileMsg').textContent='Pilih Kwarran terlebih dahulu.';return false;}
  const payload={action:'save_profile',nta:$('profileNta').value.trim(),foto_profil_data:profilePhotoData,...extra};
+ if(isTeacher)payload.id_kwarran=Number($('teacherKwarran').value);
  const ktaFile=$('ktaEvidenceInput')?.files?.[0];
  if(ktaFile){
   const allowed=['image/jpeg','image/png','image/webp','application/pdf'];
@@ -629,7 +639,7 @@ async function saveProfile(extra={}){
  if(isStudent){const ambalanChoice=$('studentJabatanAmbalan').value,ambalanOther=$('studentJabatanAmbalanOther').value.trim();if(ambalanChoice==='Lainnya'&&!ambalanOther){$('profileMsg').textContent='Tuliskan jabatan lainnya di ambalan.';return false;}Object.assign(payload,{jabatan_ambalan:ambalanChoice==='Lainnya'?ambalanOther:ambalanChoice,jabatan_sangga:$('studentJabatanSangga').value,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows});}
  $('profileMsg').textContent='Menyimpan profil...';$('saveProfile').disabled=true;
  try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:payload});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Profil gagal disimpan.');
-  if(isTeacher)teacher={...teacher,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:{})};
+  if(isTeacher)teacher={...teacher,id_kwarran:payload.id_kwarran,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:{})};
   if(isStudent){const nextLevel=participant.tingkatan;participant={...participant,nta:payload.nta,tingkatan:nextLevel,foto_profil_data:profilePhotoData,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows,jabatan_ambalan:payload.jabatan_ambalan,jabatan_sangga:payload.jabatan_sangga,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:{})};}if($('studentTierLabel'))$('studentTierLabel').textContent='Tingkatan: '+participant.tingkatan;
   if(!isTeacher&&!isStudent)account={...account,foto_profil_data:profilePhotoData};
   renderProfile();
