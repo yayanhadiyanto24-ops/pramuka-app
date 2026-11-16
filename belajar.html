@@ -326,39 +326,88 @@ a[class*="rounded"]{
 
 
 <style id="ruang-tegak-header-refresh-button">
-/* Tombol Perbarui mengisi urutan aksi di antara Keluar dan Unduh Aplikasi */
-#headerButtons{display:flex!important;flex-direction:column!important;align-items:flex-end!important;justify-content:center!important;gap:5px!important}
-#logout,#refreshAppBtn,#installAppBtn{
+/* Susunan header konsisten: Keluar, Perbarui, Unduh Aplikasi di sisi kanan */
+header .max-w-6xl{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr) 150px!important;
+ grid-template-rows:auto auto!important;
+ grid-template-areas:"brand logout" "identity install"!important;
+ align-items:center!important;
+ column-gap:12px!important;
+ row-gap:7px!important;
+ width:100%!important;
+}
+header .rt-header-brand{grid-area:brand!important;min-width:0!important}
+#headerActions{display:contents!important}
+#profileIdentity{grid-area:identity!important;min-width:0!important}
+#logout{grid-area:logout!important;justify-self:end!important;align-self:center!important}
+#headerButtons{
+ grid-area:install!important;
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:stretch!important;
+ justify-self:end!important;
+ justify-content:flex-start!important;
+ gap:6px!important;
+ width:150px!important;
+ min-width:0!important;
+}
+#logout:not(.hidden),#refreshAppBtn,#installAppBtn{
  box-sizing:border-box!important;
  display:inline-flex!important;
  align-items:center!important;
  justify-content:center!important;
- height:30px!important;
- min-height:30px!important;
- padding:0 9px!important;
- line-height:1!important;
- font-size:11px!important;
+ height:36px!important;
+ min-height:36px!important;
+ max-height:36px!important;
+ padding:0 8px!important;
+ margin:0!important;
+ line-height:1.15!important;
+ font-size:12px!important;
  font-weight:800!important;
  border-radius:8px!important;
  white-space:nowrap!important;
 }
-#logout{width:66px!important;padding:0 6px!important}
+#logout:not(.hidden){width:76px!important}
 #refreshAppBtn{
- width:92px!important;
+ width:100px!important;
  color:#302313!important;
  border:1px solid #e5bd48!important;
  background:linear-gradient(115deg,#fff0a0 0%,#f4c637 48%,#d49b16 100%)!important;
  box-shadow:0 2px 7px #21130755,inset 0 1px 0 #fff9!important;
 }
 #installAppBtn{
- width:132px!important;
+ width:150px!important;
  transform:none!important;
  border:1px solid #ffe58a!important;
  background:linear-gradient(115deg,#d99c00,#ffd94c 48%,#fff0a0 65%,#e0a719)!important;
  box-shadow:0 2px 7px #21130755,inset 0 1px 0 #fff9!important;
 }
-#logout{background:linear-gradient(120deg,#3d281b,#67472d)!important;color:#fff!important;border:1px solid #9b7956!important}
-#refreshAppBtn:active,#installAppBtn:active,#logout:active{transform:translateY(1px)!important}
+#logout:not(.hidden){background:linear-gradient(120deg,#3d281b,#67472d)!important;color:#fff!important;border:1px solid #9b7956!important}
+#refreshAppBtn:active,#installAppBtn:active,#logout:not(.hidden):active{transform:translateY(1px)!important}
+@media(max-width:640px){
+ header{padding:8px 10px 14px!important}
+ header .max-w-6xl{
+  grid-template-columns:minmax(0,1fr) 150px!important;
+  column-gap:7px!important;
+  row-gap:6px!important;
+ }
+ header .rt-header-brand{gap:7px!important}
+ header .rt-header-logo{width:44px!important;height:44px!important;flex-basis:44px!important}
+ header .rt-header-name{font-size:15px!important}
+ header .rt-header-sub{font-size:10px!important}
+ #roleSubtitle{font-size:8px!important}
+ #who{font-size:10px!important;max-width:none!important}
+ #headerButtons{width:150px!important}
+ #logout:not(.hidden),#refreshAppBtn,#installAppBtn{height:32px!important;min-height:32px!important;max-height:32px!important;font-size:11px!important}
+}
+@media(max-width:360px){
+ header .max-w-6xl{grid-template-columns:minmax(0,1fr) 138px!important}
+ #headerButtons{width:138px!important}
+ #logout:not(.hidden){width:72px!important}
+ #refreshAppBtn{width:94px!important}
+ #installAppBtn{width:138px!important;font-size:10px!important}
+}
 </style>
 
 </head>
