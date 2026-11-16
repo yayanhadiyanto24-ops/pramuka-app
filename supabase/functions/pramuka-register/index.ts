@@ -10,6 +10,10 @@ Deno.serve(async(req:Request)=>{
  const admin=createClient(url,secret,{auth:{autoRefreshToken:false,persistSession:false}});
  try{
   const body=await req.json(),action=clean(body.action||"register",30);
+  if(action==="kwarran_registration_options"){
+   const {data,error}=await admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran");
+   if(error)throw error;return reply({ok:true,kwarran:data||[]});
+  }
   if(action==="kwarran_invite_options"){
    const code=clean(body.kode_aktivasi,64).toUpperCase();
    if(!code)return reply({ok:false,message:"Masukkan kode aktivasi undangan."},400);
@@ -22,11 +26,11 @@ Deno.serve(async(req:Request)=>{
   if(action==="registration_options"){
    const code=clean(body.kode_gabung,30).toUpperCase(),gender=clean(body.jenis_kelamin,1);
    if(!code||!["L","P"].includes(gender))return reply({ok:false,message:"Masukkan kode gabung dan jenis kelamin."},400);
-   const {data:p,error:pe}=await admin.from("pangkalan").select("id_pangkalan,nama_pangkalan,nama_ambalan_putra,nama_ambalan_putri").eq("kode_gabung_peserta",code).maybeSingle();
+   const {data:p,error:pe}=await admin.from("pangkalan").select("id_pangkalan,nama_pangkalan,nama_ambalan_putra,nama_ambalan_putri,id_kwarran,kwarran!inner(nama_kwarran)").eq("kode_gabung_peserta",code).maybeSingle();
    if(pe)throw pe;if(!p)return reply({ok:false,message:"Kode gabung pangkalan tidak ditemukan."},404);
    const {data:sangga,error:se}=await admin.from("pangkalan_sangga").select("id_sangga,nama_sangga,urutan").eq("id_pangkalan",p.id_pangkalan).eq("jenis_kelamin",gender).eq("aktif",true).order("urutan");
    if(se)throw se;
-   return reply({ok:true,nama_pangkalan:p.nama_pangkalan,nama_ambalan:gender==="L"?p.nama_ambalan_putra:p.nama_ambalan_putri,sangga:sangga||[]});
+   return reply({ok:true,nama_pangkalan:p.nama_pangkalan,nama_kwarran:p.kwarran?.nama_kwarran||"",id_kwarran:p.id_kwarran,nama_ambalan:gender==="L"?p.nama_ambalan_putra:p.nama_ambalan_putri,sangga:sangga||[]});
   }
   if(action==="register"){
    const role=clean(body.role,30),email=clean(body.email,254).toLowerCase(),password=typeof body.password==="string"?body.password:"",name=clean(body.nama_lengkap,150);
@@ -127,10 +131,7 @@ Deno.serve(async(req:Request)=>{
    }else if(me.role==="pembina"){
     const years={tahun_kmd:body.tahun_kmd,tahun_kml:body.tahun_kml,tahun_kpd:body.tahun_kpd,tahun_kpl:body.tahun_kpl};
     for(const [k,v] of Object.entries(years))if(v!==null&&v!==undefined&&v!==""&&(!Number.isInteger(Number(v))||Number(v)<1950||Number(v)>new Date().getFullYear()+1))return reply({ok:false,message:"Tahun pendidikan Pembina tidak valid."},400);
-    const idKwarran=Number(body.id_kwarran);
-    if(!Number.isInteger(idKwarran)||idKwarran<=0)return reply({ok:false,message:"Pilih Kwarran yang valid."},400);
-    const {data:region,error:regionError}=await admin.from("kwarran").select("id_kwarran").eq("id_kwarran",idKwarran).maybeSingle();if(regionError)throw regionError;if(!region)return reply({ok:false,message:"Kwarran yang dipilih tidak ditemukan."},404);
-    const patch={id_kwarran:idKwarran,nta:clean(body.nta,80)||null,foto_profil_data:photo||null,tahun_kmd:years.tahun_kmd?Number(years.tahun_kmd):null,tahun_kml:years.tahun_kml?Number(years.tahun_kml):null,tahun_kpd:years.tahun_kpd?Number(years.tahun_kpd):null,tahun_kpl:years.tahun_kpl?Number(years.tahun_kpl):null,tanda_tangan_data:typeof body.tanda_tangan_data==="string"&&body.tanda_tangan_data.startsWith("data:image/")&&body.tanda_tangan_data.length<300000?body.tanda_tangan_data:null,paraf_data:typeof body.paraf_data==="string"&&body.paraf_data.startsWith("data:image/")&&body.paraf_data.length<150000?body.paraf_data:null};
+    const patch={nta:clean(body.nta,80)||null,foto_profil_data:photo||null,tahun_kmd:years.tahun_kmd?Number(years.tahun_kmd):null,tahun_kml:years.tahun_kml?Number(years.tahun_kml):null,tahun_kpd:years.tahun_kpd?Number(years.tahun_kpd):null,tahun_kpl:years.tahun_kpl?Number(years.tahun_kpl):null,tanda_tangan_data:typeof body.tanda_tangan_data==="string"&&body.tanda_tangan_data.startsWith("data:image/")&&body.tanda_tangan_data.length<300000?body.tanda_tangan_data:null,paraf_data:typeof body.paraf_data==="string"&&body.paraf_data.startsWith("data:image/")&&body.paraf_data.length<150000?body.paraf_data:null};
     if(ktaEvidence){patch.nta_bukti_kta=ktaEvidence;patch.nta_status_verifikasi="menunggu";}
     const {error}=await admin.from("profil_pembina").update(patch).eq("id_user",authData.user.id);if(error)throw error;
    }else if(me.role==="admin_kwarcab"){
