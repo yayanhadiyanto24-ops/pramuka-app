@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RUANG TEGAK · Admin Kwarran</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+window.__sbReady=new Promise(resolve=>{const load=(src,fallback)=>{const s=document.createElement('script');s.src=src;s.onload=()=>resolve(true);s.onerror=()=>{s.remove();if(fallback)load(fallback,null);else resolve(false)};document.head.appendChild(s)};load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2','https://unpkg.com/@supabase/supabase-js@2')});
+</script>
+<style>
+:root{--brown:#392316;--gold:#ffd400;--red:#c62828}
+body{background:#f7f2e9;color:#28221d}
+header{background:linear-gradient(110deg,#24150e,#60402a,#24150e);color:#fff;border-bottom:6px solid var(--red)}
+.card{background:#fff;border:1px solid #e8dcc5;border-radius:14px;box-shadow:0 6px 20px #39231610}
+button{border-radius:9px;padding:8px 14px;font-weight:700}
+.primary{background:linear-gradient(110deg,#d99c00,#ffd400,#fff0a0);color:#241b0b}
+th,td{padding:8px 10px;border-bottom:1px solid #eee5d7;white-space:nowrap}
+th{background:#fbf5e9;text-align:left}
+.own{background:#fff5c9;font-weight:700}
+</style>
+<link rel="icon" href="assets/ruang-tegak-icon.svg">
+</head>
+<body class="min-h-screen">
+<header class="px-4 py-4">
+ <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+  <div class="flex items-center gap-3"><img src="assets/ruang-tegak-icon.svg" class="w-12 h-12 object-contain" alt="Logo"><div><div class="text-yellow-300 font-black tracking-widest">RUANG TEGAK</div><h1 class="text-lg font-bold">Pemantauan Admin Kwarran</h1><p class="text-xs text-amber-100">Pantau wilayah sendiri dan bandingkan perkembangan antarkwarran</p></div></div>
+  <button id="logout" class="hidden bg-white/15 text-white border border-white/30">Keluar</button>
+ </div>
+</header>
+<main class="max-w-6xl mx-auto p-4 md:p-6 space-y-5">
+ <section id="login-box" class="card max-w-md mx-auto p-5 mt-8">
+  <h2 class="text-xl font-bold mb-1">Masuk Admin Kwarran</h2>
+  <p class="text-sm text-slate-600 mb-4">Gunakan akun yang telah dibuat dan ditetapkan oleh Admin Utama.</p>
+  <form id="login-form" class="space-y-3">
+   <input id="email" type="email" required autocomplete="username" placeholder="Email" class="w-full border rounded-lg p-3">
+   <input id="password" type="password" required autocomplete="current-password" placeholder="Password" class="w-full border rounded-lg p-3">
+   <button class="primary w-full" type="submit">Masuk</button>
+  </form>
+  <p id="login-msg" class="text-sm mt-3" role="status"></p>
+ </section>
+ <section id="dashboard" class="hidden space-y-5">
+  <div class="card p-4 flex flex-wrap items-center justify-between gap-2"><div><p class="text-xs text-slate-500">Wilayah pemantauan</p><h2 id="region-name" class="text-xl font-black"></h2><p id="admin-name" class="text-sm text-slate-600"></p></div><span class="rounded-full bg-amber-100 text-amber-900 px-3 py-1 text-xs font-bold">Admin Kwarran · Baca saja</span></div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+   <div class="card p-4"><p class="text-xs text-slate-500">Pangkalan sendiri</p><b id="own-pangkalan" class="text-2xl">0</b></div>
+   <div class="card p-4"><p class="text-xs text-slate-500">Ambalan sendiri</p><b id="own-ambalan" class="text-2xl">0</b></div>
+   <div class="card p-4"><p class="text-xs text-slate-500">Peserta didik sendiri</p><b id="own-students" class="text-2xl">0</b></div>
+   <div class="card p-4"><p class="text-xs text-slate-500">Peserta aktif</p><b id="own-active" class="text-2xl">0</b></div>
+  </div>
+  <div class="card p-4 space-y-3">
+   <div><h2 class="font-bold text-lg">Perkembangan Pangkalan di Kwarran Sendiri</h2><p class="text-xs text-slate-500">Data terperinci hanya untuk wilayah yang menjadi tanggung jawab Anda.</p></div>
+   <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th>Pangkalan / Ambalan</th><th>Pa/Pi</th><th>Peserta</th><th>Bantara</th><th>Laksana</th><th>Garuda</th></tr></thead><tbody id="own-body"></tbody></table></div>
+  </div>
+  <div class="card p-4 space-y-3">
+   <div><h2 class="font-bold text-lg">Perbandingan Antarkwarran</h2><p class="text-xs text-slate-500">Kwarran lain hanya ditampilkan dalam bentuk ringkasan jumlah. Tidak ada nama, profil, atau bukti pribadi peserta didik.</p></div>
+   <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th>Kwarran</th><th>Pangkalan</th><th>Ambalan</th><th>Peserta</th><th>Aktif</th><th>Bantara</th><th>Laksana</th><th>Garuda</th></tr></thead><tbody id="compare-body"></tbody></table></div>
+  </div>
+  <p id="status" class="text-sm text-slate-500" role="status"></p>
+ </section>
+</main>
+<script>
+const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
+const KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
+let sb;
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function ensureSb(){if(sb)return sb;const ok=await window.__sbReady;if(!ok||!window.supabase?.createClient)throw new Error('Layanan login belum termuat. Periksa koneksi internet.');sb=window.supabase.createClient(SUPABASE_URL,KEY);return sb;}
+async function loadDashboard(){
+ $('status').textContent='Memuat data pemantauan...';
+ const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'admin_kwarran_dashboard'}});
+ if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Akses ditolak.');
+ $('region-name').textContent=data.admin.nama_kwarran;
+ $('admin-name').textContent=data.admin.nama_lengkap;
+ const own=(data.comparison||[]).find(x=>Number(x.id_kwarran)===Number(data.admin.id_kwarran))||{};
+ $('own-pangkalan').textContent=own.jumlah_pangkalan||0;
+ $('own-ambalan').textContent=own.jumlah_ambalan||0;
+ $('own-students').textContent=own.jumlah_peserta||0;
+ $('own-active').textContent=own.peserta_aktif||0;
+ $('own-body').innerHTML=(data.rekap||[]).map(x=>'<tr><td>'+esc(x.nama_pangkalan)+'<div class="text-xs text-slate-500">Gudep '+esc(x.no_gudep||'-')+'</div></td><td>'+ (x.jenis_kelamin==='L'?'Pa':'Pi') +'</td><td>'+Number(x.jumlah_peserta||0)+'</td><td>'+Number(x.bantara||0)+'</td><td>'+Number(x.laksana||0)+'</td><td>'+Number(x.garuda||0)+'</td></tr>').join('')||'<tr><td colspan="6" class="text-center text-slate-500 py-4">Belum ada pangkalan yang dipetakan ke Kwarran ini.</td></tr>';
+ $('compare-body').innerHTML=(data.comparison||[]).map(x=>'<tr class="'+(Number(x.id_kwarran)===Number(data.admin.id_kwarran)?'own':'')+'"><td>'+esc(x.nama_kwarran)+(Number(x.id_kwarran)===Number(data.admin.id_kwarran)?' · Wilayah Anda':'')+'</td><td>'+Number(x.jumlah_pangkalan||0)+'</td><td>'+Number(x.jumlah_ambalan||0)+'</td><td>'+Number(x.jumlah_peserta||0)+'</td><td>'+Number(x.peserta_aktif||0)+'</td><td>'+Number(x.bantara||0)+'</td><td>'+Number(x.laksana||0)+'</td><td>'+Number(x.garuda||0)+'</td></tr>').join('')||'<tr><td colspan="8" class="text-center py-4">Belum ada data Kwarran.</td></tr>';
+ $('status').textContent='Data berhasil diperbarui.';
+}
+async function showDashboard(){$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');await loadDashboard();}
+$('login-form').addEventListener('submit',async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;$('login-msg').textContent='Memeriksa akun...';try{await ensureSb();const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await showDashboard();}catch(err){if(sb)await sb.auth.signOut().catch(()=>{});$('login-msg').textContent='Login gagal: '+(err.message||'Akun tidak dapat masuk.');}finally{b.disabled=false;}});
+$('logout').onclick=async()=>{if(sb)await sb.auth.signOut();location.reload();};
+(async()=>{try{await ensureSb();const {data}=await sb.auth.getSession();if(data.session){try{await showDashboard();}catch(err){$('login-msg').textContent=err.message;await sb.auth.signOut();}}}catch(err){$('login-msg').textContent=err.message;}})();
+</script>
+</body>
+</html>
