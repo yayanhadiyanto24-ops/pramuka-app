@@ -1024,29 +1024,6 @@ async function loadMonitor(){
 }
 
 
-async function loadTeacherPosters(){
- const board=$('teacher-poster-gallery');if(!board)return;
- board.innerHTML='<p class="text-sm muted">Memuat poster...</p>';
- try{
-  const {data,error}=await sb.storage.from('ruang-tegak-posters').list('posters',{limit:100,sortBy:{column:'created_at',order:'desc'}});
-  if(error)throw error;
-  const files=(data||[]).filter(x=>x.name&&!x.name.startsWith('.'));
-  board.innerHTML='';
-  if(!files.length){board.innerHTML='<p class="text-sm muted">Belum ada poster yang diterbitkan Admin Utama.</p>';return;}
-  files.forEach(file=>{
-   const path='posters/'+file.name;
-   const {data:pub}=sb.storage.from('ruang-tegak-posters').getPublicUrl(path);
-   const article=document.createElement('article');article.className='border rounded-xl p-2 bg-white space-y-2';
-   const link=document.createElement('a');link.href=pub.publicUrl;link.target='_blank';link.rel='noopener';link.className='block';
-   const img=document.createElement('img');img.src=pub.publicUrl;img.alt=file.name;img.loading='lazy';img.className='w-full max-h-80 object-contain rounded-lg bg-amber-50';
-   link.append(img);
-   const title=document.createElement('p');title.className='text-xs font-semibold break-all';title.textContent=file.name.replace(/^\d+-\d+-/,'');
-   const open=document.createElement('a');open.href=pub.publicUrl;open.target='_blank';open.rel='noopener';open.textContent='Buka poster ukuran penuh';open.className='inline-block text-sm font-semibold text-amber-800 underline';
-   article.append(link,title,open);board.append(article);
-  });
- }catch(err){board.innerHTML='';const msg=document.createElement('p');msg.className='text-sm text-red-700';msg.textContent='Poster belum dapat dimuat: '+(err.message||'Periksa koneksi.');board.append(msg);}
-}
-
 function printExamDocument(referralId){
  const r=examRecords.find(x=>x.id===referralId);if(!r)return;
  const student=monitorStudents?.find(x=>x.id_user===r.id_user)||null;const unit=monitorPangkalan.find(x=>x.id_pangkalan===student?.id_pangkalan);const ambalan=student?.jenis_kelamin==='L'?unit?.nama_ambalan_putra:unit?.nama_ambalan_putri;const unitLabel=[unit?.nama_pangkalan,ambalan].filter(Boolean).join(' · ');
