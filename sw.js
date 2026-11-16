@@ -1,4 +1,4 @@
-const CACHE_NAME='ruang-tegak-shell-v5';
+const CACHE_NAME='ruang-tegak-shell-v6';
 const APP_SHELL=['./','./index.html','./belajar.html','./dokumen.html','./uji.html','./manifest.webmanifest','./assets/ruang-tegak-icon.svg'];
 self.addEventListener('install',event=>{
  event.waitUntil((async()=>{
