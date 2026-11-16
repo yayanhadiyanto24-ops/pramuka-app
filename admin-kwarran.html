@@ -48,8 +48,8 @@ th{background:#fbf5e9;text-align:left}
    <div class="card p-4"><p class="text-xs text-slate-500">Peserta aktif</p><b id="own-active" class="text-2xl">0</b></div>
   </div>
   <div class="card p-4 space-y-3">
-   <div><h2 class="font-bold text-lg">Perkembangan Pangkalan di Kwarran Sendiri</h2><p class="text-xs text-slate-500">Data terperinci hanya untuk wilayah yang menjadi tanggung jawab Anda.</p></div>
-   <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th>Pangkalan / Ambalan</th><th>Pa/Pi</th><th>Peserta</th><th>Bantara</th><th>Laksana</th><th>Garuda</th></tr></thead><tbody id="own-body"></tbody></table></div>
+   <div><h2 class="font-bold text-lg">Perkembangan Tiap Ambalan di Kwarran Sendiri</h2><p class="text-xs text-slate-500">Seluruh data terperinci hanya untuk wilayah Kwarran yang menjadi tanggung jawab Anda.</p></div>
+   <div class="overflow-x-auto"><table class="w-max min-w-full text-sm"><thead class="bg-amber-50"><tr><th class="px-2 py-1 text-left whitespace-nowrap">Pangkalan</th><th class="px-2 py-1 text-left whitespace-nowrap">Ambalan</th><th class="px-2 py-1 text-center whitespace-nowrap">Pa/Pi</th><th class="px-2 py-1 text-center whitespace-nowrap">Tamu</th><th class="px-2 py-1 text-center whitespace-nowrap">Calon</th><th class="px-2 py-1 text-center whitespace-nowrap">Bantara</th><th class="px-2 py-1 text-center whitespace-nowrap">Laksana</th><th class="px-2 py-1 text-center whitespace-nowrap">Garuda</th><th class="px-2 py-1 text-center whitespace-nowrap">Jml. Sangga</th><th class="px-2 py-1 text-center whitespace-nowrap">Aktif</th><th class="px-2 py-1 text-center whitespace-nowrap">Alumni</th><th class="px-2 py-1 text-center whitespace-nowrap">Total</th></tr></thead><tbody id="own-body"></tbody><tfoot id="own-foot" class="bg-amber-100 font-bold"></tfoot></table></div><p id="own-summary" class="text-xs text-slate-500"></p>
   </div>
   <div class="card p-4 space-y-3">
    <div><h2 class="font-bold text-lg">Perbandingan Antarkwarran</h2><p class="text-xs text-slate-500">Kwarran lain hanya ditampilkan dalam bentuk ringkasan jumlah. Tidak ada nama, profil, atau bukti pribadi peserta didik.</p></div>
@@ -76,7 +76,14 @@ async function loadDashboard(){
  $('own-ambalan').textContent=own.jumlah_ambalan||0;
  $('own-students').textContent=own.jumlah_peserta||0;
  $('own-active').textContent=own.peserta_aktif||0;
- $('own-body').innerHTML=(data.rekap||[]).map(x=>'<tr><td>'+esc(x.nama_pangkalan)+'<div class="text-xs text-slate-500">Gudep '+esc(x.no_gudep||'-')+'</div></td><td>'+ (x.jenis_kelamin==='L'?'Pa':'Pi') +'</td><td>'+Number(x.jumlah_peserta||0)+'</td><td>'+Number(x.bantara||0)+'</td><td>'+Number(x.laksana||0)+'</td><td>'+Number(x.garuda||0)+'</td></tr>').join('')||'<tr><td colspan="6" class="text-center text-slate-500 py-4">Belum ada pangkalan yang dipetakan ke Kwarran ini.</td></tr>';
+ const ownRows=data.rekap||[];
+ const ownKeys=['peserta_tamu','calon_penegak','bantara','laksana','garuda','jumlah_sangga','peserta_aktif','jumlah_alumni','jumlah_peserta'];
+ const ownTotals=Object.fromEntries(ownKeys.map(k=>[k,ownRows.reduce((n,x)=>n+Number(x[k]||0),0)]));
+ const ownPangkalanCount=new Set(ownRows.map(x=>String(x.id_pangkalan))).size;
+ const ownPutra=ownRows.filter(x=>x.jenis_kelamin==='L').length,ownPutri=ownRows.filter(x=>x.jenis_kelamin==='P').length;
+ $('own-body').innerHTML=ownRows.map(x=>'<tr class="border-t"><td class="px-2 py-1 align-top font-semibold whitespace-nowrap">'+esc(x.nama_pangkalan)+'<div class="text-xs font-normal text-slate-500">Gudep '+esc(x.no_gudep||'-')+'</div></td><td class="px-2 py-1 align-top whitespace-nowrap">'+esc(x.nama_ambalan|| (x.jenis_kelamin==='L'?'Ambalan Putra':'Ambalan Putri'))+'</td><td class="px-2 py-1 text-center">'+(x.jenis_kelamin==='L'?'Putra':'Putri')+'</td>'+ownKeys.map(k=>'<td class="px-2 py-1 text-center whitespace-nowrap">'+Number(x[k]||0)+'</td>').join('')+'</tr>').join('')||'<tr><td colspan="12" class="text-center text-slate-500 py-4">Belum ada pangkalan yang dipetakan ke Kwarran ini.</td></tr>';
+ $('own-foot').innerHTML=ownRows.length?'<tr class="border-t-2 border-amber-300"><td class="px-2 py-2 whitespace-nowrap">JUMLAH: '+ownPangkalanCount+' pangkalan</td><td class="px-2 py-2 whitespace-nowrap">'+ownRows.length+' ambalan</td><td class="px-2 py-2 text-center whitespace-nowrap">Pa '+ownPutra+' · Pi '+ownPutri+'</td>'+ownKeys.map(k=>'<td class="px-2 py-2 text-center">'+ownTotals[k]+'</td>').join('')+'</tr>':'';
+ $('own-summary').textContent=ownPangkalanCount+' pangkalan · '+ownRows.length+' ambalan · '+(ownPutra+ownPutri)+' baris Pa/Pi';
  $('compare-body').innerHTML=(data.comparison||[]).map(x=>'<tr class="'+(Number(x.id_kwarran)===Number(data.admin.id_kwarran)?'own':'')+'"><td>'+esc(x.nama_kwarran)+(Number(x.id_kwarran)===Number(data.admin.id_kwarran)?' · Wilayah Anda':'')+'</td><td>'+Number(x.jumlah_pangkalan||0)+'</td><td>'+Number(x.jumlah_ambalan||0)+'</td><td>'+Number(x.jumlah_peserta||0)+'</td><td>'+Number(x.peserta_aktif||0)+'</td><td>'+Number(x.bantara||0)+'</td><td>'+Number(x.laksana||0)+'</td><td>'+Number(x.garuda||0)+'</td></tr>').join('')||'<tr><td colspan="8" class="text-center py-4">Belum ada data Kwarran.</td></tr>';
  $('status').textContent='Data berhasil diperbarui.';
 }
