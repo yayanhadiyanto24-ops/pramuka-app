@@ -393,6 +393,10 @@ main{padding:10px!important}
   </section>
   <section id="view-pantau" class="hidden space-y-4">
    <div><h2 class="text-xl font-bold">Perkembangan Peserta Didik</h2><p class="text-sm muted">Daftar peserta dan hasil belajar yang berada dalam cakupan pangkalan Pembina atau Admin Utama.</p></div>
+   <section id="teacher-poster-board" class="panel p-4 space-y-3">
+    <div><h3 class="font-bold text-lg">Informasi dan Poster dari Admin Utama</h3><p class="text-sm muted">Poster pengumuman dan informasi resmi yang diterbitkan Admin Utama.</p></div>
+    <div id="teacher-poster-gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"><p class="text-sm muted">Memuat poster...</p></div>
+   </section>
    <div class="flex flex-wrap gap-2">
     <button id="exportMonitorWord" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Unduh laporan Word</button>
     <button id="exportMonitorPdf" class="rounded-lg bg-slate-700 text-white px-4 py-2 text-sm font-semibold">Cetak / Simpan PDF</button>
@@ -429,6 +433,7 @@ function showTab(name){
  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
  ['umum','profile','sku','pantau','administrasi'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==name));
  if(name==='administrasi'&&account?.role==='pembina')loadPangkalanAdmin();
+ if(name==='pantau'&&['pembina','admin_kwarcab'].includes(account?.role))loadTeacherPosters();
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
 $('loginForm').addEventListener('submit',async e=>{
@@ -1016,6 +1021,30 @@ async function loadMonitor(){
  $('monitorList').querySelectorAll('.sub-referral-btn').forEach(b=>b.onclick=()=>createExamReferral(b.dataset.substudent,Number(b.dataset.subsku),Number(b.dataset.subpoint)));
  $('monitorList').querySelectorAll('.review-ref-btn').forEach(btn=>btn.onclick=()=>reviewExamReferral(btn.dataset.reviewRef,btn.dataset.decision));
  $('monitorList').querySelectorAll('.print-ref-btn').forEach(btn=>btn.onclick=()=>printExamDocument(btn.dataset.printRef));
+}
+
+
+async function loadTeacherPosters(){
+ const board=$('teacher-poster-gallery');if(!board)return;
+ board.innerHTML='<p class="text-sm muted">Memuat poster...</p>';
+ try{
+  const {data,error}=await sb.storage.from('ruang-tegak-posters').list('posters',{limit:100,sortBy:{column:'created_at',order:'desc'}});
+  if(error)throw error;
+  const files=(data||[]).filter(x=>x.name&&!x.name.startsWith('.'));
+  board.innerHTML='';
+  if(!files.length){board.innerHTML='<p class="text-sm muted">Belum ada poster yang diterbitkan Admin Utama.</p>';return;}
+  files.forEach(file=>{
+   const path='posters/'+file.name;
+   const {data:pub}=sb.storage.from('ruang-tegak-posters').getPublicUrl(path);
+   const article=document.createElement('article');article.className='border rounded-xl p-2 bg-white space-y-2';
+   const link=document.createElement('a');link.href=pub.publicUrl;link.target='_blank';link.rel='noopener';link.className='block';
+   const img=document.createElement('img');img.src=pub.publicUrl;img.alt=file.name;img.loading='lazy';img.className='w-full max-h-80 object-contain rounded-lg bg-amber-50';
+   link.append(img);
+   const title=document.createElement('p');title.className='text-xs font-semibold break-all';title.textContent=file.name.replace(/^\d+-\d+-/,'');
+   const open=document.createElement('a');open.href=pub.publicUrl;open.target='_blank';open.rel='noopener';open.textContent='Buka poster ukuran penuh';open.className='inline-block text-sm font-semibold text-amber-800 underline';
+   article.append(link,title,open);board.append(article);
+  });
+ }catch(err){board.innerHTML='';const msg=document.createElement('p');msg.className='text-sm text-red-700';msg.textContent='Poster belum dapat dimuat: '+(err.message||'Periksa koneksi.');board.append(msg);}
 }
 
 function printExamDocument(referralId){
