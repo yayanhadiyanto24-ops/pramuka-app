@@ -349,9 +349,10 @@ a[class*="rounded"]{
 }
 #refreshAppBtn:active{transform:translateY(1px)!important}
 /* Penyetelan jarak akhir tombol header */
-#refreshAppBtn{position:relative!important;top:6px!important}
-#refreshAppBtn::first-letter{font-size:18px!important;line-height:1!important;vertical-align:middle!important}
-#installAppBtn{transform:translateY(3px)!important}
+#refreshAppBtn{position:relative!important;top:6px!important;font-size:12px!important;gap:5px!important;min-height:30px!important}
+#refreshAppBtn::first-letter{font-size:16px!important;line-height:1!important;vertical-align:middle!important}
+#roleSubtitle{display:block!important;margin-top:7px!important;white-space:pre-line!important;max-width:calc(100vw - 155px)!important;line-height:1.3!important}
+#installAppBtn{transform:translateY(2px)!important}
 
 </style>
 
@@ -537,7 +538,7 @@ async function boot(user){
   if(!teacher)throw new Error('Profil Pembina belum ditemukan.');
   $('monitorTab').classList.remove('hidden');
   $('adminPangkalanTab').classList.remove('hidden');
-  $('roleSubtitle').textContent='Ruang Pembina · Pantau peserta · Administrasi pangkalan';
+  $('roleSubtitle').textContent='Ruang Pembina · Pantau peserta\nAdministrasi pangkalan';
  }else if(u.role==='admin_kwarcab'){$('monitorTab').classList.remove('hidden');}
  else throw new Error('Peran akun tidak dikenali.');
  const accountName=participant?.nama_lengkap||teacher?.nama_lengkap||user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_kwarcab'?'Admin Utama':'Pengguna');
