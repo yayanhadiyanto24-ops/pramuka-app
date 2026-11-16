@@ -24,6 +24,7 @@ alter table public.pangkalan
 
 create index if not exists pangkalan_id_kwarran_idx on public.pangkalan(id_kwarran);
 create index if not exists admin_kwarran_id_kwarran_idx on public.admin_kwarran(id_kwarran);
+create index if not exists admin_kwarran_assigned_by_idx on public.admin_kwarran(assigned_by);
 
 alter table public.kwarran enable row level security;
 alter table public.admin_kwarran enable row level security;
