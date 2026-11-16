@@ -269,7 +269,7 @@ Deno.serve(async(req:Request)=>{
   }
   if(action==="dashboard"){
    const [pangkalan,rekap,pembina,peserta,progress,sku]=await Promise.all([
-    admin.from("pangkalan").select("id_pangkalan,nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,kode_gabung_peserta,created_at").order("nama_pangkalan"),
+    admin.from("pangkalan").select("id_pangkalan,id_kwarran,nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,kode_gabung_peserta,created_at,kwarran(nama_kwarran)").order("nama_pangkalan"),
     admin.from("v_admin_ambalan_rekap").select("*").order("nama_pangkalan"),
     admin.from("profil_pembina").select("id_pembina,id_user,id_pangkalan,nama_lengkap,jabatan,jenis_kelamin,nta,jumlah_ambalan_berbayar,users!inner(email,status_akun)").order("nama_lengkap"),
     admin.from("profil_peserta_didik").select("id_peserta,id_user,id_pangkalan,nama_lengkap,jenis_kelamin,nta,tingkatan,sangga,kelas_sekolah,jurusan,tahun_pelajaran,status_keanggotaan,tanggal_alumni").order("nama_lengkap"),
@@ -297,7 +297,9 @@ Deno.serve(async(req:Request)=>{
     const g=pangkalanMap.get(String(p.id_pangkalan))||{};
     return {...p,nama_pangkalan:g.nama_pangkalan||"-",no_gudep:g.no_gudep||"",nama_ambalan:p.jenis_kelamin==="L"?(g.nama_ambalan_putra||"Ambalan Putra"):(g.nama_ambalan_putri||"Ambalan Putri"),progress:progressByUser.get(p.id_user)||emptyCounts()};
    });
-   return reply({ok:true,pangkalan:pangkalan.data,rekap:rekap.data,pembina:pembina.data,peserta:pesertaDetail});
+   const rekapDenganKwarran=(rekap.data||[]).map(x=>{const g=pangkalanMap.get(String(x.id_pangkalan))||{};return {...x,id_kwarran:g.id_kwarran||null,nama_kwarran:g.kwarran?.nama_kwarran||"-"};});
+   const {data:kwarran,error:kwarranError}=await admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran");if(kwarranError)throw kwarranError;
+   return reply({ok:true,pangkalan:pangkalan.data,rekap:rekapDenganKwarran,kwarran:kwarran||[],pembina:pembina.data,peserta:pesertaDetail});
   }
   if(action==="buat_kode_akses"){
    const targetId=clean(body.id_pembina,50);if(!targetId)return reply({ok:false,message:"Pilih akun Pembina."},400);
