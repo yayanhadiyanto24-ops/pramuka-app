@@ -60,7 +60,7 @@ Deno.serve(async(req:Request)=>{
     if(assignmentError){await admin.from("users").delete().eq("id_user",userId);await admin.auth.admin.deleteUser(userId);throw assignmentError;}
     const {data:consumed,error:consumeError}=await admin.from("kwarran_admin_invites").update({used_at:new Date().toISOString(),used_by:userId}).eq("id_invite",kwarranInvite.id_invite).is("used_at",null).is("revoked_at",null).select("id_invite").maybeSingle();
     if(consumeError||!consumed){await admin.from("admin_kwarran").delete().eq("id_user",userId);await admin.from("users").delete().eq("id_user",userId);await admin.auth.admin.deleteUser(userId);if(consumeError)throw consumeError;return reply({ok:false,message:"Kode aktivasi baru saja digunakan orang lain. Minta undangan baru kepada Admin Utama."},409);}
-    return reply({ok:true,message:"Pendaftaran Admin Kwarran berhasil. Akun aktif dan terhubung ke "+(await admin.from("kwarran").select("nama_kwarran").eq("id_kwarran",kwarranInvite.id_kwarran).single()).data?.nama_kwarran+".",status:"aktif"});
+    return reply({ok:true,message:"Pendaftaran Admin Kwarran berhasil. Akun aktif dan terhubung ke Kwarran dalam undangan.",status:"aktif"});
    }
    const payload={...body};delete payload.password;delete payload.email;delete payload.action;
    const {data:profile,error:profileError}=await admin.rpc("pramuka_register_profile",{p_user_id:userId,p_email:email,p_payload:payload});
