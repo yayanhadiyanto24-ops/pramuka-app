@@ -392,12 +392,7 @@ main{padding:10px!important}
     <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Penempatan Sangga</h3><p class="text-xs muted">Sangga baku Penegak: Perintis, Pencoba, Pendobrak, Penegas, dan Pelaksana. Peserta dapat dipindahkan ke Sangga lain sesuai kebutuhan.</p></div><div id="sanggaNameList" class="flex flex-wrap gap-2 text-xs"></div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="sanggaStudentList" class="space-y-2 text-sm muted">Memuat data peserta...</div></div><p id="sanggaMsg" class="text-xs muted"></p></div>
   </section>
   <section id="view-pantau" class="hidden space-y-4">
-   <div><h2 class="text-xl font-bold">Perkembangan Peserta Didik</h2><p class="text-sm muted">Daftar peserta dan hasil belajar yang berada dalam cakupan pangkalan Pembina atau Admin Utama.</p></div>
-   <section id="teacher-poster-board" class="panel p-4 space-y-3">
-    <div><h3 class="font-bold text-lg">Informasi dan Poster dari Admin Utama</h3><p class="text-sm muted">Poster pengumuman dan informasi resmi yang diterbitkan Admin Utama.</p></div>
-    <div id="teacher-poster-gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"><p class="text-sm muted">Memuat poster...</p></div>
-   </section>
-   <div class="flex flex-wrap gap-2">
+   <div><h2 class="text-xl font-bold">Perkembangan Peserta Didik</h2><p class="text-sm muted">Daftar peserta dan hasil belajar yang berada dalam cakupan pangkalan Pembina atau Admin Utama.</p></div><div class="flex flex-wrap gap-2">
     <button id="exportMonitorWord" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Unduh laporan Word</button>
     <button id="exportMonitorPdf" class="rounded-lg bg-slate-700 text-white px-4 py-2 text-sm font-semibold">Cetak / Simpan PDF</button>
    </div>
@@ -432,9 +427,7 @@ function formatText(t){return esc(t||'').replace(/^## (.+)$/gm,'<strong class="b
 function showTab(name){
  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
  ['umum','profile','sku','pantau','administrasi'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==name));
- if(name==='administrasi'&&account?.role==='pembina')loadPangkalanAdmin();
- if(name==='pantau'&&['pembina','admin_kwarcab'].includes(account?.role))loadTeacherPosters();
-}
+ if(name==='administrasi'&&account?.role==='pembina')loadPangkalanAdmin();}
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
 $('loginForm').addEventListener('submit',async e=>{
  e.preventDefault();
