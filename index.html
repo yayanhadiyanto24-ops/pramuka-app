@@ -221,6 +221,41 @@ table th,table td{
  #application nav .tab{padding:6px 7px!important;font-size:11px!important}
 }
 </style>
+
+<style id="ruang-tegak-final-compact-buttons">
+/* Aturan final: mengalahkan utility Tailwind dan aturan tombol lama */
+button:not(.signature-control):not(#clearSignature),
+[role="button"]:not(.signature-control),
+a[class*="rounded"]{
+  min-height:34px!important;
+  padding-top:5px!important;
+  padding-bottom:5px!important;
+  line-height:1.2!important;
+}
+#application nav .tab{
+  min-height:38px!important;
+  padding:6px 8px!important;
+  line-height:1.2!important;
+}
+.sku-card{
+  min-height:0!important;
+  padding:8px!important;
+}
+@media(max-width:640px){
+  button:not(.signature-control):not(#clearSignature),
+  [role="button"]:not(.signature-control),
+  a[class*="rounded"]{
+    min-height:32px!important;
+    padding-top:4px!important;
+    padding-bottom:4px!important;
+  }
+  #application nav .tab{
+    min-height:38px!important;
+    padding:6px 6px!important;
+  }
+}
+</style>
+
 </head>
 <body class="bg-amber-50 min-h-screen flex items-center justify-center p-4 font-sans">
     <div class="bg-white max-w-lg w-full rounded-2xl shadow-xl overflow-hidden border border-amber-200">
