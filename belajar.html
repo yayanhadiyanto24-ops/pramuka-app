@@ -218,8 +218,8 @@ header .max-w-6xl{
 #profileIdentity{grid-area:identity!important;display:flex!important;align-items:center!important;min-width:0!important;gap:6px!important}
 #headerProfileAvatar{width:30px!important;height:30px!important;flex:0 0 30px!important}
 #who{font-size:11px!important;line-height:1.15!important;max-width:none!important;overflow-wrap:anywhere}
-#headerButtons{grid-area:install!important;display:flex!important;justify-self:end!important;align-items:center!important}
- #appCreatorCredit{grid-area:author!important;display:block!important;margin:1px 0 0!important;text-align:right!important;font-size:9px!important;line-height:1.1!important;font-style:italic!important;color:#c9a27e!important;letter-spacing:.01em!important}
+#headerButtons{grid-area:install!important;display:flex!important;justify-self:end!important;align-self:end!important;align-items:center!important}
+ #appCreatorCredit{position:absolute!important;right:0!important;bottom:0!important;display:block!important;margin:0!important;padding:0!important;text-align:right!important;white-space:nowrap!important;font-size:8px!important;line-height:1!important;font-style:italic!important;color:#c9a27e!important;letter-spacing:0!important}
 #installAppBtn{padding:5px 8px!important;font-size:10px!important;line-height:1.1!important;border-radius:8px!important}
 #installAppMsg{font-size:9px!important;margin-top:1px!important}
 main{padding:10px!important}
@@ -234,7 +234,7 @@ main{padding:10px!important}
 #view-profile p{line-height:1.35}
 @media(min-width:768px){
  header{padding:10px 18px 16px!important}
- header .max-w-6xl{max-width:1152px!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto auto!important;grid-template-areas:"brand logout" "identity install" "author author"!important}
+ header .max-w-6xl{max-width:1152px!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;grid-template-areas:"brand logout" "identity install"!important}
  .rt-header-logo{width:50px!important;height:50px!important;flex-basis:50px!important}
  .rt-header-name{font-size:18px!important}
  #application nav{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
