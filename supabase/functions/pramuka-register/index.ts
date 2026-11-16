@@ -228,7 +228,7 @@ Deno.serve(async(req:Request)=>{
    const [kwarran,pangkalan,admins,invites]=await Promise.all([
     admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran"),
     admin.from("pangkalan").select("id_pangkalan,nama_pangkalan,no_gudep,id_kwarran").order("nama_pangkalan"),
-    admin.from("admin_kwarran").select("id_user,id_kwarran,nama_lengkap,kwarran!inner(nama_kwarran),users!inner(email,status_akun)").order("nama_lengkap"),
+    admin.from("admin_kwarran").select("id_user,id_kwarran,nama_lengkap,kwarran!inner(nama_kwarran),users!admin_kwarran_id_user_fkey!inner(email,status_akun)").order("nama_lengkap"),
     admin.from("kwarran_admin_invites").select("id_invite,id_kwarran,invite_code,created_at,used_at,revoked_at,kwarran!inner(nama_kwarran)").order("created_at",{ascending:false}).limit(100)
    ]);
    for(const x of [kwarran,pangkalan,admins,invites])if(x.error)throw x.error;
