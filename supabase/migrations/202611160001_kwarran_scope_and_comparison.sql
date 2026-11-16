@@ -22,6 +22,44 @@ alter table public.admin_kwarran add column if not exists nama_lengkap text;
 alter table public.pangkalan
   add column if not exists id_kwarran bigint references public.kwarran(id_kwarran) on delete restrict;
 
+
+
+-- Seed resmi 32 Kwarran di wilayah Kwarcab Cianjur.
+insert into public.kwarran (nama_kwarran) values
+  ('Agrabinta'),
+  ('Bojongpicung'),
+  ('Campaka'),
+  ('Campakamulya'),
+  ('Cianjur'),
+  ('Cibeber'),
+  ('Cibinong'),
+  ('Cidaun'),
+  ('Cijati'),
+  ('Cikadu'),
+  ('Cikalongkulon'),
+  ('Cilaku'),
+  ('Cipanas'),
+  ('Ciranjang'),
+  ('Cugenang'),
+  ('Gekbrong'),
+  ('Haurwangi'),
+  ('Kadupandak'),
+  ('Karangtengah'),
+  ('Leles'),
+  ('Mande'),
+  ('Naringgul'),
+  ('Pacet'),
+  ('Pagelaran'),
+  ('Pasirkuda'),
+  ('Sindangbarang'),
+  ('Sukaluyu'),
+  ('Sukanagara'),
+  ('Sukaresmi'),
+  ('Takokak'),
+  ('Tanggeung'),
+  ('Warungkondang')
+on conflict (nama_kwarran) do nothing;
+
 create index if not exists pangkalan_id_kwarran_idx on public.pangkalan(id_kwarran);
 create index if not exists admin_kwarran_id_kwarran_idx on public.admin_kwarran(id_kwarran);
 create index if not exists admin_kwarran_assigned_by_idx on public.admin_kwarran(assigned_by);
