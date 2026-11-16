@@ -52,6 +52,12 @@ Deno.serve(async(req:Request)=>{
   const {data:authData,error:authErr}=await admin.auth.getUser(token);
   if(authErr||!authData.user?.email)return reply({ok:false,message:"Sesi login tidak valid."},401);
 
+  if(action==="kwarran_options"){
+   const {data:me,error:meError}=await admin.from("users").select("role,status_akun").eq("id_user",authData.user.id).maybeSingle();
+   if(meError)throw meError;if(!me||me.role!=="pembina"||me.status_akun!=="aktif")return reply({ok:false,message:"Akses hanya untuk Pembina aktif."},403);
+   const {data,error}=await admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran");if(error)throw error;
+   return reply({ok:true,kwarran:data||[]});
+  }
   if(action==="admin_kwarran_dashboard"){
    const {data:me,error:meError}=await admin.from("users").select("role,status_akun").eq("id_user",authData.user.id).maybeSingle();
    if(meError)throw meError;
@@ -95,7 +101,10 @@ Deno.serve(async(req:Request)=>{
    }else if(me.role==="pembina"){
     const years={tahun_kmd:body.tahun_kmd,tahun_kml:body.tahun_kml,tahun_kpd:body.tahun_kpd,tahun_kpl:body.tahun_kpl};
     for(const [k,v] of Object.entries(years))if(v!==null&&v!==undefined&&v!==""&&(!Number.isInteger(Number(v))||Number(v)<1950||Number(v)>new Date().getFullYear()+1))return reply({ok:false,message:"Tahun pendidikan Pembina tidak valid."},400);
-    const patch={nta:clean(body.nta,80)||null,foto_profil_data:photo||null,tahun_kmd:years.tahun_kmd?Number(years.tahun_kmd):null,tahun_kml:years.tahun_kml?Number(years.tahun_kml):null,tahun_kpd:years.tahun_kpd?Number(years.tahun_kpd):null,tahun_kpl:years.tahun_kpl?Number(years.tahun_kpl):null,tanda_tangan_data:typeof body.tanda_tangan_data==="string"&&body.tanda_tangan_data.startsWith("data:image/")&&body.tanda_tangan_data.length<300000?body.tanda_tangan_data:null,paraf_data:typeof body.paraf_data==="string"&&body.paraf_data.startsWith("data:image/")&&body.paraf_data.length<150000?body.paraf_data:null};
+    const idKwarran=Number(body.id_kwarran);
+    if(!Number.isInteger(idKwarran)||idKwarran<=0)return reply({ok:false,message:"Pilih Kwarran yang valid."},400);
+    const {data:region,error:regionError}=await admin.from("kwarran").select("id_kwarran").eq("id_kwarran",idKwarran).maybeSingle();if(regionError)throw regionError;if(!region)return reply({ok:false,message:"Kwarran yang dipilih tidak ditemukan."},404);
+    const patch={id_kwarran:idKwarran,nta:clean(body.nta,80)||null,foto_profil_data:photo||null,tahun_kmd:years.tahun_kmd?Number(years.tahun_kmd):null,tahun_kml:years.tahun_kml?Number(years.tahun_kml):null,tahun_kpd:years.tahun_kpd?Number(years.tahun_kpd):null,tahun_kpl:years.tahun_kpl?Number(years.tahun_kpl):null,tanda_tangan_data:typeof body.tanda_tangan_data==="string"&&body.tanda_tangan_data.startsWith("data:image/")&&body.tanda_tangan_data.length<300000?body.tanda_tangan_data:null,paraf_data:typeof body.paraf_data==="string"&&body.paraf_data.startsWith("data:image/")&&body.paraf_data.length<150000?body.paraf_data:null};
     if(ktaEvidence){patch.nta_bukti_kta=ktaEvidence;patch.nta_status_verifikasi="menunggu";}
     const {error}=await admin.from("profil_pembina").update(patch).eq("id_user",authData.user.id);if(error)throw error;
    }else if(me.role==="admin_kwarcab"){
