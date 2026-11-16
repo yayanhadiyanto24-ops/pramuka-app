@@ -203,6 +203,16 @@ button.bg-amber-800:hover,button.bg-amber-900:hover{filter:brightness(1.08);box-
   </div>
  </div>
 </section>
+<section id="poster-manager" class="bg-white rounded-2xl shadow-sm p-4 space-y-3">
+ <div><h2 class="font-bold text-lg">Galeri Gambar dan Poster</h2><p class="text-sm text-slate-600">Unggah dan kelola poster informasi RUANG TEGAK. Format JPG, JPEG, PNG, WEBP, GIF, atau AVIF; maksimal 10 MB per gambar.</p></div>
+ <div class="flex flex-col sm:flex-row gap-3 sm:items-end">
+  <div class="flex-1"><label for="poster-files" class="block text-sm font-semibold mb-1">Pilih gambar atau poster</label><input id="poster-files" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" multiple class="block w-full text-sm border rounded-lg p-2"></div>
+  <button id="poster-upload" type="button" class="rounded-xl bg-amber-400 text-stone-950 font-bold px-4 py-3">Unggah Poster</button>
+ </div>
+ <p id="poster-status" class="text-sm text-slate-600" role="status" aria-live="polite">Anda dapat memilih lebih dari satu gambar sekaligus.</p>
+ <div id="poster-preview" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+ <div class="border-t pt-3"><h3 class="font-semibold mb-2">Poster yang sudah diunggah</h3><div id="poster-gallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"><p class="text-sm text-slate-500">Galeri akan dimuat setelah admin masuk.</p></div></div>
+</section>
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3"><div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-xs text-slate-500">Pangkalan</p><b id="total-pangkalan" class="text-2xl">0</b></div><div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-xs text-slate-500">Ambalan</p><b id="total-ambalan" class="text-2xl">0</b></div><div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-xs text-slate-500">Menunggu persetujuan</p><b id="total-pending" class="text-2xl">0</b></div><div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-xs text-slate-500">Peserta terdaftar</p><b id="total-peserta" class="text-2xl">0</b></div></div>
 <div class="bg-white rounded-2xl shadow-sm p-4"><div class="flex justify-between items-center mb-3"><h2 class="font-bold text-lg">Perkembangan Tiap Ambalan</h2><button id="refresh" class="text-sm text-amber-900 font-semibold">Muat ulang</button></div><div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-amber-50"><tr><th class="p-2 text-left">Pangkalan / Ambalan</th><th class="p-2">Putra/Putri</th><th class="p-2">Total</th><th class="p-2">Aktif</th><th class="p-2">Menunggu</th><th class="p-2">Calon</th><th class="p-2">Bantara</th><th class="p-2">Laksana</th><th class="p-2">Garuda</th><th class="p-2">Sangga</th><th class="p-2">Alumni</th><th class="p-2">Peserta Tamu</th></tr></thead><tbody id="rekap-body"></tbody></table></div></div>
 <div class="bg-white rounded-2xl shadow-sm p-4"><div class="flex flex-wrap items-center justify-between gap-3 mb-3"><h2 class="font-bold text-lg">Detail Perkembangan Peserta Didik</h2><input id="peserta-search" type="search" placeholder="Cari nama, pangkalan, ambalan, atau sangga..." class="w-full md:w-80 border rounded-lg px-3 py-2 text-sm"></div><div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-amber-50"><tr><th class="p-2 text-left">Peserta</th><th class="p-2 text-left">Pangkalan / Ambalan</th><th class="p-2">Tingkatan</th><th class="p-2">Sangga</th><th class="p-2 text-left">Progres Bantara</th><th class="p-2 text-left">Progres Laksana</th></tr></thead><tbody id="peserta-detail-body"></tbody></table></div><p id="peserta-detail-count" class="text-xs text-slate-500 mt-3"></p></div><div class="bg-white rounded-2xl shadow-sm p-4"><h2 class="font-bold text-lg mb-3">Persetujuan Akun</h2><div id="pending-list" class="space-y-2"></div></div>
@@ -298,4 +308,71 @@ $('brand-logo-upload').addEventListener('click',async()=>{
  }catch(err){status.textContent='Gagal mengunggah: '+(err?.message||'Periksa koneksi dan hak akses admin.');}
  finally{button.disabled=false;}
 });
+
+$('poster-files').addEventListener('change',()=>{
+ const wrap=$('poster-preview');wrap.innerHTML='';
+ const files=Array.from($('poster-files').files||[]);
+ files.forEach(file=>{
+  if(!file.type.startsWith('image/'))return;
+  const card=document.createElement('div');card.className='border rounded-lg p-2';
+  const img=document.createElement('img');img.src=URL.createObjectURL(file);img.alt=file.name;img.className='w-full h-28 object-contain rounded bg-amber-50';
+  const name=document.createElement('p');name.className='text-xs mt-1 break-all';name.textContent=file.name;
+  card.append(img,name);wrap.append(card);
+ });
+});
+async function loadPosterGallery(){
+ const gallery=$('poster-gallery');gallery.innerHTML='<p class="text-sm text-slate-500">Memuat galeri...</p>';
+ try{
+  await ensureSb();
+  const {data,error}=await sb.storage.from('ruang-tegak-posters').list('posters',{limit:100,sortBy:{column:'created_at',order:'desc'}});
+  if(error)throw error;
+  const files=(data||[]).filter(x=>x.name&&!x.name.startsWith('.'));
+  gallery.innerHTML='';
+  if(!files.length){gallery.innerHTML='<p class="text-sm text-slate-500">Belum ada poster yang diunggah.</p>';return;}
+  files.forEach(file=>{
+   const path='posters/'+file.name;
+   const {data:pub}=sb.storage.from('ruang-tegak-posters').getPublicUrl(path);
+   const card=document.createElement('div');card.className='border rounded-xl p-2 space-y-2';
+   const img=document.createElement('img');img.src=pub.publicUrl;img.alt=file.name;img.loading='lazy';img.className='w-full h-36 object-contain rounded bg-amber-50';
+   const name=document.createElement('p');name.className='text-xs break-all';name.textContent=file.name;
+   const actions=document.createElement('div');actions.className='flex gap-2';
+   const view=document.createElement('a');view.href=pub.publicUrl;view.target='_blank';view.rel='noopener';view.textContent='Lihat';view.className='flex-1 text-center rounded-lg bg-amber-100 text-amber-900 px-2 py-2 text-xs font-semibold';
+   const del=document.createElement('button');del.type='button';del.textContent='Hapus';del.className='rounded-lg bg-red-700 text-white px-3 py-2 text-xs font-semibold';
+   del.addEventListener('click',async()=>{
+    if(!confirm('Hapus poster '+file.name+'?'))return;
+    del.disabled=true;
+    try{const {error}=await sb.storage.from('ruang-tegak-posters').remove([path]);if(error)throw error;await loadPosterGallery();}
+    catch(err){$('poster-status').textContent='Gagal menghapus poster: '+(err.message||'Periksa hak akses admin.');del.disabled=false;}
+   });
+   actions.append(view,del);card.append(img,name,actions);gallery.append(card);
+  });
+ }catch(err){gallery.innerHTML='';const msg=document.createElement('p');msg.className='text-sm text-red-700';msg.textContent='Galeri gagal dimuat: '+(err.message||'Periksa koneksi dan hak akses.');gallery.append(msg);}
+}
+$('poster-upload').addEventListener('click',async()=>{
+ const files=Array.from($('poster-files').files||[]);
+ const status=$('poster-status'),button=$('poster-upload');
+ if(!files.length){status.textContent='Pilih satu atau beberapa gambar terlebih dahulu.';return;}
+ const allowed=['image/jpeg','image/png','image/webp','image/gif','image/avif'];
+ const invalid=files.find(f=>!allowed.includes(f.type)||f.size>10*1024*1024);
+ if(invalid){status.textContent='Berkas '+invalid.name+' tidak sesuai. Gunakan JPG/JPEG, PNG, WEBP, GIF, atau AVIF maksimal 10 MB.';return;}
+ button.disabled=true;status.textContent='Memeriksa sesi admin...';
+ try{
+  await ensureSb();
+  const {data:{user},error:authError}=await sb.auth.getUser();
+  if(authError||!user)throw new Error('Sesi admin berakhir. Silakan masuk kembali.');
+  for(let i=0;i<files.length;i++){
+   const file=files[i];
+   const safeName=file.name.normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'').slice(-100)||('poster-'+(i+1));
+   const path='posters/'+Date.now()+'-'+i+'-'+safeName;
+   status.textContent='Mengunggah '+(i+1)+' dari '+files.length+': '+file.name;
+   const {error}=await sb.storage.from('ruang-tegak-posters').upload(path,file,{upsert:false,contentType:file.type,cacheControl:'3600'});
+   if(error)throw error;
+  }
+  status.textContent=files.length+' gambar berhasil diunggah ke penyimpanan RUANG TEGAK.';
+  $('poster-files').value='';$('poster-preview').innerHTML='';
+  await loadPosterGallery();
+ }catch(err){status.textContent='Unggah belum berhasil: '+(err.message||'Periksa koneksi dan hak akses admin.');}
+ finally{button.disabled=false;}
+});
+
 </script></body></html>
