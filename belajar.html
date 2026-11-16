@@ -219,6 +219,7 @@ header .max-w-6xl{
 #headerProfileAvatar{width:30px!important;height:30px!important;flex:0 0 30px!important}
 #who{font-size:11px!important;line-height:1.15!important;max-width:none!important;overflow-wrap:anywhere}
 #headerButtons{grid-area:install!important;display:flex!important;justify-self:end!important;align-items:center!important}
+ #appCreatorCredit{grid-area:author!important;display:block!important;margin:1px 0 0!important;text-align:right!important;font-size:9px!important;line-height:1.1!important;font-style:italic!important;color:#c9a27e!important;letter-spacing:.01em!important}
 #installAppBtn{padding:5px 8px!important;font-size:10px!important;line-height:1.1!important;border-radius:8px!important}
 #installAppMsg{font-size:9px!important;margin-top:1px!important}
 main{padding:10px!important}
@@ -233,7 +234,7 @@ main{padding:10px!important}
 #view-profile p{line-height:1.35}
 @media(min-width:768px){
  header{padding:10px 18px 16px!important}
- header .max-w-6xl{max-width:1152px!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:"brand logout" "identity install"!important}
+ header .max-w-6xl{max-width:1152px!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto auto!important;grid-template-areas:"brand logout" "identity install" "author author"!important}
  .rt-header-logo{width:50px!important;height:50px!important;flex-basis:50px!important}
  .rt-header-name{font-size:18px!important}
  #application nav{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
@@ -329,6 +330,7 @@ a[class*="rounded"]{
  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 relative">
   <div class="rt-header-brand"><img class="rt-header-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div><div class="rt-header-name text-xl">RUANG TEGAK</div><p class="rt-header-sub text-sm">Ruang Belajar Pramuka Penegak</p><p id="roleSubtitle" class="text-amber-200 text-xs">Materi umum · SKU Bantara · SKU Laksana · Progres kecakapan</p></div></div>
   <div id="headerActions" class="rt-account-actions"><div id="profileIdentity"><img id="headerProfileAvatar" class="rt-profile-mark" alt="Foto profil"><span id="who" class="text-sm text-amber-100"></span></div><div id="headerButtons"><button id="installAppBtn" type="button" class="rounded-xl bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 border border-yellow-200 px-3 py-2 text-xs font-extrabold text-stone-950 shadow-md"><span aria-hidden="true">⬇</span> Unduh Aplikasi</button></div></div><button id="logout" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button>
+  <p id="appCreatorCredit">Pembuat &amp; Pengembang Aplikasi: Yayan Hadiyanto, S.Pd.-MT.</p>
  </div>
 </header>
 <main class="max-w-6xl mx-auto p-4 md:p-6">
