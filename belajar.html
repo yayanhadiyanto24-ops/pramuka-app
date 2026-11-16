@@ -327,14 +327,13 @@ a[class*="rounded"]{
 
 <style id="ruang-tegak-header-refresh-button">
 /* Hanya gaya tombol baru; tata letak header lama tetap dipertahankan */
-#headerButtons{align-items:flex-end!important}
 #refreshAppBtn{
  box-sizing:border-box!important;
  display:inline-flex!important;
  align-items:center!important;
  justify-content:center!important;
  align-self:flex-end!important;
- width:94px!important;
+ width:112px!important;
  min-height:30px!important;
  padding:5px 8px!important;
  margin:0!important;
@@ -998,25 +997,7 @@ setupSavedReportSignature('mabigus');
 
 function exportMonitorReport(kind){
  if(!monitorReportHtml){setMsg('Data laporan belum tersedia. Muat ulang halaman pantau.');return;}
- const full='<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Perkembangan SKU</title><style>body{font-family:Arial,sans-serif;color:#222;padding:24px}h1,h2{color:#78350f}table{width:100%;border-collapse:collapse;margin:12px 0 24px;font-size:12px}th,td{border:1px solid #bbb;padding:6px;text-align:left;vertical-align:top}th{background:#fef3c7}.muted{color:#555}.group{page-break-inside:avoid;margin-bottom:24px}img{object-fit:contain}@media print{body{padding:0}h2{page-break-after:avoid}}</style></head><body>'+monitorReportHtml+reportApprovalHtml()+'
-<script id="ruang-tegak-header-refresh-action">
-document.getElementById('refreshAppBtn')?.addEventListener('click',async()=>{
- const button=document.getElementById('refreshAppBtn');
- if(button.disabled)return;
- button.disabled=true;
- button.textContent='Memperbarui…';
- try{
-  if('serviceWorker' in navigator){
-   const registration=await navigator.serviceWorker.getRegistration('./');
-   if(registration)await registration.update().catch(()=>{});
-  }
- }finally{
-  window.location.reload();
- }
-});
-</script>
-
-</body></html>';
+ const full='<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Perkembangan SKU</title><style>body{font-family:Arial,sans-serif;color:#222;padding:24px}h1,h2{color:#78350f}table{width:100%;border-collapse:collapse;margin:12px 0 24px;font-size:12px}th,td{border:1px solid #bbb;padding:6px;text-align:left;vertical-align:top}th{background:#fef3c7}.muted{color:#555}.group{page-break-inside:avoid;margin-bottom:24px}img{object-fit:contain}@media print{body{padding:0}h2{page-break-after:avoid}}</style></head><body>'+monitorReportHtml+reportApprovalHtml()+'</body></html>';
  if(kind==='word'){
   const blob=new Blob(['\ufeff',full],{type:'application/msword'});
   const url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -1229,6 +1210,21 @@ if(installButton){
    installButton.textContent=original;
   }
  });
-}</script>
+}
+document.getElementById('refreshAppBtn')?.addEventListener('click',async()=>{
+ const button=document.getElementById('refreshAppBtn');
+ if(button.disabled)return;
+ button.disabled=true;
+ button.textContent='Memperbarui…';
+ try{
+  if('serviceWorker' in navigator){
+   const registration=await navigator.serviceWorker.getRegistration('./');
+   if(registration)await registration.update().catch(()=>{});
+  }
+ }finally{
+  window.location.reload();
+ }
+});
+</script>
 </body>
 </html>
