@@ -4,9 +4,21 @@ alter table public.profil_peserta_didik
 create index if not exists idx_profil_peserta_didik_kwarran
   on public.profil_peserta_didik(id_kwarran);
 
-update public.pangkalan
-set id_kwarran = 20
-where id_kwarran is distinct from 20;
+do $
+declare
+  v_id_kwarran bigint;
+begin
+  select id_kwarran into v_id_kwarran
+  from public.kwarran
+  where lower(nama_kwarran) = 'leles';
+  if v_id_kwarran is null then
+    raise exception 'Kwarran Leles belum tersedia.';
+  end if;
+  update public.pangkalan
+  set id_kwarran = v_id_kwarran
+  where id_kwarran is distinct from v_id_kwarran;
+end;
+$;
 
 update public.profil_pembina pb
 set id_kwarran = p.id_kwarran
