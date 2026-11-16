@@ -413,7 +413,7 @@ a[class*="rounded"]{
       <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"><b>Belum memiliki KTA Pramuka Nasional?</b><p class="mt-1">Kamu tetap dapat belajar di aplikasi. Hubungi Pembina pangkalanmu dan sampaikan bahwa kamu belum memiliki KTA. Pembina akan membantu meneruskan permohonan kepada Sekretaris Kwarran untuk proses penerbitan KTA Nasional. Setelah KTA terbit, lengkapi nomor NTA dan bukti pendukung pada profil.</p></div></div>
     </div>
     <div id="teacherProfileFields" class="hidden space-y-4 border-t pt-4">
-     <h3 class="font-bold">Pendidikan dan Pengesahan Pembina</h3><div><label for="teacherKwarran" class="block text-sm font-semibold">Kwarran</label><select id="teacherKwarran" required class="w-full border rounded-lg p-2 mt-1"><option value="">Memuat daftar Kwarran...</option></select><p class="text-xs muted mt-1">Pilih Kwarran tempat pangkalan Anda berada.</p></div><p id="teacherQuotaInfo" class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"></p><div class="flex flex-wrap gap-2"><input id="accessCodeInput" maxlength="40" class="flex-1 min-w-0 border rounded-lg p-2 text-sm uppercase" placeholder="Kode aktivasi ambalan dari Admin Utama"><button id="activateAccessCode" type="button" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-sm font-semibold">Aktifkan kode</button></div><p id="accessCodeMsg" class="text-xs muted"></p>
+     <h3 class="font-bold">Pendidikan dan Pengesahan Pembina</h3><p id="teacherQuotaInfo" class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"></p><div class="flex flex-wrap gap-2"><input id="accessCodeInput" maxlength="40" class="flex-1 min-w-0 border rounded-lg p-2 text-sm uppercase" placeholder="Kode aktivasi ambalan dari Admin Utama"><button id="activateAccessCode" type="button" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-sm font-semibold">Aktifkan kode</button></div><p id="accessCodeMsg" class="text-xs muted"></p>
      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
       <label class="text-sm">Tahun KMD<input id="yearKmd" type="number" min="1950" max="2100" class="w-full border rounded-lg p-2 mt-1"></label>
       <label class="text-sm">Tahun KML<input id="yearKml" type="number" min="1950" max="2100" class="w-full border rounded-lg p-2 mt-1"></label>
@@ -565,14 +565,7 @@ async function boot(user){
   await loadAll();
 }
 
-let profilePhotoData='',experienceRows=[],organizationRows=[],kwarranOptions=[];
-async function loadKwarranOptions(){
- const sel=$('teacherKwarran');if(!sel)return;
- sel.innerHTML='<option value="">Memuat daftar Kwarran...</option>';
- try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'kwarran_options'}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Daftar Kwarran tidak dapat dimuat.');
-  kwarranOptions=data.kwarran||[];sel.innerHTML='<option value="">Pilih Kwarran</option>'+kwarranOptions.map(x=>'<option value="'+Number(x.id_kwarran)+'">'+esc(x.nama_kwarran)+'</option>').join('');
- }catch(err){sel.innerHTML='<option value="">Daftar Kwarran gagal dimuat</option>';console.error(err);}
-}
+let profilePhotoData='',experienceRows=[],organizationRows=[];
 function renderProfile(){
  const isTeacher=account?.role==='pembina',isStudent=account?.role==='peserta_didik';
  $('teacherProfileFields').classList.toggle('hidden',!isTeacher);
@@ -621,9 +614,7 @@ $('profilePhotoInput').addEventListener('change',async e=>{
 });
 async function saveProfile(extra={}){
  const isTeacher=account.role==='pembina',isStudent=account.role==='peserta_didik';
- if(isTeacher&&!$('teacherKwarran').value){$('profileMsg').textContent='Pilih Kwarran terlebih dahulu.';return false;}
  const payload={action:'save_profile',nta:$('profileNta').value.trim(),foto_profil_data:profilePhotoData,...extra};
- if(isTeacher)payload.id_kwarran=Number($('teacherKwarran').value);
  const ktaFile=$('ktaEvidenceInput')?.files?.[0];
  if(ktaFile){
   const allowed=['image/jpeg','image/png','image/webp','application/pdf'];
@@ -639,7 +630,7 @@ async function saveProfile(extra={}){
  if(isStudent){const ambalanChoice=$('studentJabatanAmbalan').value,ambalanOther=$('studentJabatanAmbalanOther').value.trim();if(ambalanChoice==='Lainnya'&&!ambalanOther){$('profileMsg').textContent='Tuliskan jabatan lainnya di ambalan.';return false;}Object.assign(payload,{jabatan_ambalan:ambalanChoice==='Lainnya'?ambalanOther:ambalanChoice,jabatan_sangga:$('studentJabatanSangga').value,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows});}
  $('profileMsg').textContent='Menyimpan profil...';$('saveProfile').disabled=true;
  try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:payload});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Profil gagal disimpan.');
-  if(isTeacher)teacher={...teacher,id_kwarran:payload.id_kwarran,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:{})};
+  if(isTeacher)teacher={...teacher,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:{})};
   if(isStudent){const nextLevel=participant.tingkatan;participant={...participant,nta:payload.nta,tingkatan:nextLevel,foto_profil_data:profilePhotoData,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows,jabatan_ambalan:payload.jabatan_ambalan,jabatan_sangga:payload.jabatan_sangga,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:{})};}if($('studentTierLabel'))$('studentTierLabel').textContent='Tingkatan: '+participant.tingkatan;
   if(!isTeacher&&!isStudent)account={...account,foto_profil_data:profilePhotoData};
   renderProfile();
