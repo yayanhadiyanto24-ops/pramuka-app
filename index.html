@@ -448,7 +448,7 @@ function populateSchoolYears(){
 async function loadPangkalanOptions(){
     const code=document.getElementById('pd-kode').value.trim().toUpperCase(),gender=document.getElementById('pd-jk').value;
     const amb=document.getElementById('pd-ambalan'),sel=document.getElementById('pd-sangga'),info=document.getElementById('pd-pangkalan-info');
-    amb.value='';loadedPangkalanKey='';sel.disabled=true;sel.innerHTML='<option value="">Memuat pilihan sangga...</option>';
+    amb.value='';document.getElementById('pd-kwarran').value='';loadedPangkalanKey='';sel.disabled=true;sel.innerHTML='<option value="">Memuat pilihan sangga...</option>';
     if(!code){document.getElementById('pd-kwarran').value='';sel.innerHTML='<option value="">Masukkan kode gabung</option>';return;}
     try{
       const {data,error}=await supabaseClient.functions.invoke('pramuka-register',{body:{action:'registration_options',kode_gabung:code,jenis_kelamin:gender}});
