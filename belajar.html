@@ -719,7 +719,9 @@ function openSubpoint(id){
 }
 async function saveCompletionPlan(status){
  const textPlan=$('skuPlanText')?.value.trim()||'';
+ const targetDate=$('skuPlanDate')?.value||'';
  if(status==='diajukan'&&textPlan.length<20){setMsg('Tuliskan rencana kegiatan sekurang-kurangnya 20 karakter sebelum diserahkan kepada Pembina.');return;}
+ if(status==='diajukan'&&!targetDate){setMsg('Tentukan tanggal target penyelesaian sebelum menyerahkan rencana kepada Pembina.');return;}
  const payload={id_user:currentUser.id,id_sku_item:selectedItem.id_sku_item,rencana_kegiatan:textPlan,target_tanggal:$('skuPlanDate')?.value||null,status,diajukan_at:status==='diajukan'?new Date().toISOString():null,diperbarui_at:new Date().toISOString()};
  setMsg(status==='diajukan'?'Menyerahkan rencana kepada Pembina...':'Menyimpan rancangan...');
  const {error}=await sb.from('sku_completion_plans').upsert(payload,{onConflict:'id_user,id_sku_item'});
