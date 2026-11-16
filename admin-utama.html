@@ -321,7 +321,7 @@ header nav button{
 
 </head>
 <body class="min-h-screen bg-amber-50 text-slate-800">
-<header class="bg-amber-950 text-white px-4 sm:px-5 py-4 sm:py-5"><div class="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"><div class="rt-admin-brand min-w-0"><img class="rt-admin-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div class="min-w-0"><div class="rt-admin-name text-xl">RUANG TEGAK</div><h1 class="text-lg font-bold">Admin Utama</h1><p class="text-amber-200 text-sm">Pemantauan pangkalan dan perkembangan ambalan</p></div></div><nav class="flex flex-wrap items-center gap-2 w-full sm:w-auto" aria-label="Navigasi Admin Utama"><a href="belajar.html" class="rounded-lg bg-amber-700 hover:bg-amber-600 px-3 py-2 text-sm font-semibold">Ruang Belajar &amp; Progres SKU</a><a href="dokumen.html" class="rounded-lg bg-amber-500 px-3 py-2 text-sm font-bold text-stone-950">Pusat Dokumen</a><button id="logout" class="hidden rounded-lg bg-amber-800 px-4 py-2">Keluar</button></nav></div></header>
+<header class="bg-amber-950 text-white px-4 sm:px-5 py-4 sm:py-5"><div class="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"><div class="rt-admin-brand min-w-0"><img class="rt-admin-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div class="min-w-0"><div class="rt-admin-name text-xl">RUANG TEGAK</div><h1 class="text-lg font-bold">Admin Utama</h1><p class="text-amber-200 text-sm">Pemantauan pangkalan dan perkembangan ambalan</p></div></div><nav class="flex flex-wrap items-center gap-2 w-full sm:w-auto" aria-label="Navigasi Admin Utama"><a href="belajar.html" class="rounded-lg bg-amber-700 hover:bg-amber-600 px-3 py-2 text-sm font-semibold">Ruang Belajar &amp; Progres SKU</a><a href="dokumen.html" class="rounded-lg bg-amber-500 px-3 py-2 text-sm font-bold text-stone-950">Pusat Dokumen</a><a href="admin-kwarran.html" class="rounded-lg bg-amber-700 px-3 py-2 text-sm font-semibold text-white">Portal Admin Kwarran</a><button id="logout" class="hidden rounded-lg bg-amber-800 px-4 py-2">Keluar</button></nav></div></header>
 <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
 <section id="login-box" class="max-w-md mx-auto bg-white rounded-2xl shadow p-6 mt-8"><h2 class="text-xl font-bold mb-1">Masuk Admin</h2><p class="text-sm text-slate-500 mb-4">Hanya akun Admin Utama yang telah didaftarkan dapat masuk.</p><form id="login-form" class="space-y-3"><input id="email" type="email" required autocomplete="username" placeholder="Email admin" class="w-full border rounded-lg p-3"><input id="password" type="password" required autocomplete="current-password" placeholder="Password" class="w-full border rounded-lg p-3"><button class="w-full bg-amber-800 text-white font-bold rounded-lg p-3">Masuk</button></form><p id="login-msg" class="text-sm mt-3"></p></section>
 <section id="dashboard" class="hidden space-y-6"><section id="brand-logo-settings" class="bg-white rounded-2xl shadow-sm p-4 space-y-3">
@@ -350,6 +350,29 @@ header nav button{
 <div class="bg-white rounded-2xl shadow-sm p-4"><div class="flex flex-wrap items-center justify-between gap-3 mb-3"><h2 class="font-bold text-lg">Detail Perkembangan Peserta Didik</h2><input id="peserta-search" type="search" placeholder="Cari nama, pangkalan, ambalan, atau sangga..." class="w-full md:w-80 border rounded-lg px-3 py-2 text-sm"></div><div class="overflow-x-auto"><table class="w-max min-w-full table-auto text-sm"><thead class="bg-amber-50"><tr><th class="px-2 py-1 text-left whitespace-nowrap">Peserta</th><th class="px-2 py-1 text-left whitespace-nowrap">Pangkalan / Ambalan</th><th class="px-2 py-1 whitespace-nowrap">Tingkatan</th><th class="px-2 py-1 whitespace-nowrap">Sangga</th><th class="px-2 py-1 text-left whitespace-nowrap">Progres Bantara</th><th class="px-2 py-1 text-left whitespace-nowrap">Progres Laksana</th></tr></thead><tbody id="peserta-detail-body"></tbody></table></div><p id="peserta-detail-count" class="text-xs text-slate-500 mt-3"></p></div>
 <div class="bg-white rounded-2xl shadow-sm p-4"><h2 class="font-bold text-lg mb-3">Daftar Pangkalan</h2><div id="pangkalan-list" class="grid md:grid-cols-2 gap-3"></div></div>
 <div class="bg-white rounded-2xl shadow-sm p-4 space-y-3"><h2 class="font-bold text-lg">Aktivasi Ambalan Pembina</h2><p class="text-sm text-slate-600">Setelah transfer seikhlasnya dikonfirmasi, terbitkan kode untuk membuka satu ambalan tambahan dengan kuota 32 peserta didik. Setiap kode menambah satu ambalan.</p><div id="pembina-access-list" class="space-y-2"></div><p id="access-code-status" class="text-sm" role="status"></p></div>
+
+<section id="kwarran-manager" class="bg-white rounded-2xl shadow-sm p-4 space-y-4">
+ <div><h2 class="font-bold text-lg">Manajemen Kwarran</h2><p class="text-sm text-slate-600">Buat wilayah, petakan pangkalan, dan tetapkan akun Ketua/Admin Kwarran. Pangkalan lama tidak dipetakan otomatis agar tidak salah wilayah.</p></div>
+ <div class="grid md:grid-cols-2 gap-4">
+  <form id="kwarran-create-form" class="border rounded-xl p-3 space-y-2">
+   <h3 class="font-semibold">Tambah Kwarran</h3>
+   <input id="kwarran-new-name" class="w-full border rounded-lg p-2" maxlength="120" required placeholder="Nama Kwarran">
+   <button class="bg-amber-400 text-stone-950 font-bold rounded-lg px-4 py-2" type="submit">Tambah Kwarran</button>
+  </form>
+  <form id="kwarran-admin-form" class="border rounded-xl p-3 space-y-2">
+   <h3 class="font-semibold">Buat Akun Admin Kwarran</h3>
+   <input id="kwarran-admin-name" class="w-full border rounded-lg p-2" maxlength="150" required placeholder="Nama Ketua Kwarran">
+   <input id="kwarran-admin-email" class="w-full border rounded-lg p-2" type="email" required placeholder="Email akun">
+   <input id="kwarran-admin-password" class="w-full border rounded-lg p-2" type="password" minlength="10" required placeholder="Password minimal 10 karakter">
+   <select id="kwarran-admin-region" class="w-full border rounded-lg p-2" required><option value="">Pilih Kwarran</option></select>
+   <button class="bg-amber-400 text-stone-950 font-bold rounded-lg px-4 py-2" type="submit">Buat Akun Admin Kwarran</button>
+   <p class="text-xs text-slate-500">Akun langsung aktif dan hanya ditetapkan ke satu Kwarran.</p>
+  </form>
+ </div>
+ <div><h3 class="font-semibold mb-2">Pemetaan Pangkalan ke Kwarran</h3><div id="kwarran-pangkalan-map" class="grid md:grid-cols-2 gap-2"></div></div>
+ <div><h3 class="font-semibold mb-2">Akun Admin Kwarran</h3><div id="kwarran-admin-list" class="space-y-2"></div></div>
+ <p id="kwarran-manager-status" class="text-sm text-slate-500" role="status"></p>
+</section>
 <div id="status" class="text-sm text-slate-500"></div></section></main>
 <script>
 const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
@@ -394,7 +417,7 @@ function renderPesertaDetail(rows){
  $('peserta-detail-count').textContent='Menampilkan '+filtered.length+' dari '+pesertaAdminCache.length+' peserta.';
 }
 $('peserta-search')?.addEventListener('input',()=>renderPesertaDetail(pesertaAdminCache));
-async function showDashboard(){$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');await loadDashboard();await loadPosterGallery();}
+async function showDashboard(){$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');await loadDashboard();await loadPosterGallery();await loadKwarranManager();}
 async function loadDashboard(){$('status').textContent='Memuat rekap...';try{const d=await callApi({action:'dashboard'});$('total-pangkalan').textContent=d.pangkalan.length;$('total-ambalan').textContent=d.rekap.length;$('total-peserta').textContent=d.rekap.reduce((n,x)=>n+Number(x.jumlah_peserta||0),0);
 $('rekap-body').innerHTML=d.rekap.map(x=>'<tr class="border-t"><td class="px-2 py-1 align-top font-semibold whitespace-nowrap">'+esc(x.nama_pangkalan)+'<div class="text-xs font-normal text-slate-500">Gudep '+esc(x.no_gudep||'-')+'</div></td><td class="px-2 py-1 align-top font-medium whitespace-nowrap">'+esc(x.nama_ambalan)+'</td><td class="p-2 text-center">'+(x.jenis_kelamin==='L'?'Putra':'Putri')+'</td>'+['peserta_tamu','calon_penegak','bantara','laksana','garuda','jumlah_sangga','peserta_aktif','jumlah_alumni','jumlah_peserta'].map(k=>'<td class="px-2 py-1 text-center whitespace-nowrap">'+x[k]+'</td>').join('')+'</tr>').join('')||'<tr><td colspan="12" class="p-4 text-center">Belum ada data ambalan.</td></tr>';
 $('pangkalan-list').innerHTML=d.pangkalan.map(x=>'<div class="border rounded-xl p-3 space-y-1"><b>'+esc(x.nama_pangkalan)+'</b><p class="text-xs text-slate-500">Gudep: '+esc(x.no_gudep||'-')+'</p><p class="text-xs">Kode gabung pangkalan: <b class="font-mono">'+esc(x.kode_gabung_peserta)+'</b></p><p class="text-xs text-slate-500">Ambalan: '+esc(x.nama_ambalan_putra)+' / '+esc(x.nama_ambalan_putri)+'</p><p class="text-xs">Ketua Gudep: '+esc(x.nama_ketua_gudep||'Belum diisi')+'</p><p class="text-xs">Ketua Mabigus: '+esc(x.nama_ketua_mabigus||'Belum diisi')+'</p><p class="text-xs text-slate-400">Data administrasi dikelola Pembina pangkalan.</p></div>').join('')||'<p class="text-sm text-slate-500">Belum ada pangkalan.</p>';
@@ -402,6 +425,36 @@ $('pembina-access-list').innerHTML=(d.pembina||[]).map(p=>{const ambalan=Math.ma
 $('pembina-access-list').querySelectorAll('[data-issue-access]').forEach(b=>b.onclick=async()=>{b.disabled=true;$('access-code-status').textContent='Membuat kode penambahan ambalan...';try{const r=await callApi({action:'buat_kode_akses',id_pembina:b.dataset.issueAccess});$('access-code-status').textContent='Kode untuk '+b.parentElement.querySelector('b').textContent+': '+r.kode_akses+' (1 ambalan / 32 peserta). Kirim kode ini kepada Pembina.';}catch(err){$('access-code-status').textContent='Gagal membuat kode: '+err.message;b.disabled=false;}});
 
 renderPesertaDetail(d.peserta||[]);$('status').textContent='Data berhasil diperbarui.';}catch(err){$('status').textContent='Gagal memuat: '+err.message;}}
+
+async function loadKwarranManager(){
+ const status=$('kwarran-manager-status');status.textContent='Memuat pengaturan Kwarran...';
+ try{
+  const d=await callApi({action:'kwarran_management_data'});
+  const opts='<option value="">Pilih Kwarran</option>'+(d.kwarran||[]).map(k=>'<option value="'+esc(k.id_kwarran)+'">'+esc(k.nama_kwarran)+'</option>').join('');
+  $('kwarran-admin-region').innerHTML=opts;
+  $('kwarran-pangkalan-map').innerHTML=(d.pangkalan||[]).map(p=>'<div class="border rounded-lg p-3 flex flex-wrap items-center justify-between gap-2"><div class="min-w-0"><b>'+esc(p.nama_pangkalan)+'</b><div class="text-xs text-slate-500">Gudep '+esc(p.no_gudep||'-')+'</div></div><select data-pangkalan-region="'+esc(p.id_pangkalan)+'" class="border rounded-lg p-2 text-sm min-w-40"><option value="">Belum ditetapkan</option>'+(d.kwarran||[]).map(k=>'<option value="'+esc(k.id_kwarran)+'" '+(Number(p.id_kwarran)===Number(k.id_kwarran)?'selected':'')+'>'+esc(k.nama_kwarran)+'</option>').join('')+'</select></div>').join('')||'<p class="text-sm text-slate-500">Belum ada pangkalan.</p>';
+  $('kwarran-admin-list').innerHTML=(d.admins||[]).map(a=>'<div class="border rounded-lg p-3 flex flex-wrap justify-between gap-2"><div><b>'+esc(a.nama_lengkap||'Admin Kwarran')+'</b><div class="text-xs text-slate-500">'+esc(a.users?.email||'-')+'</div></div><span class="text-sm font-semibold">'+esc(a.kwarran?.nama_kwarran||'-')+'</span></div>').join('')||'<p class="text-sm text-slate-500">Belum ada akun Admin Kwarran.</p>';
+  status.textContent='Pengaturan Kwarran berhasil dimuat.';
+ }catch(err){status.textContent='Gagal memuat pengaturan Kwarran: '+err.message;}
+}
+$('kwarran-create-form').addEventListener('submit',async e=>{
+ e.preventDefault();const b=e.submitter;b.disabled=true;$('kwarran-manager-status').textContent='Menambahkan Kwarran...';
+ try{await callApi({action:'kwarran_create',nama_kwarran:$('kwarran-new-name').value.trim()});$('kwarran-new-name').value='';await loadKwarranManager();$('kwarran-manager-status').textContent='Kwarran berhasil ditambahkan.';}
+ catch(err){$('kwarran-manager-status').textContent='Gagal menambahkan Kwarran: '+err.message;}
+ finally{b.disabled=false;}
+});
+$('kwarran-admin-form').addEventListener('submit',async e=>{
+ e.preventDefault();const b=e.submitter;b.disabled=true;$('kwarran-manager-status').textContent='Membuat akun Admin Kwarran...';
+ try{const result=await callApi({action:'kwarran_create_admin',nama_lengkap:$('kwarran-admin-name').value.trim(),email:$('kwarran-admin-email').value.trim(),password:$('kwarran-admin-password').value,id_kwarran:$('kwarran-admin-region').value});$('kwarran-admin-form').reset();await loadKwarranManager();$('kwarran-manager-status').textContent=result.message||'Akun Admin Kwarran berhasil dibuat.';}
+ catch(err){$('kwarran-manager-status').textContent='Gagal membuat akun: '+err.message;}
+ finally{b.disabled=false;}
+});
+$('kwarran-pangkalan-map').addEventListener('change',async e=>{
+ const sel=e.target.closest('[data-pangkalan-region]');if(!sel)return;sel.disabled=true;$('kwarran-manager-status').textContent='Menyimpan pemetaan pangkalan...';
+ try{await callApi({action:'kwarran_assign_pangkalan',id_pangkalan:sel.dataset.pangkalanRegion,id_kwarran:sel.value||null});await loadKwarranManager();$('kwarran-manager-status').textContent='Pemetaan pangkalan berhasil disimpan.';}
+ catch(err){$('kwarran-manager-status').textContent='Gagal menyimpan pemetaan: '+err.message;sel.disabled=false;}
+});
+
 $('refresh').type='button';$('refresh').onclick=async()=>{const b=$('refresh');b.disabled=true;const old=b.textContent;b.textContent='Memuat...';try{await loadDashboard();}finally{b.disabled=false;b.textContent=old;}};
 $('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
 (async()=>{
