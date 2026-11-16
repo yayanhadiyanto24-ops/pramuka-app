@@ -520,7 +520,7 @@ function renderProfile(){
  $('studentProfileFields').classList.toggle('hidden',!isStudent);
  const p=isTeacher?teacher:(isStudent?participant:account);
  $('ntaProfileField').classList.toggle('hidden',!isTeacher&&!isStudent);
- if(isTeacher)$('teacherQuotaInfo').textContent='Kuota penerimaan saat ini: '+(teacher.nta?10+Number(teacher.kuota_tambahan||0):5)+' peserta. '+(!teacher.nta?'Lengkapi NTA/KTA untuk membuka kuota dasar 10 peserta. ':'')+'Jika kuota habis, transfer nominal seikhlasnya ke DANA 085624189461 dan konfirmasi WhatsApp 081322578732 kepada Admin Utama untuk mendapatkan kode akses tambahan.';
+ if(isTeacher)$('teacherQuotaInfo').textContent=teacher.akses_tanpa_batas?'Fasilitas tanpa batas telah aktif. Anda dapat menerima peserta didik tanpa batas kuota.':'Kuota penerimaan saat ini: '+(teacher.nta?10:5)+' peserta. '+(!teacher.nta?'Lengkapi NTA/KTA untuk membuka kuota dasar 10 peserta. ':'')+'Untuk memperoleh fasilitas tanpa batas, lakukan transfer dan konfirmasi kepada Admin Utama melalui WhatsApp.';
  if(isTeacher){$('accessCodeInput').disabled=!teacher.nta;$('activateAccessCode').disabled=!teacher.nta;}
  profilePhotoData=p?.foto_profil_data||'';
  const headerAvatar=$('headerProfileAvatar');if(headerAvatar){headerAvatar.src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"%3E%3Ccircle cx="40" cy="40" r="39" fill="%23f5c52b"/%3E%3Ccircle cx="40" cy="29" r="13" fill="%23704a1d"/%3E%3Cpath d="M15 70c2-17 12-25 25-25s23 8 25 25" fill="%23704a1d"/%3E%3C/svg%3E';}
@@ -597,7 +597,7 @@ function setupProfilePad(canvasId,openId,clearId,saveId,editorId,field){
 }
 setupProfilePad('teacherSignatureCanvas','openTeacherSignature','clearTeacherSignature','saveTeacherSignature','teacherSignatureEditor','tanda_tangan_data');
 setupProfilePad('teacherParafCanvas','openTeacherParaf','clearTeacherParaf','saveTeacherParaf','teacherParafEditor','paraf_data');
-$('activateAccessCode').onclick=async()=>{const code=$('accessCodeInput').value.trim().toUpperCase();if(!code){$('accessCodeMsg').textContent='Masukkan kode akses.';return;}const b=$('activateAccessCode');b.disabled=true;$('accessCodeMsg').textContent='Memeriksa kode...';try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'activate_access_code',kode_akses:code}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Kode tidak dapat diaktifkan.');teacher.kuota_tambahan=Number(teacher.kuota_tambahan||0)+10;$('accessCodeInput').value='';renderProfile();$('accessCodeMsg').textContent=data.message;}catch(err){$('accessCodeMsg').textContent=err.message||'Kode tidak dapat diaktifkan.';}finally{b.disabled=false;}};
+$('activateAccessCode').onclick=async()=>{const code=$('accessCodeInput').value.trim().toUpperCase();if(!code){$('accessCodeMsg').textContent='Masukkan kode akses.';return;}const b=$('activateAccessCode');b.disabled=true;$('accessCodeMsg').textContent='Memeriksa kode...';try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'activate_access_code',kode_akses:code}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Kode tidak dapat diaktifkan.');teacher.akses_tanpa_batas=true;$('accessCodeInput').value='';renderProfile();$('accessCodeMsg').textContent=data.message;}catch(err){$('accessCodeMsg').textContent=err.message||'Kode tidak dapat diaktifkan.';}finally{b.disabled=false;}};
 
 async function loadPangkalanPending(){
   const box=$('pendingStudentList');box.textContent='Memuat daftar peserta...';
