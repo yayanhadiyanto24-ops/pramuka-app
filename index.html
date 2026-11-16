@@ -354,9 +354,10 @@ a[class*="rounded"]{
             <p class="text-amber-200 text-sm mt-1">Pilih jalur pendaftaran sesuai peran Anda</p>
         </div>
         <div class="px-4 py-4 bg-amber-50 border-b border-amber-100"><p class="text-center text-xs font-bold uppercase tracking-wide text-amber-900 mb-3">Pilih halaman masuk</p><div class="grid grid-cols-3 gap-2"><a href="admin-utama.html" class="rounded-lg bg-amber-950 hover:bg-amber-900 text-white text-center font-bold text-xs sm:text-sm px-2 py-3">Admin Utama</a><a href="belajar.html" class="rounded-lg bg-amber-800 hover:bg-amber-900 text-white text-center font-bold text-xs sm:text-sm px-2 py-3">Pembina</a><a href="belajar.html" class="rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-center font-bold text-xs sm:text-sm px-2 py-3">Peserta Didik</a></div><a href="admin-kwarran.html" class="flex items-center justify-center mx-4 mt-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-center font-bold text-xs sm:text-sm px-3 py-2">Admin Kwarran</a><p class="text-center text-xs font-bold text-black mt-2">Belum memiliki akun?<br>Gunakan formulir pendaftaran di bawah</p></div>
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-3 border-b border-gray-200 bg-gray-50">
             <button id="tab-peserta" type="button" onclick="switchTab('peserta')" class="py-3.5 text-sm font-bold text-amber-900 border-b-2 border-amber-800 bg-white transition">⚜️ Peserta Didik</button>
             <button id="tab-pembina" type="button" onclick="switchTab('pembina')" class="py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition">🎖️ Pembina</button>
+            <button id="tab-admin-kwarran" type="button" onclick="switchTab('admin_kwarran')" class="py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition">🏕️ Admin Kwarran</button>
         </div>
         <div id="alert-box" role="status" aria-live="polite" class="hidden mx-6 mt-4 p-3 rounded-lg text-sm font-medium"></div>
         <form id="form-peserta" class="p-6 space-y-4">
@@ -406,6 +407,17 @@ a[class*="rounded"]{
             <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pb-password">Password *</label><input id="pb-password" type="password" required minlength="8" autocomplete="new-password" placeholder="Minimal 8 karakter" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
             <button type="submit" id="btn-pembina" class="w-full bg-amber-800 hover:bg-amber-900 disabled:opacity-60 text-white font-bold py-3 rounded-lg shadow transition">Daftarkan Pembina</button>
         </form>
+        <form id="form-admin-kwarran" class="hidden p-6 space-y-4">
+            <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
+                Pendaftaran ini khusus penerima undangan Admin Kwarran. Masukkan kode aktivasi yang diberikan Admin Utama.
+                <p id="kwarran-invite-info" class="mt-2 font-semibold" aria-live="polite">Nama Kwarran akan tampil setelah kode diperiksa.</p>
+            </div>
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="ak-kode">Kode Aktivasi Undangan *</label><input id="ak-kode" required maxlength="64" autocomplete="off" placeholder="Masukkan kode aktivasi" class="w-full px-3 py-2 border border-gray-300 rounded-lg uppercase font-mono"></div>
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="ak-nama">Nama Lengkap *</label><input id="ak-nama" required maxlength="150" autocomplete="name" placeholder="Nama lengkap" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="ak-email">Email Aktif *</label><input id="ak-email" type="email" required maxlength="254" autocomplete="email" placeholder="email@contoh.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="ak-password">Buat Password *</label><input id="ak-password" type="password" required minlength="10" autocomplete="new-password" placeholder="Minimal 10 karakter" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
+            <button type="submit" id="btn-admin-kwarran" class="w-full bg-amber-700 hover:bg-amber-800 disabled:opacity-60 text-white font-bold py-3 rounded-lg shadow transition">Daftar Sebagai Admin Kwarran</button>
+        </form>
     </div>
 <script>
 'use strict';
@@ -416,11 +428,16 @@ const SUPABASE_ANON_KEY = 'sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function switchTab(role) {
-    const peserta = role === 'peserta';
-    document.getElementById('form-peserta').classList.toggle('hidden', !peserta);
-    document.getElementById('form-pembina').classList.toggle('hidden', peserta);
-    document.getElementById('tab-peserta').className = peserta ? 'py-3.5 text-sm font-bold text-amber-900 border-b-2 border-amber-800 bg-white transition' : 'py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition';
-    document.getElementById('tab-pembina').className = !peserta ? 'py-3.5 text-sm font-bold text-amber-900 border-b-2 border-amber-800 bg-white transition' : 'py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition';
+    const roles = ['peserta', 'pembina', 'admin_kwarran'];
+    roles.forEach(item => {
+        const active = item === role;
+        const formId = item === 'admin_kwarran' ? 'form-admin-kwarran' : 'form-' + item;
+        const tabId = item === 'admin_kwarran' ? 'tab-admin-kwarran' : 'tab-' + item;
+        document.getElementById(formId).classList.toggle('hidden', !active);
+        document.getElementById(tabId).className = active
+            ? 'py-3.5 text-sm font-bold text-amber-900 border-b-2 border-amber-800 bg-white transition'
+            : 'py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition';
+    });
     hideAlert();
 }
 let loadedPangkalanKey='';
@@ -541,6 +558,35 @@ document.getElementById('form-pembina').addEventListener('submit', async e => {
     const ok = await submitRegistration(payload, document.getElementById('btn-pembina'), 'Daftarkan Pembina');
     if (ok) e.target.reset();
     toggleModePembina();
+});
+let verifiedKwarranInvite='';
+async function checkKwarranInvite(){
+    const code=document.getElementById('ak-kode').value.trim().toUpperCase();
+    const info=document.getElementById('kwarran-invite-info');
+    verifiedKwarranInvite='';
+    if(!code){info.textContent='Nama Kwarran akan tampil setelah kode diperiksa.';return;}
+    info.textContent='Memeriksa kode aktivasi...';
+    try{
+        const {data,error}=await supabaseClient.functions.invoke('pramuka-register',{body:{action:'kwarran_invite_options',kode_aktivasi:code}});
+        if(error)throw error;
+        if(!data?.ok)throw new Error(data?.message||'Kode aktivasi tidak valid.');
+        verifiedKwarranInvite=code;
+        info.textContent='Undangan valid untuk Kwarran '+data.nama_kwarran+'.';
+    }catch(err){info.textContent=err.message||'Kode aktivasi tidak dapat diperiksa.';}
+}
+document.getElementById('ak-kode').addEventListener('blur',checkKwarranInvite);
+document.getElementById('form-admin-kwarran').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const code=document.getElementById('ak-kode').value.trim().toUpperCase();
+    if(verifiedKwarranInvite!==code){await checkKwarranInvite();if(verifiedKwarranInvite!==code){showAlert('Periksa kode aktivasi yang diberikan Admin Utama.',true);return;}}
+    const ok=await submitRegistration({
+        role:'admin_kwarran',
+        kode_aktivasi:code,
+        nama_lengkap:document.getElementById('ak-nama').value.trim(),
+        email:document.getElementById('ak-email').value.trim(),
+        password:document.getElementById('ak-password').value
+    },document.getElementById('btn-admin-kwarran'),'Daftar Sebagai Admin Kwarran');
+    if(ok){e.target.reset();verifiedKwarranInvite='';document.getElementById('kwarran-invite-info').textContent='Nama Kwarran akan tampil setelah kode diperiksa.';}
 });
 populateSchoolYears();
 updatePembinaType();
