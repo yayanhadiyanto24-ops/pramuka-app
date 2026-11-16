@@ -217,7 +217,7 @@ header .max-w-6xl{
 #headerActions{display:contents!important}
 #profileIdentity{grid-area:identity!important;display:flex!important;align-items:center!important;min-width:0!important;gap:6px!important}
 #headerProfileAvatar{width:30px!important;height:30px!important;flex:0 0 30px!important}
-#who{font-size:11px!important;line-height:1.15!important;max-width:none!important;overflow-wrap:anywhere}
+#who{display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:flex-start!important;gap:0!important;min-width:0!important;max-width:210px!important;height:30px!important;line-height:1!important;overflow:hidden!important}#whoName{display:block!important;max-width:100%!important;font-size:13px!important;font-weight:800!important;line-height:15px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}#whoRole{display:block!important;font-size:10px!important;font-weight:600!important;line-height:12px!important;white-space:nowrap!important;opacity:.9!important}
 #headerButtons{grid-area:auto!important;position:absolute!important;top:27px!important;right:0!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:5px!important;z-index:3!important}#installAppBtn{transform:translateY(-5px)!important}
  #appCreatorCredit{position:absolute!important;right:0!important;bottom:-8px!important;display:block!important;margin:0!important;padding:0!important;text-align:right!important;white-space:nowrap!important;font-size:8px!important;line-height:1!important;font-style:italic!important;color:#fff2a6!important;letter-spacing:0!important}
 #installAppBtn{padding:5px 8px!important;font-size:10px!important;line-height:1.1!important;border-radius:8px!important}
@@ -361,7 +361,7 @@ a[class*="rounded"]{
 <header class="brand text-white px-4 py-5">
  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 relative">
   <div class="rt-header-brand"><img class="rt-header-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div><div class="rt-header-name text-xl">RUANG TEGAK</div><p class="rt-header-sub text-sm">Ruang Belajar Pramuka Penegak</p><p id="roleSubtitle" class="text-amber-200 text-xs">Materi umum · SKU Bantara · SKU Laksana · Progres kecakapan</p></div></div>
-  <div id="headerActions" class="rt-account-actions"><div id="profileIdentity"><img id="headerProfileAvatar" class="rt-profile-mark" alt="Foto profil"><span id="who" class="text-sm text-amber-100"></span></div><div id="headerButtons"><button id="refreshAppBtn" type="button" class="rounded-lg font-bold" aria-label="Perbarui halaman">↻ Perbarui</button><button id="installAppBtn" type="button" class="rounded-xl bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 border border-yellow-200 px-3 py-2 text-xs font-extrabold text-stone-950 shadow-md"><span aria-hidden="true">⬇</span> Unduh Aplikasi</button></div></div><button id="logout" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button>
+  <div id="headerActions" class="rt-account-actions"><div id="profileIdentity"><img id="headerProfileAvatar" class="rt-profile-mark" alt="Foto profil"><span id="who" class="text-sm text-amber-100"><span id="whoName"></span><span id="whoRole"></span></span></div><div id="headerButtons"><button id="refreshAppBtn" type="button" class="rounded-lg font-bold" aria-label="Perbarui halaman">↻ Perbarui</button><button id="installAppBtn" type="button" class="rounded-xl bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 border border-yellow-200 px-3 py-2 text-xs font-extrabold text-stone-950 shadow-md"><span aria-hidden="true">⬇</span> Unduh Aplikasi</button></div></div><button id="logout" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button>
   <p id="appCreatorCredit">Pembuat &amp; Pengembang Aplikasi: Yayan Hadiyanto, S.Pd.-MT.</p>
  </div>
 </header>
@@ -522,7 +522,9 @@ async function boot(user){
  if(ue)throw ue;if(!u)throw new Error('Profil akun belum tersedia. Hubungi Admin Utama.');
  account=u;
  $('login').classList.add('hidden');$('application').classList.remove('hidden');$('logout').classList.remove('hidden');
- $('who').textContent=(user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_kwarcab'?'Admin Utama':'Pengguna'))+' · '+u.role.replace('_',' ');
+ const displayName=user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_kwarcab'?'Admin Utama':'Pengguna');
+ $('whoName').textContent=displayName;
+ $('whoRole').textContent=({pembina:'Pembina',peserta_didik:'Peserta Didik',admin_kwarcab:'Admin Utama'}[u.role]||u.role.replaceAll('_',' '));
  if(u.status_akun!=='aktif'){
   $('accountNotice').classList.remove('hidden');$('accountNotice').textContent=u.role==='peserta_didik'?'Pendaftaran diterima. Akses belajar akan terbuka setelah disetujui Pembina sesuai satuan putera atau puteri.':'Akun masih '+u.status_akun+'. Akses belajar akan terbuka setelah disetujui Admin Utama.';return;
  }
@@ -542,7 +544,8 @@ async function boot(user){
  }else if(u.role==='admin_kwarcab'){$('monitorTab').classList.remove('hidden');}
  else throw new Error('Peran akun tidak dikenali.');
  const accountName=participant?.nama_lengkap||teacher?.nama_lengkap||user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_kwarcab'?'Admin Utama':'Pengguna');
- $('who').textContent=accountName+' · '+u.role.replace('_',' ');
+ $('whoName').textContent=accountName;
+ $('whoRole').textContent=({pembina:'Pembina',peserta_didik:'Peserta Didik',admin_kwarcab:'Admin Utama'}[u.role]||u.role.replaceAll('_',' '));
  renderProfile();
   await loadAll();
 }
