@@ -362,7 +362,7 @@ a[class*="rounded"]{
         <div id="alert-box" role="status" aria-live="polite" class="hidden mx-6 mt-4 p-3 rounded-lg text-sm font-medium"></div>
         <form id="form-peserta" class="p-6 space-y-4">
             <div class="bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded-lg text-xs">Gunakan <strong>Kode Gabung Pangkalan</strong> yang diberikan Pembina. Kode ini hanya dipakai saat pendaftaran pertama.</div>
-            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-kode">Kode Gabung Pangkalan *</label><input id="pd-kode" required autocomplete="off" placeholder="Kode dari Pembina" class="w-full px-3 py-2 border border-gray-300 rounded-lg uppercase font-mono"></div>
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-kode">Kode Gabung Pangkalan *</label><input id="pd-kode" required autocomplete="off" placeholder="Kode dari Pembina" class="w-full px-3 py-2 border border-gray-300 rounded-lg uppercase font-mono"></div><div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-kwarran">Kwarran</label><input id="pd-kwarran" readonly placeholder="Otomatis mengikuti pangkalan" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100"></div>
             <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-nama">Nama Lengkap *</label><input id="pd-nama" required maxlength="150" placeholder="Nama sesuai identitas" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
             <div class="grid grid-cols-2 gap-3">
                 <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pd-jk">Jenis Kelamin *</label><select id="pd-jk" required class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"><option value="L">Laki-laki (Putra)</option><option value="P">Perempuan (Putri)</option></select></div>
@@ -388,7 +388,7 @@ a[class*="rounded"]{
         </form>
         <form id="form-pembina" class="hidden p-6 space-y-4">
             <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pb-mode">Status Pangkalan *</label><select id="pb-mode" onchange="toggleModePembina()" class="w-full px-3 py-2 border border-amber-400 bg-amber-50 rounded-lg font-semibold text-amber-900"><option value="baru">Daftarkan Pangkalan Baru (Pembina Pertama)</option><option value="gabung">Gabung ke Pangkalan yang Sudah Terdaftar</option></select></div>
-            <div id="box-pangkalan-baru" class="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div><label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="pb-kwarran">Kwarran *</label><select id="pb-kwarran" required class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"><option value="">Memuat daftar Kwarran...</option></select><p class="text-xs text-gray-600 mt-1">Pilih Kwarran tempat pangkalan berada.</p></div><div id="box-pangkalan-baru" class="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div><label class="block text-xs font-bold text-gray-700" for="pb-nama-pangkalan">Nama Pangkalan / Sekolah *</label><input id="pb-nama-pangkalan" maxlength="180" placeholder="Contoh: SMA Negeri 1 Nusantara" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></div>
                 <div><label class="block text-xs font-bold text-gray-700" for="pb-no-gudep">Nomor Gudep (Opsional)</label><input id="pb-no-gudep" maxlength="40" placeholder="Kosongkan jika belum terbit" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></div>
                 <div class="grid grid-cols-2 gap-2">
@@ -449,11 +449,11 @@ async function loadPangkalanOptions(){
     const code=document.getElementById('pd-kode').value.trim().toUpperCase(),gender=document.getElementById('pd-jk').value;
     const amb=document.getElementById('pd-ambalan'),sel=document.getElementById('pd-sangga'),info=document.getElementById('pd-pangkalan-info');
     amb.value='';loadedPangkalanKey='';sel.disabled=true;sel.innerHTML='<option value="">Memuat pilihan sangga...</option>';
-    if(!code){sel.innerHTML='<option value="">Masukkan kode gabung</option>';return;}
+    if(!code){document.getElementById('pd-kwarran').value='';sel.innerHTML='<option value="">Masukkan kode gabung</option>';return;}
     try{
       const {data,error}=await supabaseClient.functions.invoke('pramuka-register',{body:{action:'registration_options',kode_gabung:code,jenis_kelamin:gender}});
       if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Kode gabung tidak valid.');
-      amb.value=data.nama_ambalan||'';loadedPangkalanKey=code+'|'+gender;info.textContent='Pangkalan: '+data.nama_pangkalan+' · Ambalan: '+data.nama_ambalan;
+      amb.value=data.nama_ambalan||'';document.getElementById('pd-kwarran').value=data.nama_kwarran||'';loadedPangkalanKey=code+'|'+gender;info.textContent='Pangkalan: '+data.nama_pangkalan+' · Kwarran: '+(data.nama_kwarran||'-')+' · Ambalan: '+data.nama_ambalan;
       const rows=data.sangga||[];
       sel.innerHTML='<option value="">Pilih sangga</option>'+rows.map(x=>'<option value="'+x.id_sangga+'">'+escapeText(x.nama_sangga)+'</option>').join('');
       sel.disabled=rows.length===0;
@@ -462,6 +462,14 @@ async function loadPangkalanOptions(){
 }
 function escapeText(value){const d=document.createElement('div');d.textContent=String(value??'');return d.innerHTML;}
 document.getElementById('pd-kode').addEventListener('blur',loadPangkalanOptions);
+async function loadRegistrationKwarranOptions(){
+ const sel=document.getElementById('pb-kwarran');
+ try{const {data,error}=await supabaseClient.functions.invoke('pramuka-register',{body:{action:'kwarran_registration_options'}});
+  if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Daftar Kwarran gagal dimuat.');
+  sel.innerHTML='<option value="">Pilih Kwarran</option>'+(data.kwarran||[]).map(x=>'<option value="'+Number(x.id_kwarran)+'">'+escapeText(x.nama_kwarran)+'</option>').join('');
+ }catch(err){sel.innerHTML='<option value="">Daftar Kwarran gagal dimuat</option>';console.error(err);}
+}
+loadRegistrationKwarranOptions();
 document.getElementById('pd-jk').addEventListener('change',loadPangkalanOptions);
 function updatePembinaType() {
     const putera = document.getElementById('pb-jk').value === 'L';
@@ -542,12 +550,14 @@ document.getElementById('form-pembina').addEventListener('submit', async e => {
     const payload = {
         role: 'pembina',
         mode: baru ? 'baru' : 'gabung',
+        id_kwarran: Number(document.getElementById('pb-kwarran').value),
         nama_lengkap: document.getElementById('pb-nama').value.trim(),
         jenis_kelamin: document.getElementById('pb-jk').value,
         jabatan: document.getElementById('pb-jabatan').value,
         email: document.getElementById('pb-email').value.trim(),
         password: document.getElementById('pb-password').value
     };
+    if(!payload.id_kwarran){showAlert('Pilih Kwarran terlebih dahulu.',true);return;}
     if (baru) Object.assign(payload, {
         nama_pangkalan: document.getElementById('pb-nama-pangkalan').value.trim(),
         no_gudep: document.getElementById('pb-no-gudep').value.trim() || null,
