@@ -10,6 +10,15 @@ Deno.serve(async(req:Request)=>{
  const admin=createClient(url,secret,{auth:{autoRefreshToken:false,persistSession:false}});
  try{
   const body=await req.json(),action=clean(body.action||"register",30);
+  if(action==="kwarran_invite_options"){
+   const code=clean(body.kode_aktivasi,64).toUpperCase();
+   if(!code)return reply({ok:false,message:"Masukkan kode aktivasi undangan."},400);
+   const {data:invite,error:inviteError}=await admin.from("kwarran_admin_invites").select("id_kwarran").eq("invite_code",code).is("used_at",null).is("revoked_at",null).maybeSingle();
+   if(inviteError)throw inviteError;if(!invite)return reply({ok:false,message:"Kode aktivasi tidak valid, sudah digunakan, atau telah dicabut."},404);
+   const {data:region,error:regionError}=await admin.from("kwarran").select("nama_kwarran").eq("id_kwarran",invite.id_kwarran).single();
+   if(regionError)throw regionError;
+   return reply({ok:true,nama_kwarran:region.nama_kwarran});
+  }
   if(action==="registration_options"){
    const code=clean(body.kode_gabung,30).toUpperCase(),gender=clean(body.jenis_kelamin,1);
    if(!code||!["L","P"].includes(gender))return reply({ok:false,message:"Masukkan kode gabung dan jenis kelamin."},400);
@@ -21,7 +30,15 @@ Deno.serve(async(req:Request)=>{
   }
   if(action==="register"){
    const role=clean(body.role,30),email=clean(body.email,254).toLowerCase(),password=typeof body.password==="string"?body.password:"",name=clean(body.nama_lengkap,150);
-   if(!["peserta_didik","pembina"].includes(role)||!email.includes("@")||password.length<8||!name)return reply({ok:false,message:"Periksa nama, email, peran, dan password minimal 8 karakter."},400);
+   if(!["peserta_didik","pembina","admin_kwarran"].includes(role)||!email.includes("@")||password.length<(role==="admin_kwarran"?10:8)||!name)return reply({ok:false,message:"Periksa nama, email, dan password. Password Admin Kwarran minimal 10 karakter."},400);
+   let kwarranInvite:any=null;
+   if(role==="admin_kwarran"){
+    const code=clean(body.kode_aktivasi,64).toUpperCase();
+    if(!code)return reply({ok:false,message:"Kode aktivasi undangan wajib diisi."},400);
+    const {data:invite,error:inviteError}=await admin.from("kwarran_admin_invites").select("id_invite,id_kwarran").eq("invite_code",code).is("used_at",null).is("revoked_at",null).maybeSingle();
+    if(inviteError)throw inviteError;if(!invite)return reply({ok:false,message:"Kode aktivasi tidak valid, sudah digunakan, atau telah dicabut."},404);
+    kwarranInvite=invite;
+   }
    if(role==="peserta_didik"&&(!clean(body.kode_gabung,30)||!["L","P"].includes(body.jenis_kelamin)||!["X","XI","XII"].includes(body.kelas_sekolah)||!clean(body.jurusan,100)||!new RegExp("^[0-9]{4}/[0-9]{4}$").test(clean(body.tahun_pelajaran,9))||!Number.isInteger(Number(body.id_sangga))))return reply({ok:false,message:"Lengkapi data peserta, sangga, kelas, jurusan, dan tahun pelajaran."},400);
    if(role==="pembina"){
     if(!["L","P"].includes(body.jenis_kelamin)||!["Pembina Satuan Putera","Pembina Satuan Puteri"].includes(body.jabatan)||((body.jenis_kelamin==="L")!==(body.jabatan==="Pembina Satuan Putera")))return reply({ok:false,message:"Jenis kelamin atau jabatan pembina tidak valid."},400);
@@ -36,6 +53,15 @@ Deno.serve(async(req:Request)=>{
    const {data,error}=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{display_name:name}});
    if(error||!data.user)return reply({ok:false,message:error?.message||"Akun tidak dapat dibuat."},400);
    userId=data.user.id;
+   if(role==="admin_kwarran"){
+    const {error:userError}=await admin.from("users").insert({id_user:userId,email,role:"admin_kwarran",status_akun:"aktif"});
+    if(userError){await admin.auth.admin.deleteUser(userId);throw userError;}
+    const {error:assignmentError}=await admin.from("admin_kwarran").insert({id_user:userId,id_kwarran:kwarranInvite.id_kwarran,nama_lengkap:name});
+    if(assignmentError){await admin.from("users").delete().eq("id_user",userId);await admin.auth.admin.deleteUser(userId);throw assignmentError;}
+    const {data:consumed,error:consumeError}=await admin.from("kwarran_admin_invites").update({used_at:new Date().toISOString(),used_by:userId}).eq("id_invite",kwarranInvite.id_invite).is("used_at",null).is("revoked_at",null).select("id_invite").maybeSingle();
+    if(consumeError||!consumed){await admin.from("admin_kwarran").delete().eq("id_user",userId);await admin.from("users").delete().eq("id_user",userId);await admin.auth.admin.deleteUser(userId);if(consumeError)throw consumeError;return reply({ok:false,message:"Kode aktivasi baru saja digunakan orang lain. Minta undangan baru kepada Admin Utama."},409);}
+    return reply({ok:true,message:"Pendaftaran Admin Kwarran berhasil. Akun aktif dan terhubung ke "+(await admin.from("kwarran").select("nama_kwarran").eq("id_kwarran",kwarranInvite.id_kwarran).single()).data?.nama_kwarran+".",status:"aktif"});
+   }
    const payload={...body};delete payload.password;delete payload.email;delete payload.action;
    const {data:profile,error:profileError}=await admin.rpc("pramuka_register_profile",{p_user_id:userId,p_email:email,p_payload:payload});
    if(profileError||!profile?.ok){await admin.auth.admin.deleteUser(userId);return reply({ok:false,message:profileError?.message||"Profil gagal disimpan."},400);}
@@ -198,13 +224,14 @@ Deno.serve(async(req:Request)=>{
   if(!configuredEmail||authData.user.email.toLowerCase()!==configuredEmail)return reply({ok:false,message:"Akses khusus Admin Utama."},403);
 
   if(action==="kwarran_management_data"){
-   const [kwarran,pangkalan,admins]=await Promise.all([
+   const [kwarran,pangkalan,admins,invites]=await Promise.all([
     admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran"),
     admin.from("pangkalan").select("id_pangkalan,nama_pangkalan,no_gudep,id_kwarran").order("nama_pangkalan"),
-    admin.from("admin_kwarran").select("id_user,id_kwarran,nama_lengkap,kwarran!inner(nama_kwarran),users!inner(email,status_akun)").order("nama_lengkap")
+    admin.from("admin_kwarran").select("id_user,id_kwarran,nama_lengkap,kwarran!inner(nama_kwarran),users!inner(email,status_akun)").order("nama_lengkap"),
+    admin.from("kwarran_admin_invites").select("id_invite,id_kwarran,invite_code,created_at,used_at,revoked_at,kwarran!inner(nama_kwarran)").order("created_at",{ascending:false}).limit(100)
    ]);
-   for(const x of [kwarran,pangkalan,admins])if(x.error)throw x.error;
-   return reply({ok:true,kwarran:kwarran.data||[],pangkalan:pangkalan.data||[],admins:admins.data||[]});
+   for(const x of [kwarran,pangkalan,admins,invites])if(x.error)throw x.error;
+   return reply({ok:true,kwarran:kwarran.data||[],pangkalan:pangkalan.data||[],admins:admins.data||[],invites:invites.data||[]});
   }
   if(action==="kwarran_create"){
    const name=clean(body.nama_kwarran,120);
@@ -225,24 +252,15 @@ Deno.serve(async(req:Request)=>{
    if(error)throw error;if(!data)return reply({ok:false,message:"Pangkalan tidak ditemukan."},404);
    return reply({ok:true,message:"Pemetaan pangkalan berhasil diperbarui."});
   }
-  if(action==="kwarran_create_admin"){
-   const name=clean(body.nama_lengkap,150),email=clean(body.email,254).toLowerCase(),password=typeof body.password==="string"?body.password:"",idKwarran=Number(body.id_kwarran);
-   if(!name||!email.includes("@")||password.length<10||!Number.isInteger(idKwarran)||idKwarran<=0)return reply({ok:false,message:"Lengkapi nama, email, password minimal 10 karakter, dan Kwarran."},400);
-   const [{data:existing,error:existingError},{data:region,error:regionError}]=await Promise.all([
-    admin.from("users").select("id_user").eq("email",email).maybeSingle(),
-    admin.from("kwarran").select("id_kwarran").eq("id_kwarran",idKwarran).maybeSingle()
-   ]);
-   if(existingError)throw existingError;if(regionError)throw regionError;
-   if(existing)return reply({ok:false,message:"Email sudah terdaftar. Gunakan email baru untuk akun Admin Kwarran."},409);
-   if(!region)return reply({ok:false,message:"Kwarran yang dipilih tidak ditemukan."},404);
-   const {data:created,error:createError}=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{display_name:name}});
-   if(createError||!created.user)return reply({ok:false,message:createError?.message||"Akun Admin Kwarran tidak dapat dibuat."},400);
-   const userId=created.user.id;
-   const {error:userError}=await admin.from("users").insert({id_user:userId,email,role:"admin_kwarran",status_akun:"aktif"});
-   if(userError){await admin.auth.admin.deleteUser(userId);throw userError;}
-   const {error:assignmentError}=await admin.from("admin_kwarran").insert({id_user:userId,id_kwarran:idKwarran,nama_lengkap:name,assigned_by:authData.user.id});
-   if(assignmentError){await admin.from("users").delete().eq("id_user",userId);await admin.auth.admin.deleteUser(userId);throw assignmentError;}
-   return reply({ok:true,message:"Akun Admin Kwarran berhasil dibuat dan ditetapkan ke wilayahnya."});
+  if(action==="kwarran_create_invite"){
+   const idKwarran=Number(body.id_kwarran);
+   if(!Number.isInteger(idKwarran)||idKwarran<=0)return reply({ok:false,message:"Pilih Kwarran yang akan diberi undangan."},400);
+   const {data:region,error:regionError}=await admin.from("kwarran").select("id_kwarran,nama_kwarran").eq("id_kwarran",idKwarran).maybeSingle();
+   if(regionError)throw regionError;if(!region)return reply({ok:false,message:"Kwarran tidak ditemukan."},404);
+   const inviteCode=crypto.randomUUID().replaceAll("-","").toUpperCase();
+   const {data:invite,error:inviteError}=await admin.from("kwarran_admin_invites").insert({id_kwarran:idKwarran,invite_code:inviteCode,created_by:authData.user.id}).select("id_invite,invite_code,created_at").single();
+   if(inviteError)throw inviteError;
+   return reply({ok:true,invite:{...invite,nama_kwarran:region.nama_kwarran},message:"Undangan Admin Kwarran berhasil dibuat. Bagikan nama Kwarran dan kode aktivasi ini kepada orang yang ditunjuk."});
   }
   if(action==="bootstrap_admin"){
    const {error}=await admin.from("users").upsert({id_user:authData.user.id,email:configuredEmail,role:"admin_kwarcab",status_akun:"aktif"},{onConflict:"id_user"});
