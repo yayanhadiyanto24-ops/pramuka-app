@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ruang Tegak · Pusat Dokumen</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" type="image/svg+xml" href="assets/ruang-tegak-icon.svg">
+<style>
+:root{--dark:#392316;--gold:#ffd400;--red:#c62828}
+body{background:radial-gradient(ellipse at 0 0,#ffd40022,transparent 35%),#f7f2e9;color:#28221d}
+.rt-header{background:linear-gradient(112deg,#24150e,#60402a 52%,#1f120c);color:#fff;border-bottom:7px solid #c62828;box-shadow:0 8px 24px #39231622}
+.doc-card{background:linear-gradient(135deg,#fffdf5,#fff 58%,#fff8df);border:1px solid #e8d8a7;border-radius:16px;box-shadow:0 7px 22px #432d1310}
+.btn-gold{background:linear-gradient(115deg,#d99c00,#ffd400 35%,#fff1a3 50%,#ffd400 68%,#d99c00);color:#24190b;border:1px solid #d6a300}
+input,select,textarea{background:#fff}
+</style>
+</head>
+<body class="min-h-screen">
+<header class="rt-header px-4 py-4">
+ <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+  <div class="flex items-center gap-3"><img src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" class="w-14 h-14 object-contain" alt="Logo Ruang Tegak"><div><div class="font-black tracking-widest text-lg">RUANG TEGAK</div><h1 class="font-bold">Pusat Dokumen</h1><p class="text-xs text-amber-100">Perpustakaan acuan resmi dan dokumen pembinaan</p></div></div>
+  <div class="flex flex-wrap gap-2"><a href="belajar.html" class="rounded-lg bg-amber-700 px-3 py-2 text-sm font-bold">Ruang Belajar</a><a href="index.html" class="rounded-lg bg-white/15 px-3 py-2 text-sm font-bold">Beranda</a></div>
+ </div>
+</header>
+<main class="max-w-5xl mx-auto p-4 md:p-6 space-y-5">
+ <section class="doc-card p-4 md:p-5">
+  <h2 class="font-bold text-lg">Dokumen acuan RUANG TEGAK</h2>
+  <p class="text-sm text-slate-600 mt-1">Gunakan dokumen ini sebagai sumber rujukan. Persyaratan SKU tetap mengikuti naskah resmi; materi pembelajaran aplikasi menjadi penjelas dan sarana latihan.</p>
+  <div class="mt-3 flex flex-wrap gap-2"><input id="searchDocs" type="search" placeholder="Cari nama atau isi dokumen..." class="flex-1 min-w-48 border rounded-lg p-2 text-sm"><span id="docCount" class="text-xs text-slate-500 self-center"></span></div>
+ </section>
+ <section id="adminUpload" class="doc-card p-4 md:p-5 hidden">
+  <div class="flex items-center justify-between gap-3"><div><h2 class="font-bold text-lg">Unggah dokumen</h2><p class="text-xs text-slate-600">Khusus Admin Utama. File yang diunggah akan tersedia untuk dibuka dan diunduh.</p></div><span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold">Admin</span></div>
+  <form id="uploadForm" class="mt-4 grid md:grid-cols-2 gap-3">
+   <label class="text-sm font-semibold">Jenis dokumen<select id="docKey" class="block w-full border rounded-lg p-2 mt-1"><option value="jukran-gudep-05-2026">Jukran 05 Tahun 2026 — Peraturan Gudep (file yang sudah dikirim)</option><option value="polmekbin-176-2013">SK 176 Tahun 2013 — Polmekbin Penegak dan Pandega</option><option value="seragam-174-2012">SK 174 Tahun 2012 — Pakaian Seragam</option><option value="sku-penegak-2011">SK 119 Tahun 2011 — Panduan Penyelesaian SKU Penegak</option><option value="ad-art-2023">AD/ART Munas XI 2023</option><option value="new">Dokumen baru lainnya</option></select></label>
+   <label class="text-sm font-semibold">Judul dokumen<input id="docTitle" class="block w-full border rounded-lg p-2 mt-1" placeholder="Isi jika memilih dokumen baru"></label>
+   <label class="text-sm font-semibold md:col-span-2">Keterangan<textarea id="docDescription" rows="2" class="block w-full border rounded-lg p-2 mt-1" placeholder="Ringkasan atau kegunaan dokumen"></textarea></label>
+   <label class="text-sm font-semibold md:col-span-2">Pilih file<input id="docFile" type="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain" class="block w-full border rounded-lg p-2 mt-1 text-sm"><span class="block text-xs text-slate-500 mt-1">Maksimal 50 MB. Format PDF, Word, Excel, PowerPoint, atau TXT.</span></label>
+   <div class="md:col-span-2 flex flex-wrap items-center gap-3"><button id="uploadBtn" class="btn-gold rounded-lg px-5 py-3 font-extrabold" type="submit">Unggah dokumen</button><span id="uploadMsg" class="text-sm text-slate-600" role="status"></span></div>
+  </form>
+ </section>
+ <section><div id="docsList" class="grid md:grid-cols-2 gap-3"><div class="doc-card p-4 text-sm text-slate-500">Memuat daftar dokumen...</div></div></section>
+ <section class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-slate-600"><b>Catatan:</b> Dokumen yang berasal dari situs resmi atau kwartir tetap ditautkan ke sumber asalnya. Dokumen unggahan Admin disimpan di penyimpanan RUANG TEGAK. Jika file yang pernah dikirim melalui percakapan belum tersimpan di perpustakaan aplikasi, Admin dapat memasukkannya melalui formulir unggah di atas.</section>
+</main>
+<script>
+'use strict';
+const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
+const SUPABASE_KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
+const BUCKET='ruang-tegak-dokumen';
+const sb=window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let docs=[];
+const defaults=[
+ {document_key:'sku-penegak-2011',title:'Panduan Penyelesaian SKU Penegak — SK Kwarnas 119 Tahun 2011',description:'Acuan utama persyaratan dan panduan penyelesaian SKU Bantara dan Laksana.',category:'Panduan SKU',sku_refs:['Seluruh butir SKU'],source_url:'https://kwarcabpekanbaru.or.id/web/unduh/444/SK-119-2011-Panduan%20Penyelesaian-SKU-Penegak.pdf',source_label:'Unduh PDF',sort_order:1},
+ {document_key:'ad-art-2023',title:'AD/ART Gerakan Pramuka — Munas XI 2023',description:'Landasan organisasi dan penyelenggaraan Gerakan Pramuka.',category:'Landasan Organisasi',sku_refs:['Materi umum','Laksana 11'],source_url:'https://kwarcabpekanbaru.or.id/web/unduh/474/68278964422AD-ART-Gerakan-Pramuka-Munas-2023.pdf',source_label:'Unduh PDF',sort_order:2},
+ {document_key:'jukran-gudep-05-2026',title:'Jukran Nomor 05 Tahun 2026 — Peraturan Gugus Depan',description:'Pedoman tata kelola dan pengorganisasian Gugus Depan, Ambalan, administrasi, serta pelaporan.',category:'Tata Kelola Gudep',sku_refs:['Materi umum','Bantara 5, 6, 8','Laksana 5, 6, 8'],source_url:'',source_label:'File perlu diunggah Admin',sort_order:3},
+ {document_key:'polmekbin-176-2013',title:'SK Kwarnas 176 Tahun 2013 — Pola dan Mekanisme Pembinaan Penegak dan Pandega',description:'Acuan pola pembinaan Penegak dan Pandega, peran Pembina, Ambalan, Sangga, serta kegiatan peserta didik.',category:'Pembinaan Penegak',sku_refs:['Materi umum','Bantara 5, 8','Laksana 3, 5, 8'],source_url:'https://kwarcabpekanbaru.or.id/web/unduh/456/SK-176-2013-Jukran-Polmekbin-TD.pdf',source_label:'Unduh PDF',sort_order:4},
+ {document_key:'seragam-174-2012',title:'SK Kwarnas 174 Tahun 2012 — Pakaian Seragam Anggota Gerakan Pramuka',description:'Pedoman fungsi, jenis, kelengkapan, atribut, dan tata cara pemakaian seragam Pramuka.',category:'Seragam Pramuka',sku_refs:['Materi umum: identitas dan tanda pengenal'],source_url:'https://pramuka.or.id/files/document/SK-174-2012-Jukran-Pakaian-Seragam-Pramuka.pdf',source_label:'Unduh PDF',sort_order:5}
+];
+function publicUrl(path){return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;}
+function render(){
+ const q=($('searchDocs').value||'').trim().toLowerCase();
+ const rows=docs.filter(d=>[d.title,d.description,d.category,(d.sku_refs||[]).join(' ')].join(' ').toLowerCase().includes(q));
+ $('docCount').textContent=rows.length+' dokumen';
+ $('docsList').innerHTML=rows.map(d=>{
+  const url=d.storage_path?publicUrl(d.storage_path):d.source_url;
+  const tags=(d.sku_refs||[]).map(s=>'<span class="inline-block rounded-full bg-amber-100 text-amber-900 px-2 py-1 text-xs mr-1 mt-1">'+esc(s)+'</span>').join('');
+  const status=url?'<span class="text-xs font-bold text-green-700">Tersedia</span>':'<span class="text-xs font-bold text-amber-700">Menunggu file diunggah</span>';
+  const action=url?'<a href="'+esc(url)+'" target="_blank" rel="noopener" class="btn-gold inline-flex rounded-lg px-4 py-2 text-sm font-bold">Buka / Unduh ↗</a>':'<span class="text-xs text-slate-500">File PDF yang Anda kirim sebelumnya belum tersalin ke penyimpanan aplikasi.</span>';
+  return '<article id="'+esc(d.document_key)+'" class="doc-card p-4 flex flex-col gap-3"><div class="flex items-start justify-between gap-2"><span class="rounded-full bg-amber-100 text-amber-900 px-3 py-1 text-xs font-bold">'+esc(d.category||'Dokumen')+'</span>'+status+'</div><div><h3 class="font-bold leading-snug">'+esc(d.title)+'</h3><p class="text-sm text-slate-600 mt-2">'+esc(d.description)+'</p></div><div>'+tags+'</div><div class="mt-auto pt-2">'+action+'</div></article>';
+ }).join('')||'<div class="doc-card p-5 text-sm text-slate-500">Dokumen tidak ditemukan.</div>';
+}
+async function init(){
+ if(!sb){$('docsList').innerHTML='<div class="doc-card p-4">Layanan dokumen belum termuat. Muat ulang halaman.</div>';return;}
+ const {data,error}=await sb.from('ruang_tegak_documents').select('*').order('sort_order').order('title');
+ docs=error||!data?.length?defaults:data;
+ render();
+ const {data:sess}=await sb.auth.getSession();
+ const user=sess?.session?.user;
+ if(user){
+  const {data:profile}=await sb.from('users').select('role,status_akun').eq('id_user',user.id).maybeSingle();
+  if(profile?.role==='admin_kwarcab'&&profile?.status_akun!=='nonaktif')$('adminUpload').classList.remove('hidden');
+ }
+}
+$('searchDocs').addEventListener('input',render);
+$('docKey').addEventListener('change',()=>{$('docTitle').disabled=$('docKey').value!=='new';$('docDescription').disabled=$('docKey').value!=='new';if($('docKey').value!=='new'){$('docTitle').value='';$('docDescription').value='';}});
+$('uploadForm').addEventListener('submit',async e=>{
+ e.preventDefault();const msg=$('uploadMsg'),btn=$('uploadBtn'),file=$('docFile').files[0],key=$('docKey').value;
+ if(!file){msg.textContent='Pilih file terlebih dahulu.';return;}
+ if(file.size>50*1024*1024){msg.textContent='Ukuran file melebihi 50 MB.';return;}
+ const title=$('docTitle').value.trim(),description=$('docDescription').value.trim();
+ if(key==='new'&&!title){msg.textContent='Judul dokumen baru wajib diisi.';return;}
+ btn.disabled=true;msg.textContent='Mengunggah file...';
+ try{
+  const safe=file.name.normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'')||'dokumen';
+  const path=(key==='new'?'unggahan/':'rujukan/'+key+'/')+Date.now()+'-'+safe;
+  const up=await sb.storage.from(BUCKET).upload(path,file,{upsert:false,contentType:file.type||'application/octet-stream'});
+  if(up.error)throw up.error;
+  let result;
+  if(key==='new'){
+   const slug='unggahan-'+Date.now();
+   result=await sb.from('ruang_tegak_documents').insert({document_key:slug,title,description,category:'Dokumen Tambahan',sku_refs:[],storage_path:path,source_url:null,source_label:'Unggahan Admin',is_official:false,sort_order:100,created_by:(await sb.auth.getUser()).data.user?.id}).select().single();
+  }else{
+   result=await sb.from('ruang_tegak_documents').update({storage_path:path,source_url:null,source_label:'File aplikasi',updated_at:new Date().toISOString()}).eq('document_key',key).select().single();
+  }
+  if(result.error){await sb.storage.from(BUCKET).remove([path]);throw result.error;}
+  msg.textContent='Dokumen berhasil diunggah dan tersedia untuk diunduh.';
+  $('uploadForm').reset();$('docTitle').disabled=true;$('docDescription').disabled=true;
+  await init();
+ }catch(err){msg.textContent='Unggah belum berhasil: '+(err?.message||'Periksa koneksi dan akses Admin Utama.');}
+ finally{btn.disabled=false;}
+});
+$('docTitle').disabled=true;$('docDescription').disabled=true;
+init();
+</script>
+</body></html>
