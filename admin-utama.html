@@ -377,6 +377,30 @@ async function ensureSb(){
   return sb;
 }
 const $=id=>document.getElementById(id);
+
+// Daftarkan token FCM hanya setelah administrator utama berhasil login.
+let ruangTegakFcmToken=null;
+async function simpanTokenNotifikasiRuangTegak(){
+  if(!ruangTegakFcmToken) return;
+  await ensureSb();
+  const {data,error:sessionError}=await sb.auth.getSession();
+  if(sessionError) throw sessionError;
+  const user=data?.session?.user;
+  if(!user?.id) return;
+  const {error}=await sb.from('ruang_tegak_admin_devices').upsert({
+    user_id:user.id,
+    fcm_token:ruangTegakFcmToken,
+    platform:'android',
+    enabled:true,
+    device_label:'HP Administrator Utama'
+  },{onConflict:'fcm_token'});
+  if(error) throw error;
+}
+window.addEventListener('ruangTegakFcmToken',event=>{
+  ruangTegakFcmToken=String(event.detail||'');
+  simpanTokenNotifikasiRuangTegak().catch(err=>console.warn('Token notifikasi belum tersimpan:',err?.message||err));
+});
+
 async function callApi(payload){await ensureSb();const {data,error}=await sb.functions.invoke('pramuka-register',{body:payload});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Permintaan gagal');return data;}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 $('login-form').addEventListener('submit',async e=>{
@@ -390,6 +414,7 @@ $('login-form').addEventListener('submit',async e=>{
     const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
     if(error) throw error;
     await callApi({action:'bootstrap_admin'});
+    await simpanTokenNotifikasiRuangTegak();
     await showDashboard();
   }catch(err){
     if(sb) await sb.auth.signOut().catch(()=>{});
