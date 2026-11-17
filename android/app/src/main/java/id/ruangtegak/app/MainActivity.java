@@ -20,7 +20,7 @@ public class MainActivity extends Activity {
     private WebView webView;
     private String fcmToken = null;
     private static final int NOTIFICATION_PERMISSION_REQUEST = 4102;
-    private static final String APP_URL = "https://yayanhadiyanto24-ops.github.io/pramuka-app/";
+    private static final String APP_URL = "https://yayanhadiyanto24-ops.github.io/pramuka-app/admin-utama.html";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
