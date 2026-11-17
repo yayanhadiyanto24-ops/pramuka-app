@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "913544882924",
+    "project_id": "ruang-tegak",
+    "storage_bucket": "ruang-tegak.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913544882924:android:06eee861f72c575c7153c9",
+        "android_client_info": {
+          "package_name": "id.ruangtegak.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEx6Dx2pzSulBAZFAkxUrPvO_bNllMj9o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
