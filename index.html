@@ -426,6 +426,32 @@ a[class*="rounded"]{
 const SUPABASE_URL = 'https://bopxmtxfrlrnywwhywne.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+ 
+// Firebase Cloud Messaging: menerima token dari APK Android dan mendaftarkannya
+// hanya untuk akun administrator utama melalui kebijakan RLS Supabase.
+let ruangTegakFcmToken = null;
+async function simpanTokenNotifikasiRuangTegak(session) {
+    if (!ruangTegakFcmToken || !session?.user?.id) return;
+    const { error } = await supabaseClient
+        .from('ruang_tegak_admin_devices')
+        .upsert({
+            user_id: session.user.id,
+            fcm_token: ruangTegakFcmToken,
+            platform: 'android',
+            enabled: true,
+            device_label: 'HP Administrator Utama'
+        }, { onConflict: 'fcm_token' });
+    if (error) console.warn('Pendaftaran token notifikasi gagal:', error.message);
+}
+window.addEventListener('ruangTegakFcmToken', async (event) => {
+    ruangTegakFcmToken = event.detail;
+    const { data } = await supabaseClient.auth.getSession();
+    await simpanTokenNotifikasiRuangTegak(data?.session);
+});
+supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session) setTimeout(() => simpanTokenNotifikasiRuangTegak(session), 0);
+});
+
 
 function switchTab(role) {
     const roles = ['peserta', 'pembina', 'admin_kwarran'];
