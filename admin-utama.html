@@ -366,6 +366,27 @@ header nav button{
  <div><h3 class="font-semibold mb-2">Akun Admin Kwarran Terdaftar</h3><div id="kwarran-admin-list" class="space-y-2"></div></div>
  <p id="kwarran-manager-status" class="text-sm text-slate-500" role="status"></p>
 </section>
+<section id="gudep-assessment-manager" class="bg-white rounded-2xl shadow-sm p-4 space-y-4">
+ <div><h2 class="font-bold text-lg">Pengaturan Penilaian Gudep Tergiat</h2><p class="text-sm text-slate-600">Admin Utama mengatur indikator dan bobot penilaian sebelum periode dibuka untuk Pembina. Template referensi tetap berstatus draft sampai semua komponen memiliki indikator.</p></div>
+ <div class="rounded-xl border p-3 space-y-2"><div id="gudep-template-summary" class="text-sm">Memuat template penilaian...</div><button id="gudep-template-activate" type="button" class="rounded-lg bg-amber-500 text-stone-950 font-bold px-4 py-2 text-sm" disabled>Aktifkan Template</button><p class="text-xs text-slate-500">Template aktif tidak dapat diubah. Perubahan instrumen berikutnya harus menggunakan versi template baru.</p></div>
+ <form id="gudep-criteria-form" class="border rounded-xl p-3 space-y-2">
+  <h3 class="font-semibold">Tambah / Ubah Indikator Penilaian</h3>
+  <select id="gudep-criteria-category" class="w-full border rounded-lg p-2 text-sm" required><option value="">Pilih komponen penilaian</option></select>
+  <div class="grid sm:grid-cols-2 gap-2"><input id="gudep-criteria-code" maxlength="40" placeholder="Kode indikator, mis. B1.01" class="border rounded-lg p-2 text-sm" required><input id="gudep-criteria-name" maxlength="180" placeholder="Nama indikator" class="border rounded-lg p-2 text-sm" required></div>
+  <div class="grid sm:grid-cols-2 gap-2"><input id="gudep-criteria-max" type="number" min="0.01" max="10000" step="0.01" placeholder="Nilai maksimum" class="border rounded-lg p-2 text-sm" required><label class="flex items-center gap-2 text-sm"><input id="gudep-criteria-evidence" type="checkbox" checked> Bukti pendukung wajib</label></div>
+  <textarea id="gudep-criteria-guide" rows="3" maxlength="3000" placeholder="Panduan pemberian skor dan bukti yang harus diperiksa" class="w-full border rounded-lg p-2 text-sm"></textarea>
+  <div class="flex flex-wrap gap-2"><button id="gudep-criteria-save" type="submit" class="rounded-lg bg-amber-500 text-stone-950 font-bold px-4 py-2 text-sm">Simpan Indikator</button><button id="gudep-criteria-reset" type="button" class="rounded-lg border px-4 py-2 text-sm">Batal Ubah</button></div>
+ </form>
+ <div><h3 class="font-semibold mb-2">Daftar Indikator</h3><div id="gudep-criteria-list" class="space-y-2 text-sm"><p class="text-slate-500">Memuat indikator...</p></div></div>
+ <form id="gudep-period-form" class="border rounded-xl p-3 space-y-2">
+  <h3 class="font-semibold">Buat Periode Penilaian</h3>
+  <input id="gudep-period-name" maxlength="180" placeholder="Nama periode, mis. Gudep Tergiat Kwarcab Cianjur 2026" class="w-full border rounded-lg p-2 text-sm" required>
+  <div class="grid sm:grid-cols-3 gap-2"><input id="gudep-period-year" type="number" min="2020" max="2100" value="2026" class="border rounded-lg p-2 text-sm" required><input id="gudep-period-start" type="date" class="border rounded-lg p-2 text-sm"><input id="gudep-period-end" type="date" class="border rounded-lg p-2 text-sm"></div>
+  <button type="submit" class="rounded-lg bg-amber-500 text-stone-950 font-bold px-4 py-2 text-sm">Buat Periode Draft</button>
+ </form>
+ <div><h3 class="font-semibold mb-2">Daftar Periode</h3><div id="gudep-period-list" class="space-y-2 text-sm"><p class="text-slate-500">Memuat periode...</p></div></div>
+ <p id="gudep-assessment-status" class="text-sm text-slate-500" role="status"></p>
+</section>
 <div id="status" class="text-sm text-slate-500"></div></section></main>
 <script>
 const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
