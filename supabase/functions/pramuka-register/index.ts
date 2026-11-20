@@ -9,7 +9,7 @@ Deno.serve(async(req:Request)=>{
  if(!url||!secret)return reply({ok:false,message:"Konfigurasi server belum lengkap."},500);
  const admin=createClient(url,secret,{auth:{autoRefreshToken:false,persistSession:false}});
  try{
-  const body=await req.json(),action=clean(body.action||"register",30);
+  const body=await req.json(),action=clean(body.action||"register",60);
   if(action==="kwarran_registration_options"){
    const {data,error}=await admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran");
    if(error)throw error;return reply({ok:true,kwarran:data||[]});
