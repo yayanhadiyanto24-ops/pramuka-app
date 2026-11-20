@@ -387,7 +387,7 @@ header nav button{
  <div><h3 class="font-semibold mb-2">Daftar Periode</h3><div id="gudep-period-list" class="space-y-2 text-sm"><p class="text-slate-500">Memuat periode...</p></div></div>
  <section class="border-t pt-4 space-y-3">
   <div><h3 class="font-bold text-lg">Penetapan Nilai Final Gudep Tergiat</h3><p class="text-sm text-slate-600">Daftar penilaian yang sudah diverifikasi Kwarran. Admin Utama memeriksa kembali dan menetapkan nilai final sebagai hasil resmi.</p></div>
-  <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th class="text-left">Pangkalan</th><th class="text-left">Kwarran</th><th class="text-left">Periode</th><th>Status</th><th>Nilai Kwarran</th><th>Nilai Final</th><th>Aksi</th></tr></thead><tbody id="gudep-final-list"><tr><td colspan="7" class="text-center py-3 text-slate-500">Memuat daftar...</td></tr></tbody></table></div>
+  <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th class="text-left">Pangkalan</th><th class="text-left">Kwarran</th><th class="text-left">Periode</th><th>Status</th><th>Nilai Kwarran</th><th>Nilai Final</th><th>Peringkat</th><th>Aksi</th></tr></thead><tbody id="gudep-final-list"><tr><td colspan="8" class="text-center py-3 text-slate-500">Memuat daftar...</td></tr></tbody></table></div>
   <p id="gudep-final-list-msg" class="text-xs text-slate-500" role="status"></p>
   <div id="gudep-final-detail" class="hidden border rounded-xl p-3 space-y-3">
    <div class="flex flex-wrap items-start justify-between gap-2"><div><h4 id="gudep-final-title" class="font-bold"></h4><p id="gudep-final-meta" class="text-xs text-slate-500"></p></div><button id="gudep-final-close" type="button" class="border rounded-lg px-3 py-2 text-xs">Tutup rincian</button></div>
@@ -498,11 +498,11 @@ async function loadGudepFinalList(){
   const status={terverifikasi_kwarran:'Menunggu penetapan final',final:'Final'};
   body.innerHTML=rows.map(p=>{
    const pangkalan=p.pangkalan||{},kwarran=p.kwarran||{},periode=p.gudep_penilaian_periode||{};
-   return '<tr class="border-t"><td class="py-2">'+esc(pangkalan.nama_pangkalan||'-')+'<div class="text-xs text-slate-500">Gudep '+esc(pangkalan.no_gudep||'-')+'</div></td><td class="py-2">'+esc(kwarran.nama_kwarran||'-')+'</td><td class="py-2">'+esc(periode.nama_periode||'')+' '+Number(periode.tahun||0)+'</td><td class="py-2">'+(status[p.status]||esc(p.status))+'</td><td class="py-2 text-center">'+Number(p.poin_total_verifikasi||0)+'</td><td class="py-2 text-center">'+(p.poin_total_final===null?'—':Number(p.poin_total_final))+'</td><td class="py-2"><button type="button" data-gudep-final-review="'+p.id_penilaian+'" class="border rounded-lg px-3 py-1 text-xs">'+(p.status==='final'?'Lihat':'Periksa & finalkan')+'</button></td></tr>';
-  }).join('')||'<tr><td colspan="7" class="text-center py-3 text-slate-500">Belum ada penilaian yang diteruskan Kwarran.</td></tr>';
+   return '<tr class="border-t"><td class="py-2">'+esc(pangkalan.nama_pangkalan||'-')+'<div class="text-xs text-slate-500">Gudep '+esc(pangkalan.no_gudep||'-')+'</div></td><td class="py-2">'+esc(kwarran.nama_kwarran||'-')+'</td><td class="py-2">'+esc(periode.nama_periode||'')+' '+Number(periode.tahun||0)+'</td><td class="py-2">'+(status[p.status]||esc(p.status))+'</td><td class="py-2 text-center">'+Number(p.poin_total_verifikasi||0)+'</td><td class="py-2 text-center">'+(p.poin_total_final===null?'—':Number(p.poin_total_final))+'</td><td class="py-2 text-center font-bold">'+(p.peringkat_final?'#'+p.peringkat_final:'—')+'</td><td class="py-2"><button type="button" data-gudep-final-review="'+p.id_penilaian+'" class="border rounded-lg px-3 py-1 text-xs">'+(p.status==='final'?'Lihat':'Periksa & finalkan')+'</button></td></tr>';
+  }).join('')||'<tr><td colspan="8" class="text-center py-3 text-slate-500">Belum ada penilaian yang diteruskan Kwarran.</td></tr>';
   body.querySelectorAll('[data-gudep-final-review]').forEach(btn=>btn.onclick=()=>openGudepFinalReview(Number(btn.dataset.gudepFinalReview)));
   msg.textContent=rows.length+' penilaian ditemukan.';
- }catch(err){body.innerHTML='<tr><td colspan="7" class="text-center py-3 text-red-700">'+esc(err.message||'Gagal memuat daftar.')+'</td></tr>';msg.textContent='';}
+ }catch(err){body.innerHTML='<tr><td colspan="8" class="text-center py-3 text-red-700">'+esc(err.message||'Gagal memuat daftar.')+'</td></tr>';msg.textContent='';}
 }
 async function openGudepFinalReview(id){
  const box=$('gudep-final-detail'),criteriaBox=$('gudep-final-criteria'),msg=$('gudep-final-msg');
