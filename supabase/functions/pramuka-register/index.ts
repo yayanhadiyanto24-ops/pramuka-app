@@ -145,7 +145,7 @@ Deno.serve(async(req:Request)=>{
    }else return reply({ok:false,message:"Peran akun tidak diizinkan."},403);
    return reply({ok:true,message:"Profil berhasil disimpan."});
   }
-  if(action==="pembina_pangkalan"||action==="simpan_pangkalan_pembina"||action==="simpan_tanda_tangan_pangkalan"||action==="pembina_peserta_pending"||action==="setujui_peserta_pembina"||action==="pembina_sangga_data"||action==="pindah_sangga_peserta"||action==="pindah_ambalan_peserta"||action==="activate_access_code"){
+  if(action==="pembina_pangkalan"||action==="simpan_pangkalan_pembina"||action==="simpan_tanda_tangan_pangkalan"||action==="pembina_peserta_pending"||action==="setujui_peserta_pembina"||action==="pembina_sangga_data"||action==="pindah_sangga_peserta"||action==="pindah_ambalan_peserta"||action==="activate_access_code"||action==="gudep_penilaian_pembina_data"||action==="gudep_penilaian_pembina_simpan"||action==="gudep_penilaian_pembina_kirim"||action==="gudep_penilaian_bukti_upload"||action==="gudep_penilaian_bukti_hapus"){
    const {data:authData,error:authErr}=await admin.auth.getUser(token);
    if(authErr||!authData.user)return reply({ok:false,message:"Sesi login tidak valid."},401);
    const {data:pb,error:pbErr}=await admin.from("profil_pembina").select("id_pangkalan,id_user,jabatan,jenis_kelamin,nta,jumlah_ambalan_berbayar,users!inner(status_akun,role)").eq("id_user",authData.user.id).maybeSingle();
@@ -160,6 +160,85 @@ Deno.serve(async(req:Request)=>{
     const {data:jumlah,error:activationError}=await admin.rpc("pramuka_activate_ambalan_code",{p_code:code,p_user_id:authData.user.id});if(activationError)throw activationError;
     const total=Number(jumlah||0);
     return reply({ok:true,jumlah_ambalan_berbayar:total,kuota_maksimal:total*32,message:"Kode berhasil diaktifkan. Satu ambalan tambahan terbuka untuk 32 peserta didik. Total kuota kini "+(total*32)+" peserta."});
+   }
+   if(action==="gudep_penilaian_pembina_data"){
+    const {data:periode,error:periodeError}=await admin.from("gudep_penilaian_periode").select("id_periode,id_template,nama_periode,tahun,tanggal_mulai,tanggal_akhir,status").eq("status","dibuka").order("tahun",{ascending:false}).limit(1).maybeSingle();
+    if(periodeError)throw periodeError;
+    if(!periode)return reply({ok:true,periode:null,penilaian:null,kategori:[],kriteria:[],message:"Belum ada periode penilaian Gudep Tergiat yang dibuka."});
+    const [{data:penilaian,error:penilaianError},{data:kategori,error:kategoriError},{data:kriteria,error:kriteriaError}]=await Promise.all([
+     admin.from("gudep_penilaian").select("id_penilaian,id_periode,status,poin_total_usulan,catatan_pembina").eq("id_periode",periode.id_periode).eq("id_pangkalan",pb.id_pangkalan).maybeSingle(),
+     admin.from("gudep_penilaian_kategori").select("id_kategori,parent_id,kode,nama,deskripsi,urutan").eq("id_template",periode.id_template).eq("aktif",true).order("urutan"),
+     admin.from("gudep_penilaian_kriteria").select("id_kriteria,id_kategori,kode,nama,panduan_penilaian,poin_maks,bukti_wajib,urutan").eq("aktif",true).order("urutan")
+    ]);
+    if(penilaianError)throw penilaianError;if(kategoriError)throw kategoriError;if(kriteriaError)throw kriteriaError;
+    const cats=kategori||[],catIds=new Set(cats.map(x=>x.id_kategori)),criteria=(kriteria||[]).filter(x=>catIds.has(x.id_kategori));
+    let nilai:any[]=[];
+    let bukti:any[]=[];
+    if(penilaian){
+     const [{data:n,error:ne},{data:b,error:be}]=await Promise.all([
+      admin.from("gudep_penilaian_nilai").select("id_kriteria,nilai_usulan,catatan_pembina").eq("id_penilaian",penilaian.id_penilaian),
+      admin.from("gudep_penilaian_bukti").select("id_bukti,id_kriteria,nama_file,mime_type,ukuran_byte,status_verifikasi,storage_bucket,storage_path,created_at").eq("id_penilaian",penilaian.id_penilaian).order("created_at",{ascending:false})
+     ]);
+     if(ne)throw ne;if(be)throw be;nilai=n||[];bukti=b||[];
+     if(bukti.length){
+      const paths=bukti.map(x=>x.storage_path);
+      const {data:signed,error:signedError}=await admin.storage.from("gudep-penilaian-bukti").createSignedUrls(paths,600);
+      if(signedError)throw signedError;
+      const urlMap=new Map((signed||[]).map(x=>[x.path,x.signedUrl]));
+      bukti=bukti.map(x=>({...x,url:urlMap.get(x.storage_path)||null}));
+     }
+    }
+    const nilaiMap=new Map(nilai.map(x=>[String(x.id_kriteria),x]));
+    const buktiMap=new Map<number,any[]>();
+    for(const b of bukti){const key=Number(b.id_kriteria);if(!buktiMap.has(key))buktiMap.set(key,[]);buktiMap.get(key)!.push(b);}
+    return reply({ok:true,periode,penilaian,kategori:cats,kriteria:criteria.map(k=>({...k,nilai_usulan:Number(nilaiMap.get(String(k.id_kriteria))?.nilai_usulan||0),catatan_pembina:nilaiMap.get(String(k.id_kriteria))?.catatan_pembina||"",bukti:buktiMap.get(Number(k.id_kriteria))||[]}))});
+   }
+   if(action==="gudep_penilaian_pembina_simpan"){
+    const periodeId=Number(body.id_periode),nilai=Array.isArray(body.nilai)?body.nilai:[];
+    if(!Number.isInteger(periodeId)||periodeId<=0)return reply({ok:false,message:"Periode penilaian tidak valid."},400);
+    const {data,error}=await admin.rpc("gudep_penilaian_pembina_simpan",{p_user_id:authData.user.id,p_id_periode:periodeId,p_nilai:nilai,p_catatan:clean(body.catatan,3000)});
+    if(error)return reply({ok:false,message:error.message||"Draft penilaian gagal disimpan."},400);
+    return reply({ok:true,...data,message:"Draft penilaian berhasil disimpan."});
+   }
+   if(action==="gudep_penilaian_pembina_kirim"){
+    const periodeId=Number(body.id_periode);
+    if(!Number.isInteger(periodeId)||periodeId<=0)return reply({ok:false,message:"Periode penilaian tidak valid."},400);
+    const {data,error}=await admin.rpc("gudep_penilaian_pembina_kirim",{p_user_id:authData.user.id,p_id_periode:periodeId,p_catatan:clean(body.catatan,3000)});
+    if(error)return reply({ok:false,message:error.message||"Penilaian gagal diajukan."},400);
+    return reply({ok:true,...data,message:"Penilaian berhasil diajukan kepada Admin Kwarran."});
+   }
+   if(action==="gudep_penilaian_bukti_upload"){
+    const idPenilaian=Number(body.id_penilaian),idKriteria=Number(body.id_kriteria),namaAsli=clean(body.nama_file,180),mime=clean(body.mime_type,100),ukuran=Number(body.ukuran_byte);
+    const allowed=["application/pdf","image/jpeg","image/png","image/webp"];
+    if(!Number.isInteger(idPenilaian)||idPenilaian<=0||!Number.isInteger(idKriteria)||idKriteria<=0||!namaAsli||!allowed.includes(mime)||!Number.isInteger(ukuran)||ukuran<=0||ukuran>10485760)return reply({ok:false,message:"Berkas harus berupa PDF/JPG/PNG/WebP dan maksimal 10 MB."},400);
+    const {data:penilaian,error:penilaianError}=await admin.from("gudep_penilaian").select("id_penilaian,id_periode,id_template,id_pangkalan,status").eq("id_penilaian",idPenilaian).eq("id_pangkalan",pb.id_pangkalan).maybeSingle();
+    if(penilaianError)throw penilaianError;if(!penilaian||!["draft","perlu_perbaikan"].includes(penilaian.status))return reply({ok:false,message:"Penilaian tidak ditemukan atau sudah dikunci."},403);
+    const {data:periode,error:periodeError}=await admin.from("gudep_penilaian_periode").select("status,tanggal_mulai,tanggal_akhir").eq("id_periode",penilaian.id_periode).single();
+    if(periodeError)throw periodeError;if(periode.status!=="dibuka"||(periode.tanggal_mulai&&new Date().toISOString().slice(0,10)<periode.tanggal_mulai)||(periode.tanggal_akhir&&new Date().toISOString().slice(0,10)>periode.tanggal_akhir))return reply({ok:false,message:"Periode penilaian tidak sedang menerima berkas."},400);
+    const {data:criterion,error:criterionError}=await admin.from("gudep_penilaian_kriteria").select("id_kriteria,id_kategori").eq("id_kriteria",idKriteria).eq("aktif",true).maybeSingle();
+    if(criterionError)throw criterionError;if(!criterion)return reply({ok:false,message:"Indikator tidak ditemukan."},404);
+    const {data:category,error:categoryError}=await admin.from("gudep_penilaian_kategori").select("id_kategori").eq("id_kategori",criterion.id_kategori).eq("id_template",penilaian.id_template).eq("aktif",true).maybeSingle();
+    if(categoryError)throw categoryError;if(!category)return reply({ok:false,message:"Indikator bukan bagian dari template penilaian ini."},400);
+    const safeName=namaAsli.replace(/[^a-zA-Z0-9._-]/g,"_").slice(0,120)||"bukti";
+    const path="pangkalan/"+pb.id_pangkalan+"/periode/"+penilaian.id_periode+"/"+idPenilaian+"/"+idKriteria+"/"+crypto.randomUUID()+"-"+safeName;
+    const {data:signed,error:signedError}=await admin.storage.from("gudep-penilaian-bukti").createSignedUploadUrl(path,{upsert:false});
+    if(signedError)throw signedError;
+    const {data:meta,error:metaError}=await admin.from("gudep_penilaian_bukti").insert({id_penilaian:idPenilaian,id_kriteria:idKriteria,storage_bucket:"gudep-penilaian-bukti",storage_path:path,nama_file:namaAsli,mime_type:mime,ukuran_byte:ukuran,diunggah_oleh:authData.user.id}).select("id_bukti").single();
+    if(metaError)throw metaError;
+    return reply({ok:true,id_bukti:meta.id_bukti,path,token:signed.token,bucket:"gudep-penilaian-bukti",message:"Tautan unggah bukti berhasil dibuat."});
+   }
+   if(action==="gudep_penilaian_bukti_hapus"){
+    const idBukti=Number(body.id_bukti);
+    if(!Number.isInteger(idBukti)||idBukti<=0)return reply({ok:false,message:"Bukti tidak valid."},400);
+    const {data:bukti,error:buktiError}=await admin.from("gudep_penilaian_bukti").select("id_bukti,id_penilaian,storage_bucket,storage_path").eq("id_bukti",idBukti).maybeSingle();
+    if(buktiError)throw buktiError;if(!bukti)return reply({ok:false,message:"Bukti tidak ditemukan."},404);
+    const {data:penilaian,error:penilaianError}=await admin.from("gudep_penilaian").select("id_penilaian,id_pangkalan,status").eq("id_penilaian",bukti.id_penilaian).maybeSingle();
+    if(penilaianError)throw penilaianError;if(!penilaian||penilaian.id_pangkalan!==pb.id_pangkalan||!["draft","perlu_perbaikan"].includes(penilaian.status))return reply({ok:false,message:"Bukti tidak dapat dihapus setelah penilaian diajukan."},403);
+    const {error:removeError}=await admin.storage.from(bukti.storage_bucket).remove([bukti.storage_path]);
+    if(removeError)throw removeError;
+    const {error:deleteError}=await admin.from("gudep_penilaian_bukti").delete().eq("id_bukti",idBukti);
+    if(deleteError)throw deleteError;
+    return reply({ok:true,message:"Bukti pendukung berhasil dihapus."});
    }
    if(action==="pembina_sangga_data"){
     const gender=pb.jenis_kelamin;
