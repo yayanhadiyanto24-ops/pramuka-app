@@ -142,7 +142,7 @@ Deno.serve(async(req:Request)=>{
    }else return reply({ok:false,message:"Peran akun tidak diizinkan."},403);
    return reply({ok:true,message:"Profil berhasil disimpan."});
   }
-  if(action==="pembina_pangkalan"||action==="simpan_pangkalan_pembina"||action==="simpan_tanda_tangan_pangkalan"||action==="pembina_peserta_pending"||action==="setujui_peserta_pembina"||action==="pembina_sangga_data"||action==="pindah_sangga_peserta"||action==="activate_access_code"){
+  if(action==="pembina_pangkalan"||action==="simpan_pangkalan_pembina"||action==="simpan_tanda_tangan_pangkalan"||action==="pembina_peserta_pending"||action==="setujui_peserta_pembina"||action==="pembina_sangga_data"||action==="pindah_sangga_peserta"||action==="pindah_ambalan_peserta"||action==="activate_access_code"){
    const {data:authData,error:authErr}=await admin.auth.getUser(token);
    if(authErr||!authData.user)return reply({ok:false,message:"Sesi login tidak valid."},401);
    const {data:pb,error:pbErr}=await admin.from("profil_pembina").select("id_pangkalan,id_user,jabatan,jenis_kelamin,nta,jumlah_ambalan_berbayar,users!inner(status_akun,role)").eq("id_user",authData.user.id).maybeSingle();
@@ -160,10 +160,22 @@ Deno.serve(async(req:Request)=>{
    }
    if(action==="pembina_sangga_data"){
     const gender=pb.jenis_kelamin;
-    const [{data:sangga,error:se},{data:peserta,error:pe}]=await Promise.all([
+    const [{data:sangga,error:se},{data:peserta,error:pe},{data:ambalan,error:ae}]=await Promise.all([
      admin.from("pangkalan_sangga").select("id_sangga,nama_sangga,urutan").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).eq("aktif",true).order("urutan"),
-     admin.from("profil_peserta_didik").select("id_user,nama_lengkap,jenis_kelamin,sangga,id_sangga,kelas_sekolah,jurusan,tahun_pelajaran").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).order("nama_lengkap")
-    ]);if(se)throw se;if(pe)throw pe;return reply({ok:true,sangga:sangga||[],peserta:peserta||[]});
+     admin.from("profil_peserta_didik").select("id_user,nama_lengkap,jenis_kelamin,sangga,id_sangga,id_ambalan,kelas_sekolah,jurusan,tahun_pelajaran,status_keanggotaan,users!inner(status_akun)").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).eq("users.status_akun","aktif").neq("status_keanggotaan","alumni").order("nama_lengkap"),
+     admin.from("pangkalan_ambalan").select("id_ambalan,nama_ambalan,urutan,status").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).neq("status","nonaktif").order("urutan")
+    ]);if(se)throw se;if(pe)throw pe;if(ae)throw ae;
+    return reply({ok:true,sangga:sangga||[],peserta:peserta||[],ambalan:ambalan||[]});
+   }
+   if(action==="pindah_ambalan_peserta"){
+    const targetId=clean(body.user_id,50),idAmbalan=Number(body.id_ambalan),alasan=clean(body.alasan,500);
+    if(!targetId||!Number.isInteger(idAmbalan))return reply({ok:false,message:"Peserta atau Ambalan tujuan tidak valid."},400);
+    const {data:target,error:te}=await admin.from("profil_peserta_didik").select("id_user,id_pangkalan,jenis_kelamin").eq("id_user",targetId).eq("id_pangkalan",pb.id_pangkalan).maybeSingle();
+    if(te)throw te;
+    if(!target||target.jenis_kelamin!==pb.jenis_kelamin)return reply({ok:false,message:"Peserta bukan anggota satuan yang menjadi kewenangan Anda."},403);
+    const {data:result,error:moveError}=await admin.rpc("pramuka_pindah_peserta_ambalan",{p_user_id:targetId,p_id_ambalan_tujuan:idAmbalan,p_actor_user_id:authData.user.id,p_alasan:alasan});
+    if(moveError)return reply({ok:false,message:moveError.message||"Pemindahan Ambalan gagal."},400);
+    return reply({ok:true,...result,message:result?.moved===false?result.message:"Peserta berhasil dipindahkan ke "+(result?.nama_ambalan_tujuan||"Ambalan tujuan")+". Riwayat perpindahan telah dicatat."});
    }
    if(action==="pindah_sangga_peserta"){
     const targetId=clean(body.user_id,50),idSangga=Number(body.id_sangga);if(!targetId||!Number.isInteger(idSangga))return reply({ok:false,message:"Peserta atau Sangga tidak valid."},400);
