@@ -351,7 +351,7 @@ Deno.serve(async(req:Request)=>{
     const gender=pb.jenis_kelamin;
     const [{data:sangga,error:se},{data:peserta,error:pe},{data:ambalan,error:ae},{data:pangkalan,error:pae}]=await Promise.all([
      admin.from("pangkalan_sangga").select("id_sangga,nama_sangga,urutan").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).eq("aktif",true).order("urutan"),
-     admin.from("profil_peserta_didik").select("id_user,nama_lengkap,jenis_kelamin,sangga,id_sangga,id_ambalan,kelas_sekolah,jurusan,tahun_pelajaran,status_keanggotaan,users!inner(status_akun)").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).eq("users.status_akun","aktif").neq("status_keanggotaan","alumni").order("nama_lengkap"),
+     admin.from("profil_peserta_didik").select("id_user,nama_lengkap,jenis_kelamin,sangga,id_sangga,id_ambalan,kelas_sekolah,jurusan,tahun_pelajaran,status_keanggotaan,users!inner(status_akun)").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).eq("users.status_akun","aktif").or("status_keanggotaan.is.null,status_keanggotaan.eq.aktif").order("nama_lengkap"),
      admin.from("pangkalan_ambalan").select("id_ambalan,nama_ambalan,urutan,status").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).neq("status","nonaktif").order("urutan"),
      admin.from("pangkalan").select("id_kwarran").eq("id_pangkalan",pb.id_pangkalan).single()
     ]);if(se)throw se;if(pe)throw pe;if(ae)throw ae;if(pae)throw pae;
