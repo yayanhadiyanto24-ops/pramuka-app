@@ -366,7 +366,7 @@ header nav button{
  <div><h3 class="font-semibold mb-2">Akun Admin Kwarran Terdaftar</h3><div id="kwarran-admin-list" class="space-y-2"></div></div>
  <p id="kwarran-manager-status" class="text-sm text-slate-500" role="status"></p>
 </section>
-<section id="gudep-assessment-manager" class="bg-white rounded-2xl shadow-sm p-4 space-y-4">
+<section id="gudep-assessment-manager" class="bg-white rounded-2xl shadow-sm p-4 space-y-4">\n <div class="rounded-xl border border-amber-300 bg-amber-50 p-3 space-y-2"><div class="flex flex-wrap items-center justify-between gap-2"><div><b>Modul Gudep Tergiat</b><p id="gudep-feature-state" class="text-xs text-slate-600">Memeriksa status...</p></div><button id="gudep-feature-toggle" type="button" class="rounded-lg bg-slate-800 text-white px-4 py-2 text-sm font-semibold">Memuat...</button></div><p class="text-xs text-slate-600">Hanya Admin Utama yang dapat melihat dan mengaktifkan modul ini. Saat nonaktif, Pembina dan Admin Kwarran tidak melihat menu atau dapat mengakses proses penilaiannya. Seluruh indikator, periode, nilai, dan bukti tetap tersimpan.</p></div>
  <div><h2 class="font-bold text-lg">Pengaturan Penilaian Gudep Tergiat</h2><p class="text-sm text-slate-600">Admin Utama mengatur indikator dan bobot penilaian sebelum periode dibuka untuk Pembina. Template referensi tetap berstatus draft sampai semua komponen memiliki indikator.</p></div>
  <div class="rounded-xl border p-3 space-y-2"><div id="gudep-template-summary" class="text-sm">Memuat template penilaian...</div><button id="gudep-template-activate" type="button" class="rounded-lg bg-amber-500 text-stone-950 font-bold px-4 py-2 text-sm" disabled>Aktifkan Template</button><p class="text-xs text-slate-500">Template aktif tidak dapat diubah. Perubahan instrumen berikutnya harus menggunakan versi template baru.</p></div>
  <form id="gudep-criteria-form" class="border rounded-xl p-3 space-y-2">
@@ -443,6 +443,28 @@ let gudepAssessmentCache={template:null,kategori:[],kriteria:[],periode:[]};
 function resetGudepCriteriaForm(){
  const f=$('gudep-criteria-form');f.reset();f.dataset.idKriteria='';$('gudep-criteria-evidence').checked=true;$('gudep-criteria-save').textContent='Simpan Indikator';
 }
+let gudepFeatureEnabled=false;
+async function loadGudepFeatureStatus(){
+ const d=await callApi({action:'gudep_penilaian_admin_status'});
+ gudepFeatureEnabled=!!d.enabled;
+ $('gudep-feature-state').textContent=gudepFeatureEnabled?'Aktif — dapat digunakan oleh Pembina dan Admin Kwarran.':'Nonaktif — hanya terlihat oleh Admin Utama.';
+ $('gudep-feature-toggle').textContent=gudepFeatureEnabled?'Nonaktifkan Modul':'Aktifkan Modul';
+ $('gudep-feature-toggle').className='rounded-lg px-4 py-2 text-sm font-semibold '+(gudepFeatureEnabled?'bg-red-700 text-white':'bg-emerald-700 text-white');
+ $('gudep-assessment-manager').classList.toggle('opacity-70',!gudepFeatureEnabled);
+}
+$('gudep-feature-toggle')?.addEventListener('click',async()=>{
+ const btn=$('gudep-feature-toggle');btn.disabled=true;
+ try{
+  const next=!gudepFeatureEnabled;
+  if(next&&!confirm('Aktifkan Penilaian Gudep Tergiat untuk Pembina dan Admin Kwarran?'))return;
+  if(!next&&!confirm('Nonaktifkan Penilaian Gudep Tergiat? Data dan hasil penilaian tidak akan dihapus.'))return;
+  await callApi({action:'gudep_penilaian_admin_toggle',enabled:next});
+  await loadGudepFeatureStatus();
+  if(next){await loadGudepPenilaianAdmin();await loadGudepFinalList();}
+  else{$('gudep-assessment-status').textContent='Modul dinonaktifkan. Seluruh data tetap tersimpan.';}
+ }catch(err){$('gudep-feature-state').textContent=err.message||'Status modul gagal diperbarui.';}
+ finally{btn.disabled=false;}
+});
 async function loadGudepPenilaianAdmin(){
  $('gudep-assessment-status').textContent='Memuat pengaturan penilaian...';
  const d=await callApi({action:'gudep_penilaian_admin_data'});
@@ -636,7 +658,7 @@ ambalanRekapCache=d.rekap||[];pangkalanRankingCache=d.peringkat_pangkalan||[];kw
 $('pangkalan-list').innerHTML=d.pangkalan.map(x=>'<div class="border rounded-xl p-3 space-y-1"><b>'+esc(x.nama_pangkalan)+'</b><p class="text-xs text-slate-500">Gudep: '+esc(x.no_gudep||'-')+'</p><p class="text-xs">Kode gabung pangkalan: <b class="font-mono">'+esc(x.kode_gabung_peserta)+'</b></p><p class="text-xs text-slate-500">Ambalan: '+esc(x.nama_ambalan_putra)+' / '+esc(x.nama_ambalan_putri)+'</p><p class="text-xs">Ketua Gudep: '+esc(x.nama_ketua_gudep||'Belum diisi')+'</p><p class="text-xs">Ketua Mabigus: '+esc(x.nama_ketua_mabigus||'Belum diisi')+'</p><p class="text-xs text-slate-400">Data administrasi dikelola Pembina pangkalan.</p></div>').join('')||'<p class="text-sm text-slate-500">Belum ada pangkalan.</p>';
 pembinaAccessCache=d.pembina||[];renderPembinaAccess();
 
-renderPesertaDetail(d.peserta||[]);try{await loadGudepPenilaianAdmin();}catch(err){$('gudep-assessment-status').textContent='Pengaturan penilaian belum dapat dimuat: '+(err.message||'Kesalahan');}try{await loadGudepFinalList();}catch(err){$('gudep-final-list-msg').textContent=err.message||'Daftar final belum dapat dimuat.';}$('status').textContent='Data berhasil diperbarui.';}catch(err){$('status').textContent='Gagal memuat: '+err.message;}}
+renderPesertaDetail(d.peserta||[]);try{await loadGudepFeatureStatus();if(gudepFeatureEnabled){await loadGudepPenilaianAdmin();await loadGudepFinalList();}else{$('gudep-assessment-status').textContent='Modul nonaktif. Data penilaian tetap tersimpan dan hanya dapat diakses Admin Utama.';$('gudep-final-list-msg').textContent='Modul sedang dinonaktifkan.';}}catch(err){$('gudep-assessment-status').textContent='Status modul belum dapat dimuat: '+(err.message||'Kesalahan');}$('status').textContent='Data berhasil diperbarui.';}catch(err){$('status').textContent='Gagal memuat: '+err.message;}}
 
 async function loadKwarranManager(){
  const status=$('kwarran-manager-status');status.textContent='Memuat pengaturan Kwarran...';
