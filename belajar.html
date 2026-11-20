@@ -517,8 +517,8 @@ function setMsg(t){$('appMsg').textContent=t||'';}
 function formatText(t){return esc(t||'').replace(/^## (.+)$/gm,'<strong class="block text-lg mt-4 mb-2">$1</strong>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}
 function showTab(name){
  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
- ['umum','profile','sku','pantau','administrasi'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==name));
- if(name==='administrasi'&&account?.role==='pembina')loadPangkalanAdmin();}
+ ['umum','profile','sku','pantau','administrasi','peringkat'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==name));
+ if((name==='administrasi'||name==='peringkat')&&account?.role==='pembina')loadPangkalanAdmin();}
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
 $('loginForm').addEventListener('submit',async e=>{
  e.preventDefault();
