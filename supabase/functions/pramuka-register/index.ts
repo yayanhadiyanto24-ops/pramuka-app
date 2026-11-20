@@ -430,21 +430,33 @@ Deno.serve(async(req:Request)=>{
    }
    if(action==="pembina_pangkalan"){
     const [{data:p,error:pe},{data:u,error:ue}]=await Promise.all([
-     admin.from("pangkalan").select("id_pangkalan,nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,tanda_tangan_ketua_gudep_data,tanda_tangan_mabigus_data,kode_gabung_peserta").eq("id_pangkalan",pb.id_pangkalan).single(),
+     admin.from("pangkalan").select("id_pangkalan,nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,struktur_gudep,tanda_tangan_ketua_gudep_data,tanda_tangan_mabigus_data,kode_gabung_peserta").eq("id_pangkalan",pb.id_pangkalan).single(),
      admin.from("users").select("kode_unik").eq("id_user",authData.user.id).single()
     ]);
     if(pe)throw pe;if(ue)throw ue;
     return reply({ok:true,pangkalan:p,kode_unik:u.kode_unik});
    }
-   const patch={nama_pangkalan:clean(body.nama_pangkalan),no_gudep:clean(body.no_gudep,40)||null,nama_ambalan_putra:clean(body.nama_ambalan_putra,120),nama_ambalan_putri:clean(body.nama_ambalan_putri,120),nama_ketua_gudep:clean(body.nama_ketua_gudep,150)||null,nama_ketua_mabigus:clean(body.nama_ketua_mabigus,150)||null};
+   const allowedStructureGroups=["mabigus","pengurus_gudep","dewan_kehormatan_gudep","dewan_ambalan_putra","dewan_ambalan_putri","dewan_kehormatan_penegak_putra","dewan_kehormatan_penegak_putri","unsur_pendukung"];
+   const rawStructure=Array.isArray(body.struktur_gudep)?body.struktur_gudep:[];
+   if(rawStructure.length>150)return reply({ok:false,message:"Jumlah personel struktur terlalu banyak."},400);
+   const struktur=rawStructure.map((item:any,index:number)=>({
+    kelompok:allowedStructureGroups.includes(clean(item?.kelompok,50))?clean(item.kelompok,50):"",
+    jabatan:clean(item?.jabatan,100),
+    nama:clean(item?.nama,150),
+    jenis_kelamin:["L","P"].includes(clean(item?.jenis_kelamin,1))?clean(item.jenis_kelamin,1):null,
+    unsur_asal:clean(item?.unsur_asal,100)||null,
+    urutan:index+1
+   })).filter((item:any)=>item.kelompok&&item.jabatan&&item.nama);
+   if(rawStructure.some((item:any)=>!allowedStructureGroups.includes(clean(item?.kelompok,50))))return reply({ok:false,message:"Kelompok struktur Gudep tidak dikenal."},400);
+   const patch={nama_pangkalan:clean(body.nama_pangkalan),no_gudep:clean(body.no_gudep,40)||null,nama_ambalan_putra:clean(body.nama_ambalan_putra,120),nama_ambalan_putri:clean(body.nama_ambalan_putri,120),nama_ketua_gudep:clean(body.nama_ketua_gudep,150)||null,nama_ketua_mabigus:clean(body.nama_ketua_mabigus,150)||null,struktur_gudep:struktur};
    if(!patch.nama_pangkalan||!patch.nama_ambalan_putra||!patch.nama_ambalan_putri)return reply({ok:false,message:"Nama pangkalan dan kedua nama ambalan wajib diisi."},400);
-   const {data:before,error:beforeError}=await admin.from("pangkalan").select("nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus").eq("id_pangkalan",pb.id_pangkalan).single();
+   const {data:before,error:beforeError}=await admin.from("pangkalan").select("nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,struktur_gudep").eq("id_pangkalan",pb.id_pangkalan).single();
    if(beforeError)throw beforeError;
    const {error:updateError}=await admin.from("pangkalan").update(patch).eq("id_pangkalan",pb.id_pangkalan);
    if(updateError)throw updateError;
    const {error:auditError}=await admin.from("pangkalan_change_audit").insert({id_pangkalan:pb.id_pangkalan,changed_by:authData.user.id,before_data:before,after_data:patch});
    if(auditError)throw auditError;
-   return reply({ok:true,message:"Administrasi pangkalan berhasil disimpan."});
+   return reply({ok:true,message:"Data Pangkalan berhasil disimpan."});
   }
   const {data:config}=await admin.from("app_admin_config").select("admin_email").eq("singleton",true).single();
   const configuredEmail=clean(config?.admin_email,254).toLowerCase();
