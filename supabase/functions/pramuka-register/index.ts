@@ -287,15 +287,17 @@ Deno.serve(async(req:Request)=>{
    if(error)throw error;return reply({ok:true,message:"Akun Admin Utama aktif."});
   }
   if(action==="dashboard"){
-   const [pangkalan,rekap,pembina,peserta,progress,sku]=await Promise.all([
+   const [pangkalan,rekap,pembina,peserta,progress,sku,peringkatPangkalan,peringkatKwarran]=await Promise.all([
     admin.from("pangkalan").select("id_pangkalan,id_kwarran,nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,kode_gabung_peserta,created_at,kwarran(nama_kwarran)").order("nama_pangkalan"),
-    admin.from("v_admin_ambalan_rekap").select("*").order("nama_pangkalan"),
+    admin.from("v_admin_ambalan_rekap").select("*").order("nama_pangkalan").order("jenis_kelamin").order("urutan_ambalan"),
     admin.from("profil_pembina").select("id_pembina,id_user,id_pangkalan,nama_lengkap,jabatan,jenis_kelamin,nta,jumlah_ambalan_berbayar,users!inner(email,status_akun)").order("nama_lengkap"),
     admin.from("profil_peserta_didik").select("id_peserta,id_user,id_pangkalan,nama_lengkap,jenis_kelamin,nta,tingkatan,sangga,kelas_sekolah,jurusan,tahun_pelajaran,status_keanggotaan,tanggal_alumni").order("nama_lengkap"),
     admin.from("sku_learning_progress").select("id_progress,id_user,id_sku_item,status").order("id_progress",{ascending:false}),
-    admin.from("sku_items").select("id_sku_item,tingkat").eq("aktif",true)
+    admin.from("sku_items").select("id_sku_item,tingkat").eq("aktif",true),
+    admin.from("v_pangkalan_peringkat").select("*").order("id_kwarran").order("peringkat_kwarran",{ascending:true,nullsFirst:false}).order("nama_pangkalan"),
+    admin.from("v_kwarran_comparison").select("*").order("peringkat_kwarran",{ascending:true,nullsFirst:false}).order("nama_kwarran")
    ]);
-   for(const x of [pangkalan,rekap,pembina,peserta,progress,sku])if(x.error)throw x.error;
+   for(const x of [pangkalan,rekap,pembina,peserta,progress,sku,peringkatPangkalan,peringkatKwarran])if(x.error)throw x.error;
    const pangkalanMap=new Map((pangkalan.data||[]).map(x=>[String(x.id_pangkalan),x]));
    const skuMap=new Map((sku.data||[]).map(x=>[String(x.id_sku_item),x]));
    const latest=new Map();
@@ -318,7 +320,7 @@ Deno.serve(async(req:Request)=>{
    });
    const rekapDenganKwarran=(rekap.data||[]).map(x=>{const g=pangkalanMap.get(String(x.id_pangkalan))||{};return {...x,id_kwarran:g.id_kwarran||null,nama_kwarran:g.kwarran?.nama_kwarran||"-"};});
    const {data:kwarran,error:kwarranError}=await admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran");if(kwarranError)throw kwarranError;
-   return reply({ok:true,pangkalan:pangkalan.data,rekap:rekapDenganKwarran,kwarran:kwarran||[],pembina:pembina.data,peserta:pesertaDetail});
+   return reply({ok:true,pangkalan:pangkalan.data,rekap:rekapDenganKwarran,peringkat_pangkalan:peringkatPangkalan.data||[],peringkat_kwarran:peringkatKwarran.data||[],kwarran:kwarran||[],pembina:pembina.data,peserta:pesertaDetail});
   }
   if(action==="buat_kode_akses"){
    const targetId=clean(body.id_pembina,50);if(!targetId)return reply({ok:false,message:"Pilih akun Pembina."},400);
