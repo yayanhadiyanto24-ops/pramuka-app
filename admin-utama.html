@@ -601,7 +601,7 @@ function renderPembinaAccess(){
  const rows=pembinaAccessCache.filter(p=>[p.nama_lengkap,p.users?.email,p.jabatan,p.nta].some(v=>String(v||'').toLowerCase().includes(q)));
  $('pembina-access-list').innerHTML=rows.map(p=>{
   const ambalan=Math.max(0,Number(p.jumlah_ambalan_berbayar||0));
-  const kuota=ambalan>0?ambalan*32:10;
+  const kuota=ambalan>0?ambalan*32:(p.nta?10:5);
   return '<div class="flex flex-wrap items-center justify-between gap-3 border rounded-lg p-3"><div><b>'+esc(p.nama_lengkap)+'</b><p class="text-xs text-slate-500">'+esc(p.users?.email||'')+' · '+esc(p.jabatan)+' · NTA '+(p.nta?'sudah diisi':'belum diisi')+' · '+ambalan+' ambalan berbayar · Kuota '+kuota+' peserta</p></div><button data-issue-access="'+esc(p.id_user)+'" '+(!p.nta?'disabled title="Pembina harus melengkapi NTA/KTA"':'')+' class="rounded-lg bg-amber-800 text-white px-3 py-2 text-xs font-semibold">Terbitkan kode +1 ambalan</button></div>';
  }).join('')||'<p class="text-sm text-slate-500">'+(pembinaAccessCache.length?'Tidak ada akun yang cocok.':'Belum ada Pembina.')+'</p>';
  $('pembina-access-count').textContent='Menampilkan '+rows.length+' dari '+pembinaAccessCache.length+' akun Pembina.';
