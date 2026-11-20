@@ -165,6 +165,9 @@ Deno.serve(async(req:Request)=>{
     const {data:periode,error:periodeError}=await admin.from("gudep_penilaian_periode").select("id_periode,id_template,nama_periode,tahun,tanggal_mulai,tanggal_akhir,status").eq("status","dibuka").order("tahun",{ascending:false}).limit(1).maybeSingle();
     if(periodeError)throw periodeError;
     if(!periode)return reply({ok:true,periode:null,penilaian:null,kategori:[],kriteria:[],message:"Belum ada periode penilaian Gudep Tergiat yang dibuka."});
+    const today=new Date().toISOString().slice(0,10);
+    if(periode.tanggal_mulai&&today<periode.tanggal_mulai)return reply({ok:true,periode:null,penilaian:null,kategori:[],kriteria:[],message:"Periode penilaian belum dimulai. Perhatikan tanggal mulai yang ditetapkan Admin Utama."});
+    if(periode.tanggal_akhir&&today>periode.tanggal_akhir)return reply({ok:true,periode:null,penilaian:null,kategori:[],kriteria:[],message:"Batas waktu pengisian penilaian telah berakhir."});
     const [{data:penilaian,error:penilaianError},{data:kategori,error:kategoriError},{data:kriteria,error:kriteriaError}]=await Promise.all([
      admin.from("gudep_penilaian").select("id_penilaian,id_periode,status,poin_total_usulan,catatan_pembina").eq("id_periode",periode.id_periode).eq("id_pangkalan",pb.id_pangkalan).maybeSingle(),
      admin.from("gudep_penilaian_kategori").select("id_kategori,parent_id,kode,nama,deskripsi,urutan").eq("id_template",periode.id_template).eq("aktif",true).order("urutan"),
