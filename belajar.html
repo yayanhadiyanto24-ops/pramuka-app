@@ -718,7 +718,12 @@ async function loadPangkalanPending(){
       catch(err){$('sanggaMsg').textContent=err.message||'Pemindahan gagal.';b.disabled=false;b.textContent='Pindahkan';}
     });
    }catch(err){names.textContent='Gagal memuat sangga: '+(err.message||'Kesalahan');students.textContent='';ambalanNames.textContent='Gagal memuat Ambalan: '+(err.message||'Kesalahan');ambalanStudents.textContent='';}
-   // Modul Gudep Tergiat dinonaktifkan untuk Pembina; kode dan data tetap disimpan.
+   // Modul Gudep Tergiat hanya ditampilkan jika Admin Utama mengaktifkannya.
+   try{
+    const {data:feature,error:featureError}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_feature_status'}});
+    if(featureError)throw featureError;
+    if(feature?.enabled){$('gudepPembinaPanel').classList.remove('hidden');await loadGudepAssessmentPembina();}
+   }catch(err){console.warn('Status modul Gudep Tergiat tidak dapat dimuat:',err?.message||err);}
   }
 
     let gudepPembinaCache=null;
