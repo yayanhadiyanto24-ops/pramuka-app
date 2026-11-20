@@ -786,9 +786,19 @@ async function loadPangkalanPending(){
      };
      $('gudepPembinaSubmit').onclick=async()=>{
       if(!confirm('Ajukan penilaian ini kepada Admin Kwarran? Setelah diajukan, nilai tidak dapat diubah kecuali dikembalikan untuk perbaikan.'))return;
-      const btn=$('gudepPembinaSubmit');btn.disabled=true;msg.textContent='Mengajukan penilaian...';
-      try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_pembina_kirim',id_periode:p.id_periode,catatan:$('gudepPembinaCatatan').value}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Penilaian gagal diajukan.');msg.textContent=data.message||'Penilaian diajukan.';await loadGudepAssessmentPembina();}
-      catch(err){msg.textContent=err.message||'Penilaian gagal diajukan.';btn.disabled=false;}
+      const btn=$('gudepPembinaSubmit');btn.disabled=true;msg.textContent='Menyimpan perubahan terakhir...';
+      try{
+       const values=Array.from(criteriaBox.querySelectorAll('[data-gudep-score]')).map(input=>{
+        const id=input.dataset.gudepScore,note=criteriaBox.querySelector('[data-gudep-note="'+id+'"]');
+        return {id_kriteria:Number(id),nilai_usulan:Number(input.value||0),catatan_pembina:note?.value||''};
+       });
+       const {data:saveData,error:saveError}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_pembina_simpan',id_periode:p.id_periode,nilai:values,catatan:$('gudepPembinaCatatan').value}});
+       if(saveError)throw saveError;if(!saveData?.ok)throw new Error(saveData?.message||'Perubahan terakhir gagal disimpan.');
+       msg.textContent='Mengajukan penilaian...';
+       const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_pembina_kirim',id_periode:p.id_periode,catatan:$('gudepPembinaCatatan').value}});
+       if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Penilaian gagal diajukan.');
+       msg.textContent=data.message||'Penilaian diajukan.';await loadGudepAssessmentPembina();
+      }catch(err){msg.textContent=err.message||'Penilaian gagal diajukan.';btn.disabled=false;}
      };
      msg.textContent=editable?'Isi nilai dan bukti, lalu simpan draft sebelum mengajukan.':'Penilaian sudah diajukan dan menunggu proses verifikasi.';
     }
