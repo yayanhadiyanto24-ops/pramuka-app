@@ -93,6 +93,7 @@ Deno.serve(async(req:Request)=>{
    if(cfgError)throw cfgError;if(accountError)throw accountError;
    gudepEnabled=cfg?.gudep_assessment_enabled===true;
    isGudepOwner=!!cfg?.admin_email&&String(authData.user.email).toLowerCase()===String(cfg.admin_email).toLowerCase()&&account?.role==="admin_kwarcab"&&account?.status_akun==="aktif";
+   if(action==="gudep_penilaian_feature_status")return reply({ok:true,enabled:gudepEnabled});
    if(action==="gudep_penilaian_admin_status"||action==="gudep_penilaian_admin_toggle"){
     if(!isGudepOwner)return reply({ok:false,message:"Fitur ini hanya dapat dikelola Admin Utama."},403);
     if(action==="gudep_penilaian_admin_status")return reply({ok:true,enabled:gudepEnabled});
