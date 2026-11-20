@@ -84,6 +84,26 @@ Deno.serve(async(req:Request)=>{
   if(!token)return reply({ok:false,message:"Silakan login sebagai Admin Utama."},401);
   const {data:authData,error:authErr}=await admin.auth.getUser(token);
   if(authErr||!authData.user?.email)return reply({ok:false,message:"Sesi login tidak valid."},401);
+  let gudepEnabled=false,isGudepOwner=false;
+  if(action.startsWith("gudep_penilaian_")){
+   const [{data:cfg,error:cfgError},{data:account,error:accountError}]=await Promise.all([
+    admin.from("app_admin_config").select("admin_email,gudep_assessment_enabled").eq("singleton",true).maybeSingle(),
+    admin.from("users").select("role,status_akun").eq("id_user",authData.user.id).maybeSingle()
+   ]);
+   if(cfgError)throw cfgError;if(accountError)throw accountError;
+   gudepEnabled=cfg?.gudep_assessment_enabled===true;
+   isGudepOwner=!!cfg?.admin_email&&String(authData.user.email).toLowerCase()===String(cfg.admin_email).toLowerCase()&&account?.role==="admin_kwarcab"&&account?.status_akun==="aktif";
+   if(action==="gudep_penilaian_admin_status"||action==="gudep_penilaian_admin_toggle"){
+    if(!isGudepOwner)return reply({ok:false,message:"Fitur ini hanya dapat dikelola Admin Utama."},403);
+    if(action==="gudep_penilaian_admin_status")return reply({ok:true,enabled:gudepEnabled});
+    if(typeof body.enabled!=="boolean")return reply({ok:false,message:"Status fitur tidak valid."},400);
+    const {error:updateError}=await admin.from("app_admin_config").update({gudep_assessment_enabled:body.enabled,updated_at:new Date().toISOString()}).eq("singleton",true);
+    if(updateError)throw updateError;
+    return reply({ok:true,enabled:body.enabled,message:body.enabled?"Modul Gudep Tergiat diaktifkan.":"Modul Gudep Tergiat dinonaktifkan."});
+   }
+   if(!gudepEnabled&&!isGudepOwner)return reply({ok:false,disabled:true,message:"Modul Gudep Tergiat sedang dinonaktifkan oleh Admin Utama."},423);
+   if((action==="gudep_penilaian_kwarcab_data"||action==="gudep_penilaian_kwarcab_detail"||action==="gudep_penilaian_kwarcab_finalkan"||action==="gudep_penilaian_admin_data"||action==="gudep_penilaian_simpan_kriteria"||action==="gudep_penilaian_nonaktifkan_kriteria"||action==="gudep_penilaian_aktifkan_template"||action==="gudep_penilaian_simpan_periode"||action==="gudep_penilaian_ubah_status_periode")&&!isGudepOwner)return reply({ok:false,message:"Akses hanya untuk Admin Utama pemilik aplikasi."},403);
+  }
 
   if(action==="kwarran_options"){
    const {data:me,error:meError}=await admin.from("users").select("role,status_akun").eq("id_user",authData.user.id).maybeSingle();
