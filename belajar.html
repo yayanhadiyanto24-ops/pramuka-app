@@ -479,7 +479,7 @@ a[class*="rounded"]{
     <button id="savePangkalan" class="rounded-lg bg-amber-800 text-white px-4 py-3 font-semibold">Simpan data pangkalan</button><p id="pangkalanMsg" class="text-sm muted"></p>
    </div>
    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Persetujuan Peserta Didik</h3><p class="text-xs muted">Daftar hanya menampilkan peserta dari satuan yang sesuai dengan jabatan Pembina ini.</p></div><div id="pendingStudentList" class="space-y-2 text-sm muted">Memuat daftar peserta...</div></div>
-    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Pengelolaan Ambalan</h3><p class="text-xs muted">Ambalan Putera dan Puteri dikelola terpisah. Maksimal 32 anggota aktif per Ambalan. Ambalan Persiapan menjadi Aktif setelah mencapai 12 anggota.</p></div><div id="ambalanNameList" class="grid sm:grid-cols-2 gap-2 text-sm">Memuat daftar Ambalan...</div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="ambalanStudentList" class="space-y-2 text-sm muted">Memuat peserta...</div></div><p id="ambalanMsg" class="text-xs muted"></p></div><div class="panel p-4 space-y-3"><div><h3 class="font-bold">Penempatan Sangga</h3><p class="text-xs muted">Sangga baku Penegak: Perintis, Pencoba, Pendobrak, Penegas, dan Pelaksana. Peserta dapat dipindahkan ke Sangga lain sesuai kebutuhan.</p></div><div id="sanggaNameList" class="flex flex-wrap gap-2 text-xs"></div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="sanggaStudentList" class="space-y-2 text-sm muted">Memuat data peserta...</div></div><p id="sanggaMsg" class="text-xs muted"></p></div>
+    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Peringkat Pangkalan se-Kwarran</h3><p class="text-xs muted">Peringkat dihitung dari total poin Ambalan yang memenuhi syarat. Pangkalan Anda diberi penanda khusus.</p></div><div id="pangkalanRankingList" class="space-y-2 text-sm">Memuat peringkat...</div></div><div class="panel p-4 space-y-3"><div><h3 class="font-bold">Pengelolaan Ambalan</h3><p class="text-xs muted">Ambalan Putera dan Puteri dikelola terpisah. Maksimal 32 anggota aktif per Ambalan. Ambalan Persiapan menjadi Aktif setelah mencapai 12 anggota.</p></div><div id="ambalanNameList" class="grid sm:grid-cols-2 gap-2 text-sm">Memuat daftar Ambalan...</div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="ambalanStudentList" class="space-y-2 text-sm muted">Memuat peserta...</div></div><p id="ambalanMsg" class="text-xs muted"></p></div><div class="panel p-4 space-y-3"><div><h3 class="font-bold">Penempatan Sangga</h3><p class="text-xs muted">Sangga baku Penegak: Perintis, Pencoba, Pendobrak, Penegas, dan Pelaksana. Peserta dapat dipindahkan ke Sangga lain sesuai kebutuhan.</p></div><div id="sanggaNameList" class="flex flex-wrap gap-2 text-xs"></div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="sanggaStudentList" class="space-y-2 text-sm muted">Memuat data peserta...</div></div><p id="sanggaMsg" class="text-xs muted"></p></div>
   </section>
   <section id="view-pantau" class="hidden space-y-4">
    <div><h2 class="text-xl font-bold">Perkembangan Peserta Didik</h2><p class="text-sm muted">Daftar peserta dan hasil belajar yang berada dalam cakupan pangkalan Pembina atau Admin Utama.</p></div><div class="flex flex-wrap gap-2">
@@ -673,13 +673,20 @@ async function loadPangkalanPending(){
    try{
     const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pembina_sangga_data'}});
     if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Data penempatan tidak dapat dimuat.');
-    const sangga=data.sangga||[],peserta=data.peserta||[],ambalan=data.ambalan||[];
+    const sangga=data.sangga||[],peserta=data.peserta||[],ambalan=data.ambalan||[],rankingPangkalan=data.ranking_pangkalan||[];
     const counts=new Map(sangga.map(s=>[String(s.id_sangga),0]));
     const ambalanCounts=new Map(ambalan.map(a=>[String(a.id_ambalan),0]));
     peserta.forEach(p=>{
       const sk=String(p.id_sangga||'');if(counts.has(sk))counts.set(sk,counts.get(sk)+1);
       const ak=String(p.id_ambalan||'');if(ambalanCounts.has(ak))ambalanCounts.set(ak,ambalanCounts.get(ak)+1);
     });
+    const rankingBox=$('pangkalanRankingList');
+    rankingBox.innerHTML=rankingPangkalan.map((p,i)=>{
+      const own=String(p.id_pangkalan)===String(data.id_pangkalan);
+      const rank=p.peringkat_kwarran?('#'+p.peringkat_kwarran):'—';
+      const status=p.layak_peringkat?'Layak peringkat':'Belum memenuhi syarat';
+      return '<div class="rounded-lg border p-3 flex flex-wrap items-center justify-between gap-2 '+(own?'border-amber-500 bg-amber-50 ring-1 ring-amber-300':'')+'"><div><b>'+rank+' · '+esc(p.nama_pangkalan)+(own?' · PANGKALAN ANDA':'')+'</b><p class="text-xs muted">'+status+' · '+Number(p.jumlah_ambalan_layak||0)+' Ambalan layak · '+Number(p.peserta_aktif||0)+' anggota aktif</p></div><div class="text-right"><b class="text-lg">'+Number(p.total_poin||0)+'</b><p class="text-xs muted">poin</p></div></div>';
+    }).join('')||'<p class="text-sm muted">Belum ada data peringkat untuk Kwarran ini.</p>';
     ambalanNames.innerHTML=ambalan.map(a=>{
       const n=ambalanCounts.get(String(a.id_ambalan))||0;
       const status=a.status==='aktif'?'Aktif':a.status==='persiapan'?'Persiapan':'Nonaktif';
