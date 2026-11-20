@@ -479,7 +479,7 @@ a[class*="rounded"]{
     <button id="savePangkalan" class="rounded-lg bg-amber-800 text-white px-4 py-3 font-semibold">Simpan data pangkalan</button><p id="pangkalanMsg" class="text-sm muted"></p>
    </div>
    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Persetujuan Peserta Didik</h3><p class="text-xs muted">Daftar hanya menampilkan peserta dari satuan yang sesuai dengan jabatan Pembina ini.</p></div><div id="pendingStudentList" class="space-y-2 text-sm muted">Memuat daftar peserta...</div></div>
-    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Penempatan Sangga</h3><p class="text-xs muted">Sangga baku Penegak: Perintis, Pencoba, Pendobrak, Penegas, dan Pelaksana. Peserta dapat dipindahkan ke Sangga lain sesuai kebutuhan.</p></div><div id="sanggaNameList" class="flex flex-wrap gap-2 text-xs"></div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="sanggaStudentList" class="space-y-2 text-sm muted">Memuat data peserta...</div></div><p id="sanggaMsg" class="text-xs muted"></p></div>
+    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Pengelolaan Ambalan</h3><p class="text-xs muted">Ambalan Putera dan Puteri dikelola terpisah. Maksimal 32 anggota aktif per Ambalan. Ambalan Persiapan menjadi Aktif setelah mencapai 12 anggota.</p></div><div id="ambalanNameList" class="grid sm:grid-cols-2 gap-2 text-sm">Memuat daftar Ambalan...</div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="ambalanStudentList" class="space-y-2 text-sm muted">Memuat peserta...</div></div><p id="ambalanMsg" class="text-xs muted"></p></div><div class="panel p-4 space-y-3"><div><h3 class="font-bold">Penempatan Sangga</h3><p class="text-xs muted">Sangga baku Penegak: Perintis, Pencoba, Pendobrak, Penegas, dan Pelaksana. Peserta dapat dipindahkan ke Sangga lain sesuai kebutuhan.</p></div><div id="sanggaNameList" class="flex flex-wrap gap-2 text-xs"></div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="sanggaStudentList" class="space-y-2 text-sm muted">Memuat data peserta...</div></div><p id="sanggaMsg" class="text-xs muted"></p></div>
   </section>
   <section id="view-pantau" class="hidden space-y-4">
    <div><h2 class="text-xl font-bold">Perkembangan Peserta Didik</h2><p class="text-sm muted">Daftar peserta dan hasil belajar yang berada dalam cakupan pangkalan Pembina atau Admin Utama.</p></div><div class="flex flex-wrap gap-2">
@@ -666,17 +666,51 @@ async function loadPangkalanPending(){
   }catch(err){box.textContent='Gagal memuat daftar peserta: '+(err.message||'Kesalahan');}
  }
  async function loadSanggaAdmin(){
-   const names=$('sanggaNameList'),students=$('sanggaStudentList');names.textContent='Memuat sangga...';students.textContent='Memuat peserta...';
+   const names=$('sanggaNameList'),students=$('sanggaStudentList');
+   const ambalanNames=$('ambalanNameList'),ambalanStudents=$('ambalanStudentList');
+   names.textContent='Memuat sangga...';students.textContent='Memuat peserta...';
+   ambalanNames.textContent='Memuat daftar Ambalan...';ambalanStudents.textContent='Memuat peserta...';
    try{
     const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pembina_sangga_data'}});
-    if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Data sangga tidak dapat dimuat.');
-    const sangga=data.sangga||[],peserta=data.peserta||[];
+    if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Data penempatan tidak dapat dimuat.');
+    const sangga=data.sangga||[],peserta=data.peserta||[],ambalan=data.ambalan||[];
     const counts=new Map(sangga.map(s=>[String(s.id_sangga),0]));
-    peserta.forEach(p=>{const key=String(p.id_sangga||'');if(counts.has(key))counts.set(key,counts.get(key)+1);});
-    names.innerHTML=sangga.map(x=>{const n=counts.get(String(x.id_sangga))||0;return '<span class="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-3 py-2"><b>'+esc(x.nama_sangga)+'</b><span class="rounded-full bg-amber-800 text-white px-2 py-0.5 text-xs font-bold">'+n+' anggota</span></span>';}).join('')||'<span>Belum ada sangga. Hubungi Admin/Pembina untuk menyiapkan daftar sangga.</span>';
+    const ambalanCounts=new Map(ambalan.map(a=>[String(a.id_ambalan),0]));
+    peserta.forEach(p=>{
+      const sk=String(p.id_sangga||'');if(counts.has(sk))counts.set(sk,counts.get(sk)+1);
+      const ak=String(p.id_ambalan||'');if(ambalanCounts.has(ak))ambalanCounts.set(ak,ambalanCounts.get(ak)+1);
+    });
+    ambalanNames.innerHTML=ambalan.map(a=>{
+      const n=ambalanCounts.get(String(a.id_ambalan))||0;
+      const status=a.status==='aktif'?'Aktif':a.status==='persiapan'?'Persiapan':'Nonaktif';
+      return '<div class="rounded-lg border p-3 flex items-center justify-between gap-2"><div><b>'+esc(a.urutan+'. '+a.nama_ambalan)+'</b><p class="text-xs muted">'+status+'</p></div><span class="shrink-0 rounded-full bg-amber-800 text-white px-2 py-1 text-xs font-bold">'+n+'/32</span></div>';
+    }).join('')||'<p class="text-sm muted">Belum ada data Ambalan.</p>';
+    ambalanStudents.innerHTML=peserta.map(p=>{
+      const current=ambalan.find(a=>String(a.id_ambalan)===String(p.id_ambalan));
+      const options=ambalan.map(a=>'<option value="'+a.id_ambalan+'" '+(String(a.id_ambalan)===String(p.id_ambalan)?'selected':'')+'>'+esc(a.urutan+'. '+a.nama_ambalan)+' ('+(ambalanCounts.get(String(a.id_ambalan))||0)+'/32)</option>').join('');
+      return '<div class="border rounded-lg p-3 space-y-2"><div class="flex flex-wrap items-center justify-between gap-2"><b>'+esc(p.nama_lengkap)+'</b><span class="text-xs rounded-full bg-amber-50 border border-amber-200 px-2 py-1">'+esc(current?current.nama_ambalan:'Belum ditempatkan')+'</span></div><div class="flex flex-col sm:flex-row gap-2"><select data-move-ambalan="'+esc(p.id_user)+'" class="min-w-0 flex-1 border rounded-lg p-2 text-sm">'+options+'</select><input data-reason-ambalan="'+esc(p.id_user)+'" maxlength="500" placeholder="Alasan perpindahan (opsional)" class="min-w-0 flex-1 border rounded-lg p-2 text-xs"><button data-save-ambalan="'+esc(p.id_user)+'" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-xs font-semibold">Pindahkan</button></div></div>';
+    }).join('')||'<p class="text-sm muted">Belum ada peserta aktif pada satuan ini.</p>';
+    ambalanStudents.querySelectorAll('[data-save-ambalan]').forEach(b=>b.onclick=async()=>{
+      const id=b.dataset.saveAmbalan,select=ambalanStudents.querySelector('[data-move-ambalan="'+id+'"]'),reason=ambalanStudents.querySelector('[data-reason-ambalan="'+id+'"]');
+      b.disabled=true;b.textContent='Memindahkan...';
+      try{
+       const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pindah_ambalan_peserta',user_id:id,id_ambalan:Number(select.value),alasan:reason.value.trim()}});
+       if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Pemindahan Ambalan gagal.');
+       $('ambalanMsg').textContent=data.message||'Penempatan Ambalan diperbarui.';await loadSanggaAdmin();
+      }catch(err){$('ambalanMsg').textContent=err.message||'Pemindahan Ambalan gagal.';b.disabled=false;b.textContent='Pindahkan';}
+    });
+    names.innerHTML=sangga.map(x=>{
+      const n=counts.get(String(x.id_sangga))||0;
+      return '<span class="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-3 py-2"><b>'+esc(x.nama_sangga)+'</b><span class="rounded-full bg-amber-800 text-white px-2 py-0.5 text-xs font-bold">'+n+' anggota</span></span>';
+    }).join('')||'<span>Belum ada sangga. Hubungi Admin/Pembina untuk menyiapkan daftar sangga.</span>';
     students.innerHTML=peserta.map(p=>'<div class="border rounded-lg p-3 space-y-2"><div class="flex flex-wrap items-center justify-between gap-2"><b>'+esc(p.nama_lengkap)+'</b><span class="text-xs rounded-full bg-amber-50 border border-amber-200 px-2 py-1">Sangga '+esc(p.sangga||'Belum ditempatkan')+'</span></div><p class="text-xs muted">'+esc(p.kelas_sekolah||'-')+' · '+esc(p.jurusan||'-')+' · '+esc(p.tahun_pelajaran||'-')+'</p><div class="flex gap-2"><select data-move-sangga="'+esc(p.id_user)+'" class="min-w-0 flex-1 border rounded-lg p-2 text-sm">'+sangga.map(s=>'<option value="'+s.id_sangga+'" '+(String(s.id_sangga)===String(p.id_sangga)?'selected':'')+'>'+esc(s.nama_sangga)+' ('+(counts.get(String(s.id_sangga))||0)+' anggota)</option>').join('')+'</select><button data-save-sangga="'+esc(p.id_user)+'" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-xs font-semibold" '+(!sangga.length?'disabled':'')+'>Pindahkan</button></div></div>').join('')||'<p class="text-sm muted">Belum ada peserta di satuan ini.</p>';
-    students.querySelectorAll('[data-save-sangga]').forEach(b=>b.onclick=async()=>{const id=b.dataset.saveSangga,select=students.querySelector('[data-move-sangga="'+id+'"]');b.disabled=true;b.textContent='Memindahkan...';try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pindah_sangga_peserta',user_id:id,id_sangga:select.value}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Pemindahan gagal.');$('sanggaMsg').textContent=data.message+' Jumlah anggota tiap sangga telah diperbarui.';await loadSanggaAdmin();}catch(err){$('sanggaMsg').textContent=err.message||'Pemindahan gagal.';b.disabled=false;b.textContent='Pindahkan';}});
-   }catch(err){names.textContent='Gagal memuat sangga: '+(err.message||'Kesalahan');students.textContent='';}
+    students.querySelectorAll('[data-save-sangga]').forEach(b=>b.onclick=async()=>{
+      const id=b.dataset.saveSangga,select=students.querySelector('[data-move-sangga="'+id+'"]');
+      b.disabled=true;b.textContent='Memindahkan...';
+      try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'pindah_sangga_peserta',user_id:id,id_sangga:select.value}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Pemindahan gagal.');$('sanggaMsg').textContent=data.message+' Jumlah anggota tiap sangga telah diperbarui.';await loadSanggaAdmin();}
+      catch(err){$('sanggaMsg').textContent=err.message||'Pemindahan gagal.';b.disabled=false;b.textContent='Pindahkan';}
+    });
+   }catch(err){names.textContent='Gagal memuat sangga: '+(err.message||'Kesalahan');students.textContent='';ambalanNames.textContent='Gagal memuat Ambalan: '+(err.message||'Kesalahan');ambalanStudents.textContent='';}
   }
     async function loadPangkalanAdmin(){
  $('pangkalanMsg').textContent='Memuat data pangkalan...';
