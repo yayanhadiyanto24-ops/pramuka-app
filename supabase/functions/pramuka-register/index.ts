@@ -154,9 +154,13 @@ Deno.serve(async(req:Request)=>{
    if(meError)throw meError;
    if(!me||me.role!=="admin_kwarcab"||me.status_akun!=="aktif")return reply({ok:false,message:"Akses hanya untuk Admin Utama aktif."},403);
    if(action==="gudep_penilaian_kwarcab_data"){
-    const {data,error}=await admin.from("gudep_penilaian").select("id_penilaian,id_periode,id_kwarran,status,poin_total_usulan,poin_total_verifikasi,poin_total_final,diajukan_at,ditinjau_at,difinalkan_at,pangkalan!inner(id_pangkalan,nama_pangkalan,no_gudep),kwarran!inner(id_kwarran,nama_kwarran),gudep_penilaian_periode!inner(nama_periode,tahun)").in("status",["terverifikasi_kwarran","final"]).order("updated_at",{ascending:false});
-    if(error)throw error;
-    return reply({ok:true,penilaian:data||[]});
+    const [{data,error},{data:rankRows,error:rankError}]=await Promise.all([
+     admin.from("gudep_penilaian").select("id_penilaian,id_periode,id_kwarran,status,poin_total_usulan,poin_total_verifikasi,poin_total_final,diajukan_at,ditinjau_at,difinalkan_at,pangkalan!inner(id_pangkalan,nama_pangkalan,no_gudep),kwarran!inner(id_kwarran,nama_kwarran),gudep_penilaian_periode!inner(nama_periode,tahun)").in("status",["terverifikasi_kwarran","final"]).order("updated_at",{ascending:false}),
+     admin.from("v_gudep_penilaian_peringkat_final").select("id_penilaian,peringkat_final")
+    ]);
+    if(error)throw error;if(rankError)throw rankError;
+    const rankMap=new Map((rankRows||[]).map(x=>[String(x.id_penilaian),x.peringkat_final]));
+    return reply({ok:true,penilaian:(data||[]).map(x=>({...x,peringkat_final:rankMap.get(String(x.id_penilaian))??null}))});
    }
    if(action==="gudep_penilaian_kwarcab_detail"){
     const id=Number(body.id_penilaian);
