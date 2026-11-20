@@ -730,7 +730,7 @@ async function loadPangkalanPending(){
      if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Data penilaian tidak dapat dimuat.');
      gudepPembinaCache=data;
      if(!data.periode){
-      periodBox.innerHTML='<b>Belum ada periode penilaian yang dibuka.</b><p class="text-xs muted">Pembina dapat mengisi penilaian setelah Admin Utama membuka periode.</p>';msg.textContent=data.message||'';return;
+      periodBox.innerHTML='<b>'+esc(data.message||'Belum ada periode penilaian yang dibuka.')+'</b><p class="text-xs muted">Perhatikan jadwal periode yang ditetapkan Admin Utama.</p>';msg.textContent='';return;
      }
      const p=data.periode,a=data.penilaian,editable=!a||['draft','perlu_perbaikan'].includes(a.status);
      const statusLabel={draft:'Draft',perlu_perbaikan:'Perlu perbaikan',diajukan:'Menunggu pemeriksaan Kwarran',ditinjau_kwarran:'Sedang ditinjau Kwarran',terverifikasi_kwarran:'Terverifikasi Kwarran',final:'Final',ditolak:'Ditolak'};
