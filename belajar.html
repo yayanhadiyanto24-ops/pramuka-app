@@ -394,7 +394,7 @@ a[class*="rounded"]{
    <button class="tab active rounded-lg px-4 py-2 text-sm font-semibold" data-tab="umum">Materi Umum</button>
    <button class="tab rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="profile">Lengkapi Profil</button>
    <button class="tab rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="sku">Materi SKU</button>
-   <button id="monitorTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="pantau">Pantau Peserta</button>
+   <button id="monitorTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="pantau">Kesiapan SKU</button>
    <button id="adminPangkalanTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="administrasi">Data Pangkalan</button><button id="pangkalanRankingTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="peringkat">Peringkat Pangkalan</button><a href="dokumen.html" class="tab rounded-lg px-4 py-2 text-sm font-semibold inline-flex items-center justify-center">Pusat Dokumen</a>
   </nav>
   <section id="view-profile" class="hidden space-y-4">
@@ -486,9 +486,15 @@ a[class*="rounded"]{
   </section>
   <section id="view-peringkat" class="hidden space-y-4"><div><h2 class="text-xl font-bold">Peringkat Pangkalan se-Kwarran</h2><p class="text-sm muted">Bandingkan posisi pangkalan Anda dengan pangkalan lain dalam Kwarran yang sama. Peringkat dihitung dari total poin Ambalan yang memenuhi syarat.</p></div><div class="panel p-4 space-y-3"><div><h3 class="font-bold">Peringkat Pangkalan se-Kwarran</h3><p class="text-xs muted">Peringkat dihitung dari total poin Ambalan yang memenuhi syarat. Pangkalan Anda diberi penanda khusus.</p></div><div id="pangkalanRankingList" class="space-y-2 text-sm">Memuat peringkat...</div></div></section>
   <section id="view-pantau" class="hidden space-y-4">
-   <div><h2 class="text-xl font-bold">Perkembangan Peserta Didik</h2><p class="text-sm muted">Daftar peserta dan hasil belajar yang berada dalam cakupan pangkalan Pembina atau Admin Utama.</p></div><div class="flex flex-wrap gap-2">
+   <div><h2 class="text-xl font-bold">Pemantauan Kesiapan SKU</h2><p class="text-sm muted">Tinjau jawaban dan bukti foto/video per butir SKU. Berikan pemantapan hanya jika diperlukan, atau nyatakan peserta siap mengajukan pengujian.</p></div><div class="flex flex-wrap gap-2">
     <button id="exportMonitorWord" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Unduh laporan Word</button>
     <button id="exportMonitorPdf" class="rounded-lg bg-slate-700 text-white px-4 py-2 text-sm font-semibold">Cetak / Simpan PDF</button>
+   </div>
+   <div class="panel p-4 space-y-3" id="skuReadinessPanel">
+    <div><h3 class="font-bold">Pemantauan per Butir SKU</h3><p class="text-xs muted">Pilih satu butir atau subpoin untuk melihat seluruh peserta yang sudah memulai. Bukti foto/video dapat diperiksa langsung. Instruksi kelompok dikirim kepada peserta yang belum mengunggah lampiran.</p></div>
+    <label class="block text-sm font-semibold">Pilih butir SKU / subpoin<select id="readinessSkuFilter" class="w-full border rounded-lg p-2 mt-1"><option value="">Pilih butir SKU...</option></select></label>
+    <div class="rounded-lg border bg-amber-50 p-3 space-y-2"><label class="block text-sm font-semibold">Instruksi atau pemantapan dari Pembina<textarea id="readinessGroupNote" rows="3" maxlength="1500" class="w-full border rounded-lg p-2 mt-1" placeholder="Contoh: Ikuti kegiatan gotong royong membersihkan lingkungan pangkalan, kemudian unggah foto/video kegiatan sebagai bukti."></textarea></label><button id="sendReadinessGroupNote" type="button" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Kirim instruksi kepada peserta yang belum unggah bukti</button><p id="readinessActionMsg" class="text-xs muted" role="status"></p></div>
+    <div id="readinessResults" class="space-y-3 text-sm"><p class="muted">Pilih butir SKU untuk melihat kesiapan peserta.</p></div>
    </div>
    <div class="panel p-4 space-y-3">
     <div><h3 class="font-bold">Pengesahan laporan (opsional)</h3><p class="text-xs muted">Jika diperlukan, minta Ketua Gudep dan/atau Ketua Mabigus membubuhkan tanda tangan langsung pada layar HP Pembina. Mereka tidak perlu memiliki akun aplikasi.</p></div>
@@ -512,7 +518,7 @@ window.addEventListener('unhandledrejection',e=>{const m=$('loginMsg');if(m&&!cu
 const SUPABASE_KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
 const sb=window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 if(!sb){$('loginMsg').textContent='Layanan login belum termuat. Periksa koneksi internet, lalu muat ulang halaman.';}
-let currentUser=null, account=null, participant=null, teacher=null, items=[], lessons=[], progress=[], general=[], examRecords=[], subpoints=[], subpointProgress=[], completionPlans=[], monitorReportHtml='', monitorStudents=[], monitorPangkalan=[];
+let currentUser=null, account=null, participant=null, teacher=null, items=[], lessons=[], progress=[], general=[], examRecords=[], subpoints=[], subpointProgress=[], completionPlans=[], monitorReportHtml='', monitorStudents=[], monitorPangkalan=[], monitorProgressRows=[], monitorSubpointRows=[];
 let selectedItem=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const statusLabel=s=>({dipelajari:'Sedang dipelajari',siap_diuji:'Menunggu ujian',perlu_perbaikan:'Perlu perbaikan',lulus:'Lulus'})[s]||'Belum mulai';
@@ -1253,7 +1259,7 @@ async function loadMonitor(){
  $('monitorSummary').innerHTML=[
   ['Peserta didik',totals.peserta],['Sedang belajar',totals.belajar],['Menunggu ujian',totals.menunggu],['Butir lulus',totals.lulus]
  ].map(([label,value])=>'<div class="panel p-4"><p class="text-xs muted">'+label+'</p><b class="text-2xl">'+value+'</b></div>').join('');
- monitorStudents=students||[];monitorPangkalan=pangkalan||[];const pMap=new Map((pangkalan||[]).map(p=>[p.id_pangkalan,p]));
+ monitorStudents=students||[];monitorPangkalan=pangkalan||[];monitorProgressRows=allProgress;monitorSubpointRows=allSubpointProgress;const pMap=new Map((pangkalan||[]).map(p=>[p.id_pangkalan,p]));
  if((pangkalan||[]).length){const p=pangkalan[0];if(!$('reportKetuaGudep').value)$('reportKetuaGudep').value=p.nama_ketua_gudep||'';if(!$('reportMabigus').value)$('reportMabigus').value=p.nama_ketua_mabigus||'';reportSignatureData.gudep=p.tanda_tangan_ketua_gudep_data||'';reportSignatureData.mabigus=p.tanda_tangan_mabigus_data||'';setReportSignaturePreview('gudep',reportSignatureData.gudep);setReportSignaturePreview('mabigus',reportSignatureData.mabigus);}
  for(const s of (students||[])){
   const key=String(s.id_pangkalan)+'-'+s.jenis_kelamin;
@@ -1302,6 +1308,7 @@ async function loadMonitor(){
  $('monitorList').querySelectorAll('.sub-referral-btn').forEach(b=>b.onclick=()=>createExamReferral(b.dataset.substudent,Number(b.dataset.subsku),Number(b.dataset.subpoint)));
  $('monitorList').querySelectorAll('.review-ref-btn').forEach(btn=>btn.onclick=()=>reviewExamReferral(btn.dataset.reviewRef,btn.dataset.decision));
  $('monitorList').querySelectorAll('.print-ref-btn').forEach(btn=>btn.onclick=()=>printExamDocument(btn.dataset.printRef));
+ renderSkuReadiness();
 }
 
 
