@@ -559,7 +559,7 @@ async function boot(user){
   $('monitorTab').classList.remove('hidden');
   $('adminPangkalanTab').classList.remove('hidden');
    $('pangkalanRankingTab').classList.remove('hidden');
-  $('roleSubtitle').textContent='Ruang Pembina · Pantau peserta\nAdministrasi pangkalan';
+  $('roleSubtitle').textContent='Ruang Pembina · Pantau peserta\nData Pangkalan';
  }else if(u.role==='admin_kwarcab'){$('monitorTab').classList.remove('hidden');}
  else throw new Error('Peran akun tidak dikenali.');
  const accountName=participant?.nama_lengkap||teacher?.nama_lengkap||user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_kwarcab'?'Admin Utama':'Pengguna');
