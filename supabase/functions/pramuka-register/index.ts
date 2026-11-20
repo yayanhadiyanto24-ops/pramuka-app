@@ -104,12 +104,15 @@ Deno.serve(async(req:Request)=>{
    ]);
    if(comparison.error)throw comparison.error;if(pangkalan.error)throw pangkalan.error;
    const ids=(pangkalan.data||[]).map(x=>x.id_pangkalan);
-   let rekap=[];
+   let rekap=[],rankingPangkalan:any[]=[];
    if(ids.length){
-    const {data,error}=await admin.from("v_admin_ambalan_rekap").select("*").in("id_pangkalan",ids).order("nama_pangkalan");
-    if(error)throw error;rekap=data||[];
+    const [{data:rows,error:rowsError},{data:ranking,error:rankingError}]=await Promise.all([
+     admin.from("v_admin_ambalan_rekap").select("*").in("id_pangkalan",ids).order("nama_pangkalan").order("jenis_kelamin"),
+     admin.from("v_pangkalan_peringkat").select("*").eq("id_kwarran",assignment.id_kwarran).order("peringkat_kwarran",{ascending:true,nullsFirst:false}).order("nama_pangkalan")
+    ]);
+    if(rowsError)throw rowsError;if(rankingError)throw rankingError;rekap=rows||[];rankingPangkalan=ranking||[];
    }
-   return reply({ok:true,admin:{nama_lengkap:assignment.nama_lengkap||authData.user.user_metadata?.display_name||"Admin Kwarran",nama_kwarran:assignment.kwarran.nama_kwarran,id_kwarran:assignment.id_kwarran},comparison:comparison.data||[],pangkalan:pangkalan.data||[],rekap});
+   return reply({ok:true,admin:{nama_lengkap:assignment.nama_lengkap||authData.user.user_metadata?.display_name||"Admin Kwarran",nama_kwarran:assignment.kwarran.nama_kwarran,id_kwarran:assignment.id_kwarran},comparison:comparison.data||[],pangkalan:pangkalan.data||[],rekap,ranking_pangkalan:rankingPangkalan});
   }
   if(action==="save_profile"){
    const {data:me,error:meError}=await admin.from("users").select("role,status_akun").eq("id_user",authData.user.id).single();
@@ -160,12 +163,18 @@ Deno.serve(async(req:Request)=>{
    }
    if(action==="pembina_sangga_data"){
     const gender=pb.jenis_kelamin;
-    const [{data:sangga,error:se},{data:peserta,error:pe},{data:ambalan,error:ae}]=await Promise.all([
+    const [{data:sangga,error:se},{data:peserta,error:pe},{data:ambalan,error:ae},{data:pangkalan,error:pae}]=await Promise.all([
      admin.from("pangkalan_sangga").select("id_sangga,nama_sangga,urutan").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).eq("aktif",true).order("urutan"),
      admin.from("profil_peserta_didik").select("id_user,nama_lengkap,jenis_kelamin,sangga,id_sangga,id_ambalan,kelas_sekolah,jurusan,tahun_pelajaran,status_keanggotaan,users!inner(status_akun)").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).eq("users.status_akun","aktif").neq("status_keanggotaan","alumni").order("nama_lengkap"),
-     admin.from("pangkalan_ambalan").select("id_ambalan,nama_ambalan,urutan,status").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).neq("status","nonaktif").order("urutan")
-    ]);if(se)throw se;if(pe)throw pe;if(ae)throw ae;
-    return reply({ok:true,sangga:sangga||[],peserta:peserta||[],ambalan:ambalan||[]});
+     admin.from("pangkalan_ambalan").select("id_ambalan,nama_ambalan,urutan,status").eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",gender).neq("status","nonaktif").order("urutan"),
+     admin.from("pangkalan").select("id_kwarran").eq("id_pangkalan",pb.id_pangkalan).single()
+    ]);if(se)throw se;if(pe)throw pe;if(ae)throw ae;if(pae)throw pae;
+    let rankingPangkalan:any[]=[];
+    if(pangkalan?.id_kwarran){
+     const {data:ranking,error:rankingError}=await admin.from("v_pangkalan_peringkat").select("id_pangkalan,nama_pangkalan,no_gudep,jumlah_ambalan,jumlah_ambalan_layak,peserta_aktif,peserta_tamu,total_poin,layak_peringkat,peringkat_kwarran").eq("id_kwarran",pangkalan.id_kwarran).order("peringkat_kwarran",{ascending:true,nullsFirst:false}).order("nama_pangkalan");
+     if(rankingError)throw rankingError;rankingPangkalan=ranking||[];
+    }
+    return reply({ok:true,sangga:sangga||[],peserta:peserta||[],ambalan:ambalan||[],ranking_pangkalan:rankingPangkalan,id_pangkalan:pb.id_pangkalan});
    }
    if(action==="pindah_ambalan_peserta"){
     const targetId=clean(body.user_id,50),idAmbalan=Number(body.id_ambalan),alasan=clean(body.alasan,500);
