@@ -252,7 +252,9 @@ Deno.serve(async(req:Request)=>{
    ]);
    if(te)throw te;if(ke)throw ke;if(kr)throw kr;if(pe)throw pe;
    const tplId=template?.id_template;
-   return reply({ok:true,template:template||null,kategori:(kategori||[]).filter(x=>!tplId||x.id_template===tplId),kriteria:kriteria||[],periode:(periode||[]).filter(x=>!tplId||x.id_template===tplId)});
+   const categoriesForTemplate=(kategori||[]).filter(x=>!tplId||x.id_template===tplId);
+   const categoryIds=new Set(categoriesForTemplate.map(x=>x.id_kategori));
+   return reply({ok:true,template:template||null,kategori:categoriesForTemplate,kriteria:(kriteria||[]).filter(x=>categoryIds.has(x.id_kategori)),periode:(periode||[]).filter(x=>!tplId||x.id_template===tplId)});
   }
   if(action==="gudep_penilaian_simpan_kriteria"){
    const idKategori=Number(body.id_kategori),idKriteria=body.id_kriteria?Number(body.id_kriteria):null;
@@ -321,11 +323,13 @@ Deno.serve(async(req:Request)=>{
    if(pe)throw pe;
    if(status==="dibuka"){
     if(!["draft","ditutup"].includes(periode.status))return reply({ok:false,message:"Periode tidak dapat dibuka dari status saat ini."},409);
-    const [{data:tpl,error:te},{count,error:ce}]=await Promise.all([
-     admin.from("gudep_penilaian_template").select("status").eq("id_template",periode.id_template).single(),
-     admin.from("gudep_penilaian_kriteria").select("id_kriteria",{count:"exact",head:true}).eq("aktif",true)
-    ]);
-    if(te)throw te;if(ce)throw ce;if(tpl.status!=="aktif"||!count)return reply({ok:false,message:"Template aktif dan indikator penilaian wajib tersedia."},400);
+    const {data:tpl,error:te}=await admin.from("gudep_penilaian_template").select("status").eq("id_template",periode.id_template).single();
+    if(te)throw te;if(tpl.status!=="aktif")return reply({ok:false,message:"Template penilaian belum aktif."},400);
+    const {data:leaf,error:le}=await admin.from("gudep_penilaian_kategori").select("id_kategori").eq("id_template",periode.id_template).not("parent_id","is",null).eq("aktif",true);
+    if(le)throw le;const leafIds=(leaf||[]).map(x=>x.id_kategori);
+    if(!leafIds.length)return reply({ok:false,message:"Komponen penilaian belum tersedia."},400);
+    const {count,error:ce}=await admin.from("gudep_penilaian_kriteria").select("id_kriteria",{count:"exact",head:true}).in("id_kategori",leafIds).eq("aktif",true);
+    if(ce)throw ce;if(!count)return reply({ok:false,message:"Indikator penilaian wajib tersedia."},400);
    }else if(periode.status!=="dibuka")return reply({ok:false,message:"Hanya periode yang sedang dibuka yang dapat ditutup."},409);
    const {data:updated,error:updateError}=await admin.from("gudep_penilaian_periode").update({status,updated_at:new Date().toISOString()}).eq("id_periode",id).select("*").single();
    if(updateError){if(updateError.code==="23505")return reply({ok:false,message:"Sudah ada periode terbuka untuk template dan tahun ini."},409);throw updateError;}
