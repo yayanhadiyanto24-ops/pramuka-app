@@ -243,6 +243,94 @@ Deno.serve(async(req:Request)=>{
   const configuredEmail=clean(config?.admin_email,254).toLowerCase();
   if(!configuredEmail||authData.user.email.toLowerCase()!==configuredEmail)return reply({ok:false,message:"Akses khusus Admin Utama."},403);
 
+  if(action==="gudep_penilaian_admin_data"){
+   const [{data:template,error:te},{data:kategori,error:ke},{data:kriteria,error:kr},{data:periode,error:pe}]=await Promise.all([
+    admin.from("gudep_penilaian_template").select("*").eq("kode_template","CIANJUR_2023_SMA_SMK_MA").maybeSingle(),
+    admin.from("gudep_penilaian_kategori").select("*").order("urutan"),
+    admin.from("gudep_penilaian_kriteria").select("*").order("urutan"),
+    admin.from("gudep_penilaian_periode").select("id_periode,id_template,nama_periode,tahun,tanggal_mulai,tanggal_akhir,status,catatan,created_at").order("tahun",{ascending:false}).order("created_at",{ascending:false})
+   ]);
+   if(te)throw te;if(ke)throw ke;if(kr)throw kr;if(pe)throw pe;
+   const tplId=template?.id_template;
+   return reply({ok:true,template:template||null,kategori:(kategori||[]).filter(x=>!tplId||x.id_template===tplId),kriteria:kriteria||[],periode:(periode||[]).filter(x=>!tplId||x.id_template===tplId)});
+  }
+  if(action==="gudep_penilaian_simpan_kriteria"){
+   const idKategori=Number(body.id_kategori),idKriteria=body.id_kriteria?Number(body.id_kriteria):null;
+   const kode=clean(body.kode,40).toUpperCase(),nama=clean(body.nama,180),panduan=clean(body.panduan_penilaian,3000);
+   const poinMaks=Number(body.poin_maks),buktiWajib=body.bukti_wajib!==false;
+   if(!Number.isInteger(idKategori)||idKategori<=0||!kode||!nama||!Number.isFinite(poinMaks)||poinMaks<=0||poinMaks>10000)return reply({ok:false,message:"Lengkapi kategori, kode, nama indikator, dan nilai maksimum yang valid."},400);
+   const {data:cat,error:catError}=await admin.from("gudep_penilaian_kategori").select("id_kategori,id_template,parent_id").eq("id_kategori",idKategori).maybeSingle();
+   if(catError)throw catError;if(!cat||!cat.parent_id)return reply({ok:false,message:"Pilih komponen penilaian, bukan kelompok utama."},400);
+   const {data:tpl,error:tplError}=await admin.from("gudep_penilaian_template").select("id_template,status").eq("id_template",cat.id_template).single();
+   if(tplError)throw tplError;if(tpl.status!=="draft")return reply({ok:false,message:"Template sudah aktif. Buat versi baru untuk mengubah indikator dan bobot."},409);
+   const values={id_kategori:idKategori,kode,nama,panduan_penilaian:panduan,poin_maks:poinMaks,bukti_wajib:buktiWajib,aturan_skor:{}};
+   let saved:any,error:any;
+   if(idKriteria){
+    const {data:existing,error:existingError}=await admin.from("gudep_penilaian_kriteria").select("id_kriteria,id_kategori").eq("id_kriteria",idKriteria).maybeSingle();
+    if(existingError)throw existingError;if(!existing||existing.id_kategori!==idKategori)return reply({ok:false,message:"Indikator tidak ditemukan pada komponen yang dipilih."},404);
+    const result=await admin.from("gudep_penilaian_kriteria").update(values).eq("id_kriteria",idKriteria).select("*").single();saved=result.data;error=result.error;
+   }else{
+    const result=await admin.from("gudep_penilaian_kriteria").insert(values).select("*").single();saved=result.data;error=result.error;
+   }
+   if(error){if(error.code==="23505")return reply({ok:false,message:"Kode indikator sudah digunakan pada komponen ini."},409);throw error;}
+   return reply({ok:true,kriteria:saved,message:"Indikator penilaian berhasil disimpan."});
+  }
+  if(action==="gudep_penilaian_nonaktifkan_kriteria"){
+   const id=Number(body.id_kriteria);
+   if(!Number.isInteger(id)||id<=0)return reply({ok:false,message:"Indikator tidak valid."},400);
+   const {data:row,error:rowError}=await admin.from("gudep_penilaian_kriteria").select("id_kriteria,id_kategori,gudep_penilaian_kategori!inner(id_template)").eq("id_kriteria",id).maybeSingle();
+   if(rowError)throw rowError;if(!row)return reply({ok:false,message:"Indikator tidak ditemukan."},404);
+   const {data:tpl,error:tplError}=await admin.from("gudep_penilaian_template").select("status").eq("id_template",row.gudep_penilaian_kategori.id_template).single();
+   if(tplError)throw tplError;if(tpl.status!=="draft")return reply({ok:false,message:"Template aktif tidak dapat diubah. Buat versi baru."},409);
+   const {error}=await admin.from("gudep_penilaian_kriteria").update({aktif:false}).eq("id_kriteria",id);
+   if(error)throw error;return reply({ok:true,message:"Indikator dinonaktifkan."});
+  }
+  if(action==="gudep_penilaian_aktifkan_template"){
+   const id=Number(body.id_template);
+   if(!Number.isInteger(id)||id<=0)return reply({ok:false,message:"Template tidak valid."},400);
+   const {data:tpl,error:te}=await admin.from("gudep_penilaian_template").select("id_template,status").eq("id_template",id).single();
+   if(te)throw te;if(tpl.status!=="draft")return reply({ok:false,message:"Template bukan berstatus draft."},409);
+   const [{data:leaf,error:le},{data:criteria,error:ce}]=await Promise.all([
+    admin.from("gudep_penilaian_kategori").select("id_kategori").eq("id_template",id).not("parent_id","is",null).eq("aktif",true),
+    admin.from("gudep_penilaian_kriteria").select("id_kriteria,id_kategori,poin_maks").eq("aktif",true)
+   ]);
+   if(le)throw le;if(ce)throw ce;
+   const leafIds=(leaf||[]).map(x=>x.id_kategori),criteriaForTemplate=(criteria||[]).filter(x=>leafIds.includes(x.id_kategori));
+   const missing=leafIds.filter(x=>!criteriaForTemplate.some(k=>k.id_kategori===x));
+   if(!leafIds.length||missing.length)return reply({ok:false,message:"Setiap komponen penilaian wajib memiliki minimal satu indikator aktif sebelum template dapat diaktifkan."},400);
+   if(!criteriaForTemplate.length||criteriaForTemplate.some(x=>Number(x.poin_maks)<=0))return reply({ok:false,message:"Bobot indikator belum lengkap."},400);
+   const {data:updated,error:updateError}=await admin.from("gudep_penilaian_template").update({status:"aktif",updated_at:new Date().toISOString()}).eq("id_template",id).select("*").single();
+   if(updateError)throw updateError;
+   return reply({ok:true,template:updated,message:"Template penilaian berhasil diaktifkan."});
+  }
+  if(action==="gudep_penilaian_simpan_periode"){
+   const idTemplate=Number(body.id_template),tahun=Number(body.tahun),nama=clean(body.nama_periode,180);
+   const mulai=clean(body.tanggal_mulai,10)||null,akhir=clean(body.tanggal_akhir,10)||null;
+   if(!Number.isInteger(idTemplate)||idTemplate<=0||!Number.isInteger(tahun)||tahun<2020||tahun>2100||!nama)return reply({ok:false,message:"Nama periode, tahun, dan template wajib diisi."},400);
+   if(mulai&&akhir&&akhir<mulai)return reply({ok:false,message:"Tanggal akhir tidak boleh lebih awal dari tanggal mulai."},400);
+   const {data:tpl,error:te}=await admin.from("gudep_penilaian_template").select("id_template,status").eq("id_template",idTemplate).single();
+   if(te)throw te;if(tpl.status!=="aktif")return reply({ok:false,message:"Aktifkan template dan lengkapi semua komponennya sebelum membuat periode."},400);
+   const {data,error}=await admin.from("gudep_penilaian_periode").insert({id_template:idTemplate,nama_periode:nama,tahun,tanggal_mulai:mulai,tanggal_akhir:akhir,status:"draft",created_by:authData.user.id}).select("*").single();
+   if(error){if(error.code==="23505")return reply({ok:false,message:"Periode terbuka untuk template dan tahun ini sudah ada."},409);throw error;}
+   return reply({ok:true,periode:data,message:"Periode penilaian berhasil dibuat sebagai draft."});
+  }
+  if(action==="gudep_penilaian_ubah_status_periode"){
+   const id=Number(body.id_periode),status=clean(body.status,20);
+   if(!Number.isInteger(id)||id<=0||!["dibuka","ditutup"].includes(status))return reply({ok:false,message:"Periode atau status tidak valid."},400);
+   const {data:periode,error:pe}=await admin.from("gudep_penilaian_periode").select("id_periode,id_template,tahun,status").eq("id_periode",id).single();
+   if(pe)throw pe;
+   if(status==="dibuka"){
+    if(!["draft","ditutup"].includes(periode.status))return reply({ok:false,message:"Periode tidak dapat dibuka dari status saat ini."},409);
+    const [{data:tpl,error:te},{count,error:ce}]=await Promise.all([
+     admin.from("gudep_penilaian_template").select("status").eq("id_template",periode.id_template).single(),
+     admin.from("gudep_penilaian_kriteria").select("id_kriteria",{count:"exact",head:true}).eq("aktif",true)
+    ]);
+    if(te)throw te;if(ce)throw ce;if(tpl.status!=="aktif"||!count)return reply({ok:false,message:"Template aktif dan indikator penilaian wajib tersedia."},400);
+   }else if(periode.status!=="dibuka")return reply({ok:false,message:"Hanya periode yang sedang dibuka yang dapat ditutup."},409);
+   const {data:updated,error:updateError}=await admin.from("gudep_penilaian_periode").update({status,updated_at:new Date().toISOString()}).eq("id_periode",id).select("*").single();
+   if(updateError){if(updateError.code==="23505")return reply({ok:false,message:"Sudah ada periode terbuka untuk template dan tahun ini."},409);throw updateError;}
+   return reply({ok:true,periode:updated,message:status==="dibuka"?"Periode penilaian berhasil dibuka.":"Periode penilaian berhasil ditutup."});
+  }
   if(action==="kwarran_management_data"){
    const [kwarran,pangkalan,admins,invites]=await Promise.all([
     admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran"),
