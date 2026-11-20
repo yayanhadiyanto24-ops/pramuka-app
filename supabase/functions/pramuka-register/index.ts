@@ -91,6 +91,64 @@ Deno.serve(async(req:Request)=>{
    const {data,error}=await admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran");if(error)throw error;
    return reply({ok:true,kwarran:data||[]});
   }
+  if(action==="gudep_penilaian_kwarran_data"||action==="gudep_penilaian_kwarran_detail"||action==="gudep_penilaian_kwarran_simpan"||action==="gudep_penilaian_kwarran_verifikasi_bukti"||action==="gudep_penilaian_kwarran_keputusan"){
+   const {data:me,error:meError}=await admin.from("users").select("role,status_akun").eq("id_user",authData.user.id).maybeSingle();
+   if(meError)throw meError;
+   if(!me||me.role!=="admin_kwarran"||me.status_akun!=="aktif")return reply({ok:false,message:"Akses hanya untuk Admin Kwarran aktif."},403);
+   const {data:assignment,error:assignmentError}=await admin.from("admin_kwarran").select("id_kwarran").eq("id_user",authData.user.id).maybeSingle();
+   if(assignmentError)throw assignmentError;if(!assignment)return reply({ok:false,message:"Akun Admin Kwarran belum memiliki wilayah tugas."},403);
+   if(action==="gudep_penilaian_kwarran_data"){
+    const {data,error}=await admin.from("gudep_penilaian").select("id_penilaian,id_periode,status,poin_total_usulan,poin_total_verifikasi,diajukan_at,ditinjau_at,catatan_pembina,catatan_kwarran,pangkalan!inner(id_pangkalan,nama_pangkalan,no_gudep),gudep_penilaian_periode!inner(nama_periode,tahun)").eq("id_kwarran",assignment.id_kwarran).order("diajukan_at",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
+    if(error)throw error;
+    return reply({ok:true,penilaian:data||[],id_kwarran:assignment.id_kwarran});
+   }
+   if(action==="gudep_penilaian_kwarran_detail"){
+    const id=Number(body.id_penilaian);
+    if(!Number.isInteger(id)||id<=0)return reply({ok:false,message:"Nomor penilaian tidak valid."},400);
+    const {data:penilaian,error:pe}=await admin.from("gudep_penilaian").select("*,pangkalan!inner(id_pangkalan,nama_pangkalan,no_gudep),gudep_penilaian_periode!inner(nama_periode,tahun)").eq("id_penilaian",id).eq("id_kwarran",assignment.id_kwarran).maybeSingle();
+    if(pe)throw pe;if(!penilaian)return reply({ok:false,message:"Penilaian tidak ditemukan dalam wilayah Anda."},404);
+    const [{data:kategori,error:ke},{data:kriteria,error:kr},{data:nilai,error:ne},{data:bukti,error:be}]=await Promise.all([
+     admin.from("gudep_penilaian_kategori").select("id_kategori,parent_id,kode,nama,deskripsi,urutan").eq("id_template",penilaian.id_template).eq("aktif",true).order("urutan"),
+     admin.from("gudep_penilaian_kriteria").select("id_kriteria,id_kategori,kode,nama,panduan_penilaian,poin_maks,bukti_wajib,urutan").eq("aktif",true).order("urutan"),
+     admin.from("gudep_penilaian_nilai").select("id_kriteria,nilai_usulan,nilai_verifikator,catatan_pembina,catatan_penilai").eq("id_penilaian",id),
+     admin.from("gudep_penilaian_bukti").select("id_bukti,id_kriteria,nama_file,mime_type,ukuran_byte,status_verifikasi,catatan_verifikasi,storage_bucket,storage_path,created_at").eq("id_penilaian",id).order("created_at",{ascending:false})
+    ]);
+    if(ke)throw ke;if(kr)throw kr;if(ne)throw ne;if(be)throw be;
+    const cats=kategori||[],catIds=new Set(cats.map(x=>x.id_kategori)),criteria=(kriteria||[]).filter(x=>catIds.has(x.id_kategori));
+    const nilaiMap=new Map((nilai||[]).map(x=>[String(x.id_kriteria),x]));
+    let evidence=bukti||[];
+    if(evidence.length){
+     const {data:signed,error:signedError}=await admin.storage.from("gudep-penilaian-bukti").createSignedUrls(evidence.map(x=>x.storage_path),600);
+     if(signedError)throw signedError;
+     const urlMap=new Map((signed||[]).map(x=>[x.path,x.signedUrl]));
+     evidence=evidence.map(x=>({...x,url:urlMap.get(x.storage_path)||null}));
+    }
+    const evidenceMap=new Map<number,any[]>();
+    for(const b of evidence){const key=Number(b.id_kriteria);if(!evidenceMap.has(key))evidenceMap.set(key,[]);evidenceMap.get(key)!.push(b);}
+    return reply({ok:true,penilaian,kategori:cats,kriteria:criteria.map(k=>({...k,...(nilaiMap.get(String(k.id_kriteria))||{}),nilai_usulan:Number(nilaiMap.get(String(k.id_kriteria))?.nilai_usulan||0),nilai_verifikator:nilaiMap.get(String(k.id_kriteria))?.nilai_verifikator===null?null:Number(nilaiMap.get(String(k.id_kriteria))?.nilai_verifikator||0),bukti:evidenceMap.get(Number(k.id_kriteria))||[]}))});
+   }
+   if(action==="gudep_penilaian_kwarran_simpan"){
+    const id=Number(body.id_penilaian),nilai=Array.isArray(body.nilai)?body.nilai:[];
+    if(!Number.isInteger(id)||id<=0)return reply({ok:false,message:"Nomor penilaian tidak valid."},400);
+    const {data,error}=await admin.rpc("gudep_penilaian_kwarran_simpan",{p_user_id:authData.user.id,p_id_penilaian:id,p_nilai:nilai,p_catatan:clean(body.catatan,3000)});
+    if(error)return reply({ok:false,message:error.message||"Nilai verifikasi gagal disimpan."},400);
+    return reply({ok:true,...data,message:"Nilai verifikasi berhasil disimpan."});
+   }
+   if(action==="gudep_penilaian_kwarran_verifikasi_bukti"){
+    const id=Number(body.id_bukti),status=clean(body.status_verifikasi,20);
+    if(!Number.isInteger(id)||id<=0||!["valid","tidak_valid"].includes(status))return reply({ok:false,message:"Data verifikasi bukti tidak valid."},400);
+    const {data,error}=await admin.rpc("gudep_penilaian_kwarran_verifikasi_bukti",{p_user_id:authData.user.id,p_id_bukti:id,p_status:status,p_catatan:clean(body.catatan,2000)});
+    if(error)return reply({ok:false,message:error.message||"Verifikasi bukti gagal."},400);
+    return reply({ok:true,...data,message:"Status bukti berhasil diperbarui."});
+   }
+   if(action==="gudep_penilaian_kwarran_keputusan"){
+    const id=Number(body.id_penilaian),keputusan=clean(body.keputusan,30);
+    if(!Number.isInteger(id)||id<=0||!["verifikasi","perlu_perbaikan"].includes(keputusan))return reply({ok:false,message:"Keputusan pemeriksaan tidak valid."},400);
+    const {data,error}=await admin.rpc("gudep_penilaian_kwarran_keputusan",{p_user_id:authData.user.id,p_id_penilaian:id,p_keputusan:keputusan,p_catatan:clean(body.catatan,3000)});
+    if(error)return reply({ok:false,message:error.message||"Keputusan pemeriksaan gagal disimpan."},400);
+    return reply({ok:true,...data,message:keputusan==="verifikasi"?"Penilaian berhasil diverifikasi dan diteruskan ke Admin Utama.":"Penilaian dikembalikan kepada Pembina untuk perbaikan."});
+   }
+  }
   if(action==="admin_kwarran_dashboard"){
    const {data:me,error:meError}=await admin.from("users").select("role,status_akun").eq("id_user",authData.user.id).maybeSingle();
    if(meError)throw meError;
