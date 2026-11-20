@@ -1341,9 +1341,23 @@ function renderSkuReadinessList(){
   const evidenceId='readiness_evidence_'+(isSub?'sub_':'item_')+(isSub?p.id_subpoint:p.id_progress)+'_'+i;
   return '<article class="rounded-xl border p-3 space-y-2"><div class="flex flex-wrap justify-between gap-2"><div><b>'+esc(p.student.nama_lengkap)+'</b><p class="text-xs muted">'+esc(p.student.tingkatan||'')+' · Ambalan '+esc(p.student.jenis_kelamin==='L'?'Putra':'Putri')+' · Sangga '+esc(p.student.sangga||'-')+'</p></div><span class="pill '+(ready?'status-lulus':hasFiles?'status-menunggu':'status-revisi')+'">'+(ready?'Siap mengajukan ujian':hasFiles?'Bukti tersedia':'Belum ada lampiran')+'</span></div><div class="text-sm"><b>Jawaban:</b><p class="whitespace-pre-wrap mt-1">'+esc(p.catatan_peserta||'Belum mengisi jawaban.')+'</p><b class="block mt-2">Keterangan bukti/pengalaman:</b><p class="whitespace-pre-wrap mt-1">'+esc(p.bukti_pencapaian||'-')+'</p><div id="'+evidenceId+'" class="mt-2"></div></div>'+(p.catatan_pembina?'<div class="rounded bg-amber-50 p-2 text-xs"><b>Catatan Pembina:</b><p class="whitespace-pre-wrap">'+esc(p.catatan_pembina)+'</p></div>':'')+'<div class="flex flex-wrap gap-2"><button type="button" data-ready-row="'+i+'" class="rounded-lg bg-emerald-700 text-white px-3 py-2 text-xs font-semibold">Siap mengajukan pengujian</button><button type="button" data-instruct-row="'+i+'" class="rounded-lg border px-3 py-2 text-xs font-semibold">Kirim instruksi/pemantapan</button></div></article>';
  }).join(''):'<p class="rounded-lg bg-slate-50 p-3 text-sm muted">Belum ada progres peserta pada butir ini. Peserta yang sudah mulai belajar akan muncul di sini.</p>');
- rows.forEach((p,i)=>{const id='readiness_evidence_'+(isSub?'sub_':'item_')+(isSub?p.id_subpoint:p.id_progress)+'_'+i;renderEvidenceAttachments(id,p.bukti_lampiran||[]);});
+ rows.forEach((p,i)=>{const id='readiness_evidence_'+(isSub?'sub_':'item_')+(isSub?p.id_subpoint:p.id_progress)+'_'+i;renderReadinessEvidence(id,p.bukti_lampiran||[]);});
  target.querySelectorAll('[data-ready-row]').forEach(btn=>btn.onclick=()=>updateReadinessNote(rows[Number(btn.dataset.readyRow)],selection,'Pembina menyatakan Anda siap mengajukan pengujian. Silakan kembali ke butir SKU ini dan tekan tombol "Ajukan ujian" jika sudah siap.'));
  target.querySelectorAll('[data-instruct-row]').forEach(btn=>btn.onclick=()=>{const note=$('readinessGroupNote').value.trim();if(!note){$('readinessActionMsg').textContent='Tuliskan instruksi atau pemantapan terlebih dahulu.';return;}updateReadinessNote(rows[Number(btn.dataset.instructRow)],selection,note);});
+}
+async function renderReadinessEvidence(containerId,attachments){
+ const el=$(containerId);if(!el)return;const files=Array.isArray(attachments)?attachments:[];
+ if(!files.length){el.innerHTML='<p class="text-xs muted">Belum ada lampiran foto/video.</p>';return;}
+ el.innerHTML='<b class="block text-xs mb-2">Bukti yang diunggah ('+files.length+')</b>'+files.map((f,i)=>'<div id="'+containerId+'_file_'+i+'" class="mb-2 text-xs muted">Memuat bukti '+(i+1)+'...</div>').join('');
+ for(let i=0;i<files.length;i++){
+  const {data,error}=await sb.storage.from('sku-bukti').createSignedUrl(files[i].path,3600);
+  const node=$(containerId+'_file_'+i);if(!node)continue;
+  if(error){node.textContent=(files[i].name||'Lampiran')+' · Tidak dapat dibuka';continue;}
+  const url=esc(data.signedUrl),name=esc(files[i].name||'Lampiran');
+  if((files[i].type||'').startsWith('image/'))node.innerHTML='<a href="'+url+'" target="_blank" rel="noopener"><img src="'+url+'" alt="'+name+'" loading="lazy" class="max-h-64 rounded-lg border object-contain bg-slate-50"></a><p class="mt-1">'+name+'</p>';
+  else if((files[i].type||'').startsWith('video/'))node.innerHTML='<video controls playsinline preload="metadata" class="w-full max-h-64 rounded-lg bg-black"><source src="'+url+'" type="'+esc(files[i].type)+'"></video><p class="mt-1">'+name+'</p>';
+  else node.innerHTML='<a class="text-amber-800 underline" href="'+url+'" target="_blank" rel="noopener">'+name+'</a>';
+ }
 }
 async function updateReadinessNote(row,selection,note){
  if(!row||!note)return;const msg=$('readinessActionMsg');msg.textContent='Menyimpan arahan Pembina...';
