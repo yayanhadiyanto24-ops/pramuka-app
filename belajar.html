@@ -1312,6 +1312,54 @@ async function loadMonitor(){
 }
 
 
+
+function readinessSelection(){
+ const value=$('readinessSkuFilter')?.value||'';
+ if(value.startsWith('sub:')){const id=Number(value.slice(4));return {kind:'sub',id,rows:monitorSubpointRows.filter(p=>p.id_subpoint===id),table:'sku_subpoint_progress',pk:'id_subpoint_progress'};}
+ if(value.startsWith('item:')){const id=Number(value.slice(5));return {kind:'item',id,rows:monitorProgressRows.filter(p=>p.id_sku_item===id),table:'sku_learning_progress',pk:'id_progress'};}
+ return null;
+}
+function renderSkuReadiness(){
+ const select=$('readinessSkuFilter'),target=$('readinessResults');if(!select||!target)return;
+ const previous=select.value;
+ select.innerHTML='<option value="">Pilih butir SKU...</option>'+items.map(it=>'<optgroup label="'+esc(it.tingkat+' · '+it.nomor_butir+' '+it.judul_butir)+'"><option value="item:'+it.id_sku_item+'">Butir utama · '+esc(it.nomor_butir+' '+it.judul_butir)+'</option>'+subpoints.filter(sp=>sp.id_sku_item===it.id_sku_item).map(sp=>'<option value="sub:'+sp.id_subpoint+'">'+esc(sp.kode_subpoint+' · '+sp.judul_subpoint)+'</option>').join('')+'</optgroup>').join('');
+ if(previous&&Array.from(select.options).some(o=>o.value===previous))select.value=previous;
+ select.onchange=renderSkuReadinessList;
+ $('sendReadinessGroupNote').onclick=sendReadinessGroupInstruction;
+ renderSkuReadinessList();
+}
+function renderSkuReadinessList(){
+ const target=$('readinessResults'),selection=readinessSelection();if(!target)return;
+ if(!selection){target.innerHTML='<p class="muted">Pilih butir SKU untuk melihat kesiapan peserta.</p>';return;}
+ const isSub=selection.kind==='sub',sub=isSub?subpoints.find(x=>x.id_subpoint===selection.id):null,item=items.find(x=>x.id_sku_item===(isSub?sub?.id_sku_item:selection.id));
+ const rows=selection.rows.filter(p=>p.status!=='lulus').map(p=>({...p,student:monitorStudents.find(s=>s.id_user===p.id_user)})).filter(p=>p.student);
+ target.innerHTML='<div class="flex flex-wrap justify-between gap-2"><b>'+(isSub?'Subpoin '+esc(sub?.kode_subpoint||'')+' · '+esc(sub?.judul_subpoint||''):'Butir '+esc(item?.nomor_butir||'')+' · '+esc(item?.judul_butir||''))+'</b><span class="pill">'+rows.length+' peserta terpantau</span></div>'+(rows.length?rows.map((p,i)=>{
+  const hasFiles=Array.isArray(p.bukti_lampiran)&&p.bukti_lampiran.length>0;
+  const ready=(p.catatan_pembina||'').toLowerCase().includes('siap mengajukan pengujian');
+  const evidenceId='readiness_evidence_'+(isSub?'sub_':'item_')+(isSub?p.id_subpoint:p.id_progress)+'_'+i;
+  return '<article class="rounded-xl border p-3 space-y-2"><div class="flex flex-wrap justify-between gap-2"><div><b>'+esc(p.student.nama_lengkap)+'</b><p class="text-xs muted">'+esc(p.student.tingkatan||'')+' · Ambalan '+esc(p.student.jenis_kelamin==='L'?'Putra':'Putri')+' · Sangga '+esc(p.student.sangga||'-')+'</p></div><span class="pill '+(ready?'status-lulus':hasFiles?'status-menunggu':'status-revisi')+'">'+(ready?'Siap mengajukan ujian':hasFiles?'Bukti tersedia':'Belum ada lampiran')+'</span></div><div class="text-sm"><b>Jawaban:</b><p class="whitespace-pre-wrap mt-1">'+esc(p.catatan_peserta||'Belum mengisi jawaban.')+'</p><b class="block mt-2">Keterangan bukti/pengalaman:</b><p class="whitespace-pre-wrap mt-1">'+esc(p.bukti_pencapaian||'-')+'</p><div id="'+evidenceId+'" class="mt-2"></div></div>'+(p.catatan_pembina?'<div class="rounded bg-amber-50 p-2 text-xs"><b>Catatan Pembina:</b><p class="whitespace-pre-wrap">'+esc(p.catatan_pembina)+'</p></div>':'')+'<div class="flex flex-wrap gap-2"><button type="button" data-ready-row="'+i+'" class="rounded-lg bg-emerald-700 text-white px-3 py-2 text-xs font-semibold">Siap mengajukan pengujian</button><button type="button" data-instruct-row="'+i+'" class="rounded-lg border px-3 py-2 text-xs font-semibold">Kirim instruksi/pemantapan</button></div></article>';
+ }).join(''):'<p class="rounded-lg bg-slate-50 p-3 text-sm muted">Belum ada progres peserta pada butir ini. Peserta yang sudah mulai belajar akan muncul di sini.</p>');
+ rows.forEach((p,i)=>{const id='readiness_evidence_'+(isSub?'sub_':'item_')+(isSub?p.id_subpoint:p.id_progress)+'_'+i;renderEvidenceAttachments(id,p.bukti_lampiran||[]);});
+ target.querySelectorAll('[data-ready-row]').forEach(btn=>btn.onclick=()=>updateReadinessNote(rows[Number(btn.dataset.readyRow)],selection,'Pembina menyatakan Anda siap mengajukan pengujian. Silakan kembali ke butir SKU ini dan tekan tombol "Ajukan ujian" jika sudah siap.'));
+ target.querySelectorAll('[data-instruct-row]').forEach(btn=>btn.onclick=()=>{const note=$('readinessGroupNote').value.trim();if(!note){$('readinessActionMsg').textContent='Tuliskan instruksi atau pemantapan terlebih dahulu.';return;}updateReadinessNote(rows[Number(btn.dataset.instructRow)],selection,note);});
+}
+async function updateReadinessNote(row,selection,note){
+ if(!row||!note)return;const msg=$('readinessActionMsg');msg.textContent='Menyimpan arahan Pembina...';
+ const {error}=await sb.from(selection.table).update({catatan_pembina:note}).eq(selection.pk,row[selection.pk]);
+ if(error){msg.textContent='Arahan belum tersimpan: '+error.message;return;}
+ msg.textContent='Arahan berhasil dikirim kepada '+row.student.nama_lengkap+'.';await loadMonitor();
+}
+async function sendReadinessGroupInstruction(){
+ const selection=readinessSelection(),note=$('readinessGroupNote')?.value.trim();const msg=$('readinessActionMsg');
+ if(!selection){msg.textContent='Pilih butir SKU terlebih dahulu.';return;}
+ if(!note){msg.textContent='Tuliskan instruksi atau pemantapan terlebih dahulu.';return;}
+ const targets=selection.rows.filter(p=>p.status!=='lulus'&&!(Array.isArray(p.bukti_lampiran)&&p.bukti_lampiran.length));
+ if(!targets.length){msg.textContent='Tidak ada peserta pada butir ini yang belum mengunggah lampiran bukti.';return;}
+ msg.textContent='Mengirim instruksi kepada '+targets.length+' peserta...';
+ for(const row of targets){const {error}=await sb.from(selection.table).update({catatan_pembina:note}).eq(selection.pk,row[selection.pk]);if(error){msg.textContent='Sebagian instruksi mungkin belum terkirim. Kesalahan: '+error.message;await loadMonitor();return;}}
+ msg.textContent='Instruksi berhasil dikirim kepada '+targets.length+' peserta.';await loadMonitor();
+}
+
 function printExamDocument(referralId){
  const r=examRecords.find(x=>x.id===referralId);if(!r)return;
  const student=monitorStudents?.find(x=>x.id_user===r.id_user)||null;const unit=monitorPangkalan.find(x=>x.id_pangkalan===student?.id_pangkalan);const ambalan=student?.jenis_kelamin==='L'?unit?.nama_ambalan_putra:unit?.nama_ambalan_putri;const unitLabel=[unit?.nama_pangkalan,ambalan].filter(Boolean).join(' · ');
