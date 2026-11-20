@@ -465,16 +465,19 @@ a[class*="rounded"]{
    </div>
   </section>
   <section id="view-administrasi" class="hidden space-y-4">
-   <div><h2 class="text-xl font-bold">Data Pangkalan &amp; Gudep</h2><p class="text-sm muted">Diisi dan diperbarui oleh Pembina. Perubahan berlaku untuk pangkalan bersama.</p></div>
+   <div><h2 class="text-xl font-bold">Data Pangkalan</h2><p class="text-sm muted">Identitas dan susunan organisasi Gugus Depan. Dikelola Pembina untuk pangkalan bersama.</p></div>
    <div class="panel p-4 space-y-3">
     <div class="bg-amber-50 rounded-lg p-3"><p class="text-xs muted">Kode gabung pangkalan — digunakan saat pendaftaran pertama anggota baru</p><div class="flex items-center justify-between gap-2"><b id="pangkalanJoinCode" class="font-mono text-lg">Memuat...</b><button id="copyPangkalanJoinCode" class="text-sm font-semibold text-amber-900">Salin</button></div></div>
     <div class="grid md:grid-cols-2 gap-3">
      <label class="text-sm font-semibold">Nama pangkalan / sekolah<input id="paNama" maxlength="180" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
      <label class="text-sm font-semibold">Nomor Gudep<input id="paGudep" maxlength="40" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
-     <label class="text-sm font-semibold">Nama Ambalan Putera<input id="paPutera" maxlength="120" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
-     <label class="text-sm font-semibold">Nama Ambalan Puteri<input id="paPuteri" maxlength="120" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
-     <label class="text-sm font-semibold">Ketua Gudep<input id="paKetuaGudep" maxlength="150" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
-     <label class="text-sm font-semibold">Ketua Mabigus<input id="paKetuaMabigus" maxlength="150" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
+     <label class="text-sm font-semibold">Nama Ambalan Putra<input id="paPutera" maxlength="120" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
+     <label class="text-sm font-semibold">Nama Ambalan Putri<input id="paPuteri" maxlength="120" class="mt-1 w-full border rounded-lg p-2 font-normal"></label>
+    </div>
+    <input id="paKetuaGudep" type="hidden"><input id="paKetuaMabigus" type="hidden">
+    <div class="border-t pt-4 space-y-3">
+     <div><h3 class="font-bold">Struktur Organisasi Gugus Depan</h3><p class="text-xs muted">Mengacu Pasal 15–18 Jukran Kwarnas Nomor 05 Tahun 2026. Isi nama sesuai susunan kepengurusan yang ditetapkan pangkalan.</p></div>
+     <div id="strukturGudepSections" class="grid lg:grid-cols-2 gap-3"></div>
     </div>
     <button id="savePangkalan" class="rounded-lg bg-amber-800 text-white px-4 py-3 font-semibold">Simpan data pangkalan</button><p id="pangkalanMsg" class="text-sm muted"></p>
    </div>
@@ -809,6 +812,53 @@ async function loadPangkalanPending(){
      };
      msg.textContent=editable?'Isi nilai dan bukti, lalu simpan draft sebelum mengajukan.':'Penilaian sudah diajukan dan menunggu proses verifikasi.';
     }
+const STRUKTUR_GUDEP_GROUPS=[
+ {id:'mabigus',title:'Majelis Pembimbing Gudep (Mabigus)',note:'Sekurang-kurangnya Ketua, Sekretaris, dan beberapa anggota.',defaults:['Ketua','Sekretaris','Anggota']},
+ {id:'pengurus_gudep',title:'Pengurus Gugus Depan',note:'Sekurang-kurangnya Ketua Gudep, Wakil Ketua Gudep, dan Pembina Satuan.',defaults:['Ketua Gudep','Wakil Ketua Gudep','Pembina Satuan Putra','Pembina Satuan Putri']},
+ {id:'dewan_kehormatan_gudep',title:'Dewan Kehormatan Gudep',note:'Tiga orang dari unsur Pengurus Gudep dan Pembina Pramuka.',defaults:['Anggota 1','Anggota 2','Anggota 3'],asal:true},
+ {id:'dewan_ambalan_putra',title:'Dewan Ambalan Penegak Putra',note:'Pradana, Pemangku Adat, Kerani, Bendahara, dan beberapa anggota.',defaults:['Pradana','Pemangku Adat','Kerani','Bendahara','Anggota']},
+ {id:'dewan_ambalan_putri',title:'Dewan Ambalan Penegak Putri',note:'Pradana, Pemangku Adat, Kerani, Bendahara, dan beberapa anggota.',defaults:['Pradana','Pemangku Adat','Kerani','Bendahara','Anggota']},
+ {id:'dewan_kehormatan_penegak_putra',title:'Dewan Kehormatan Penegak Putra',note:'Anggota Ambalan yang telah dilantik; diketuai Pemangku Adat dan didampingi Pembina.',defaults:['Pemangku Adat (Ketua)','Anggota','Anggota','Pembina Pendamping']},
+ {id:'dewan_kehormatan_penegak_putri',title:'Dewan Kehormatan Penegak Putri',note:'Anggota Ambalan yang telah dilantik; diketuai Pemangku Adat dan didampingi Pembina.',defaults:['Pemangku Adat (Ketua)','Anggota','Anggota','Pembina Pendamping']},
+ {id:'unsur_pendukung',title:'Unsur Pendukung (Opsional)',note:'Tambahkan hanya jika dibentuk sesuai kebutuhan Gudep.',defaults:[]}
+];
+function renderStrukturGudep(data=[]){
+ const host=$('strukturGudepSections');if(!host)return;
+ host.innerHTML=STRUKTUR_GUDEP_GROUPS.map(g=>{
+  const rows=(data||[]).filter(x=>x.kelompok===g.id);
+  const items=rows.length?rows:g.defaults.map(jabatan=>({jabatan,nama:'',jenis_kelamin:g.id.endsWith('_putra')?'L':g.id.endsWith('_putri')?'P':'',unsur_asal:''}));
+  return `<section class="border rounded-xl p-3 space-y-2" data-struct-section="${g.id}">
+   <div><h4 class="font-semibold text-sm">${g.title}</h4><p class="text-xs muted">${g.note}</p></div>
+   <div class="space-y-2" data-struct-rows>${items.map(x=>strukturGudepRow(g.id,x,g.asal)).join('')}</div>
+   <button type="button" data-struct-add="${g.id}" class="text-xs font-semibold text-amber-800">+ Tambah personel</button>
+  </section>`;
+ }).join('');
+}
+function strukturGudepRow(group,x={},asal=false){
+ return `<div class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_92px] gap-2 items-start border-t pt-2" data-struct-row>
+  <input data-field="jabatan" maxlength="100" class="w-full border rounded-lg p-2 text-sm" placeholder="Jabatan" value="${esc(x.jabatan||'')}">
+  <input data-field="nama" maxlength="150" class="w-full border rounded-lg p-2 text-sm" placeholder="Nama lengkap" value="${esc(x.nama||'')}">
+  <select data-field="jenis_kelamin" class="w-full border rounded-lg p-2 text-sm"><option value="">Pa/Pi</option><option value="L" ${x.jenis_kelamin==='L'?'selected':''}>Pa</option><option value="P" ${x.jenis_kelamin==='P'?'selected':''}>Pi</option></select>
+  ${asal?'<input data-field="unsur_asal" maxlength="100" class="sm:col-span-2 w-full border rounded-lg p-2 text-sm" placeholder="Unsur asal: Pengurus Gudep / Pembina Pramuka" value="'+esc(x.unsur_asal||'')+'">':''}
+  <button type="button" data-struct-remove class="text-xs text-red-700 text-left">Hapus baris</button>
+ </div>`;
+}
+function collectStrukturGudep(){
+ return [...document.querySelectorAll('#strukturGudepSections [data-struct-section]')].flatMap(section=>
+  [...section.querySelectorAll('[data-struct-row]')].map(row=>({
+   kelompok:section.dataset.structSection,
+   jabatan:row.querySelector('[data-field="jabatan"]')?.value.trim()||'',
+   nama:row.querySelector('[data-field="nama"]')?.value.trim()||'',
+   jenis_kelamin:row.querySelector('[data-field="jenis_kelamin"]')?.value||null,
+   unsur_asal:row.querySelector('[data-field="unsur_asal"]')?.value.trim()||null
+  })).filter(x=>x.jabatan&&x.nama)
+ );
+}
+$('strukturGudepSections')?.addEventListener('click',e=>{
+ const add=e.target.closest('[data-struct-add]');
+ if(add){const g=STRUKTUR_GUDEP_GROUPS.find(x=>x.id===add.dataset.structAdd);const rows=add.parentElement.querySelector('[data-struct-rows]');rows.insertAdjacentHTML('beforeend',strukturGudepRow(g.id,{jabatan:'',nama:'',jenis_kelamin:g.id.endsWith('_putra')?'L':g.id.endsWith('_putri')?'P':''},!!g.asal));return;}
+ if(e.target.closest('[data-struct-remove]')){e.target.closest('[data-struct-row]')?.remove();}
+});
     async function loadPangkalanAdmin(){
  $('pangkalanMsg').textContent='Memuat data pangkalan...';
  try{
@@ -817,7 +867,14 @@ async function loadPangkalanPending(){
   const p=data.pangkalan;
   $('paNama').value=p.nama_pangkalan||'';$('paGudep').value=p.no_gudep||'';
   $('paPutera').value=p.nama_ambalan_putra||'';$('paPuteri').value=p.nama_ambalan_putri||'';
-  $('paKetuaGudep').value=p.nama_ketua_gudep||'';$('paKetuaMabigus').value=p.nama_ketua_mabigus||'';
+  const struktur=Array.isArray(p.struktur_gudep)?p.struktur_gudep:[];
+  if(!struktur.length){
+   if(p.nama_ketua_gudep)struktur.push({kelompok:'pengurus_gudep',jabatan:'Ketua Gudep',nama:p.nama_ketua_gudep});
+   if(p.nama_ketua_mabigus)struktur.push({kelompok:'mabigus',jabatan:'Ketua',nama:p.nama_ketua_mabigus});
+  }
+  renderStrukturGudep(struktur);
+  $('paKetuaGudep').value=p.nama_ketua_gudep||struktur.find(x=>x.kelompok==='pengurus_gudep'&&/ketua gudep/i.test(x.jabatan))?.nama||'';
+  $('paKetuaMabigus').value=p.nama_ketua_mabigus||struktur.find(x=>x.kelompok==='mabigus'&&/^ketua$/i.test(x.jabatan))?.nama||'';
   $('pangkalanJoinCode').textContent=p.kode_gabung_peserta||'-';
   $('copyPangkalanJoinCode').onclick=()=>navigator.clipboard?.writeText(p.kode_gabung_peserta||'');
   $('pangkalanMsg').textContent='Data pangkalan siap diperbarui.';
@@ -828,7 +885,7 @@ async function loadPangkalanPending(){
 $('savePangkalan').addEventListener('click',async()=>{
  const b=$('savePangkalan');b.disabled=true;b.textContent='Menyimpan...';$('pangkalanMsg').textContent='';
  try{
-  const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'simpan_pangkalan_pembina',nama_pangkalan:$('paNama').value.trim(),no_gudep:$('paGudep').value.trim(),nama_ambalan_putra:$('paPutera').value.trim(),nama_ambalan_putri:$('paPuteri').value.trim(),nama_ketua_gudep:$('paKetuaGudep').value.trim(),nama_ketua_mabigus:$('paKetuaMabigus').value.trim()}});
+  const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'simpan_pangkalan_pembina',nama_pangkalan:$('paNama').value.trim(),no_gudep:$('paGudep').value.trim(),nama_ambalan_putra:$('paPutera').value.trim(),nama_ambalan_putri:$('paPuteri').value.trim(),nama_ketua_gudep:collectStrukturGudep().find(x=>x.kelompok==='pengurus_gudep'&&/ketua gudep/i.test(x.jabatan))?.nama||'',nama_ketua_mabigus:collectStrukturGudep().find(x=>x.kelompok==='mabigus'&&/^ketua$/i.test(x.jabatan))?.nama||'',struktur_gudep:collectStrukturGudep()}});
   if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Penyimpanan gagal.');
   $('pangkalanMsg').textContent='Data pangkalan berhasil disimpan.';
  }catch(err){$('pangkalanMsg').textContent='Gagal menyimpan: '+(err.message||'Kesalahan');}
