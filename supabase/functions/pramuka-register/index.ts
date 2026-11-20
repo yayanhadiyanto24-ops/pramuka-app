@@ -187,14 +187,9 @@ Deno.serve(async(req:Request)=>{
     if(targetError)throw targetError;
     const matching=(pb.jabatan==="Pembina Satuan Putera"&&target?.jenis_kelamin==="L")||(pb.jabatan==="Pembina Satuan Puteri"&&target?.jenis_kelamin==="P");
     if(!target||!matching)return reply({ok:false,message:"Peserta bukan anggota satuan yang menjadi kewenangan Anda."},403);
-    const {count,error:countError}=await admin.from("profil_peserta_didik").select("id_user,users!inner(status_akun)",{count:"exact",head:true}).eq("id_pangkalan",pb.id_pangkalan).eq("jenis_kelamin",pb.jenis_kelamin).eq("users.status_akun","aktif").neq("status_keanggotaan","alumni");if(countError)throw countError;
-    const jumlahAmbalan=Math.max(0,Number(pb.jumlah_ambalan_berbayar||0));
-    const batas=jumlahAmbalan>0?jumlahAmbalan*32:10;
-    if(Number(count||0)>=batas)return reply({ok:false,message:"Kuota saat ini sudah penuh ("+batas+" peserta). "+(!clean(pb.nta,80)?"Lengkapi NTA/KTA terlebih dahulu. ":"")+"Untuk membuka satu ambalan tambahan (32 peserta), transfer seikhlasnya dan konfirmasi kepada Admin Utama agar diterbitkan kode aktivasi."},403);
-    const {data:updated,error:updateError}=await admin.from("users").update({status_akun:"aktif"}).eq("id_user",targetId).eq("role","peserta_didik").eq("status_akun","pending").select("id_user").maybeSingle();
-    if(updateError)throw updateError;
-    if(!updated)return reply({ok:false,message:"Akun tidak ditemukan atau sudah diproses."},409);
-    return reply({ok:true,message:"Peserta didik berhasil disetujui."});
+    const {data:activation,error:activationError}=await admin.rpc("pramuka_activate_pending_participant",{p_user_id:targetId});
+    if(activationError)return reply({ok:false,message:activationError.message||"Kuota atau penempatan Ambalan tidak dapat diproses."},403);
+    return reply({ok:true,message:"Peserta didik berhasil disetujui dan ditempatkan pada "+(activation?.nama_ambalan||"Ambalan yang tersedia")+".",id_ambalan:activation?.id_ambalan,nama_ambalan:activation?.nama_ambalan,urutan_ambalan:activation?.urutan_ambalan});
    }
    if(action==="simpan_tanda_tangan_pangkalan"){
     const field=body.jenis_tanda_tangan==="ketua_gudep"?"tanda_tangan_ketua_gudep_data":body.jenis_tanda_tangan==="mabigus"?"tanda_tangan_mabigus_data":null;
