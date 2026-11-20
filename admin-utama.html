@@ -453,7 +453,7 @@ function renderPembinaAccess(){
  });
 }
 $('pembina-access-search')?.addEventListener('input',renderPembinaAccess);
-let ambalanRekapCache=[];
+let ambalanRekapCache=[],pangkalanRankingCache=[],kwarranRankingCache=[],kwarranNameMap={};
 function renderAmbalanRekap(){
  const selected=$('rekap-kwarran-filter')?.value||'';
  const rows=ambalanRekapCache.filter(x=>!selected||String(x.id_kwarran)===selected);
@@ -465,9 +465,15 @@ function renderAmbalanRekap(){
   $('rekap-foot').innerHTML=rows.length?'<tr class="border-t-2 border-amber-300"><td class="px-2 py-2 whitespace-nowrap">JUMLAH: '+pangkalanCount+' pangkalan</td><td class="px-2 py-2 whitespace-nowrap">'+rows.length+' ambalan</td><td class="px-2 py-2 text-center whitespace-nowrap">Pa '+putra+' · Pi '+putri+'</td>'+keys.map(k=>'<td class="px-2 py-2 text-center">'+totals[k]+'</td>').join('')+'<td class="px-2 py-2 text-center">—</td></tr>':'';
  $('rekap-summary').textContent=(selected?($('rekap-kwarran-filter').selectedOptions[0]?.textContent||'Kwarran terpilih'):'Seluruh Kwarcab')+' · '+pangkalanCount+' pangkalan · '+rows.length+' ambalan · '+(putra+putri)+' baris Pa/Pi';
 }
-$('rekap-kwarran-filter')?.addEventListener('change',renderAmbalanRekap);
+function renderRanking(){
+ const selected=$('rekap-kwarran-filter')?.value||'';
+ const pangkalanRows=pangkalanRankingCache.filter(x=>!selected||String(x.id_kwarran)===selected);
+ $('ranking-pangkalan-body').innerHTML=pangkalanRows.map(x=>'<tr class="border-t '+(x.layak_peringkat?'':'text-slate-400')+'"><td class="p-2">'+esc(kwarranNameMap[String(x.id_kwarran)]||'-')+'</td><td class="p-2 text-center">'+(x.peringkat_kwarran?'#'+x.peringkat_kwarran:'—')+'</td><td class="p-2">'+esc(x.nama_pangkalan)+'<div class="text-xs text-slate-500">Gudep '+esc(x.no_gudep||'-')+'</div></td><td class="p-2 text-center">'+Number(x.jumlah_ambalan_layak||0)+'/'+Number(x.jumlah_ambalan||0)+'</td><td class="p-2 text-center">'+Number(x.peserta_aktif||0)+'</td><td class="p-2 text-center font-bold">'+Number(x.total_poin||0)+'</td></tr>').join('')||'<tr><td colspan="6" class="p-4 text-center">Belum ada pangkalan yang memenuhi syarat peringkat pada filter ini.</td></tr>';
+ $('ranking-kwarran-body').innerHTML=kwarranRankingCache.map(x=>'<tr class="border-t '+(x.peringkat_kwarran?'':'text-slate-400')+'"><td class="p-2 text-center">'+(x.peringkat_kwarran?'#'+x.peringkat_kwarran:'—')+'</td><td class="p-2">'+esc(x.nama_kwarran)+'</td><td class="p-2 text-center">'+Number(x.pangkalan_layak_peringkat||0)+'</td><td class="p-2 text-center">'+Number(x.ambalan_layak_peringkat||0)+'</td><td class="p-2 text-center font-bold">'+Number(x.total_poin||0)+'</td></tr>').join('')||'<tr><td colspan="5" class="p-4 text-center">Belum ada data Kwarran.</td></tr>';
+}
+$('rekap-kwarran-filter')?.addEventListener('change',()=>{renderAmbalanRekap();renderRanking();});
 async function loadDashboard(){$('status').textContent='Memuat rekap...';try{const d=await callApi({action:'dashboard'});$('total-pangkalan').textContent=d.pangkalan.length;$('total-ambalan').textContent=d.rekap.length;$('total-peserta').textContent=d.rekap.reduce((n,x)=>n+Number(x.jumlah_peserta||0),0);
-ambalanRekapCache=d.rekap||[];const kwarranOptions=(d.kwarran||[]).map(k=>'<option value="'+esc(k.id_kwarran)+'">'+esc(k.nama_kwarran)+'</option>').join('');$('rekap-kwarran-filter').innerHTML='<option value="">Semua Kwarran</option>'+kwarranOptions;renderAmbalanRekap();
+ambalanRekapCache=d.rekap||[];pangkalanRankingCache=d.peringkat_pangkalan||[];kwarranRankingCache=d.peringkat_kwarran||[];kwarranNameMap=Object.fromEntries((d.kwarran||[]).map(k=>[String(k.id_kwarran),k.nama_kwarran]));const kwarranOptions=(d.kwarran||[]).map(k=>'<option value="'+esc(k.id_kwarran)+'">'+esc(k.nama_kwarran)+'</option>').join('');$('rekap-kwarran-filter').innerHTML='<option value="">Semua Kwarran</option>'+kwarranOptions;renderAmbalanRekap();renderRanking();
 $('pangkalan-list').innerHTML=d.pangkalan.map(x=>'<div class="border rounded-xl p-3 space-y-1"><b>'+esc(x.nama_pangkalan)+'</b><p class="text-xs text-slate-500">Gudep: '+esc(x.no_gudep||'-')+'</p><p class="text-xs">Kode gabung pangkalan: <b class="font-mono">'+esc(x.kode_gabung_peserta)+'</b></p><p class="text-xs text-slate-500">Ambalan: '+esc(x.nama_ambalan_putra)+' / '+esc(x.nama_ambalan_putri)+'</p><p class="text-xs">Ketua Gudep: '+esc(x.nama_ketua_gudep||'Belum diisi')+'</p><p class="text-xs">Ketua Mabigus: '+esc(x.nama_ketua_mabigus||'Belum diisi')+'</p><p class="text-xs text-slate-400">Data administrasi dikelola Pembina pangkalan.</p></div>').join('')||'<p class="text-sm text-slate-500">Belum ada pangkalan.</p>';
 pembinaAccessCache=d.pembina||[];renderPembinaAccess();
 
