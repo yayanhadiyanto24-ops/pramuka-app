@@ -69,7 +69,10 @@ Deno.serve(async(req:Request)=>{
    const payload={...body};delete payload.password;delete payload.email;delete payload.action;
    const {data:profile,error:profileError}=await admin.rpc("pramuka_register_profile",{p_user_id:userId,p_email:email,p_payload:payload});
    if(profileError||!profile?.ok){await admin.auth.admin.deleteUser(userId);return reply({ok:false,message:profileError?.message||"Profil gagal disimpan."},400);}
-   const result:Record<string,unknown>={ok:true,message:role==="pembina"?"Pendaftaran Pembina berhasil. Akun langsung aktif dan dapat digunakan.":"Pendaftaran peserta didik berhasil. Akun langsung aktif dan dapat digunakan untuk belajar.",status:"aktif",nama_pangkalan:profile.nama_pangkalan,nama_ambalan:profile.nama_ambalan};
+   const result:Record<string,unknown>={ok:true,message:role==="pembina"?"Pendaftaran Pembina berhasil. Akun langsung aktif dan dapat digunakan.":"Pendaftaran peserta didik berhasil. Akun langsung aktif dan ditempatkan pada Ambalan "+(profile.nama_ambalan||"yang tersedia")+".",status:"aktif",nama_pangkalan:profile.nama_pangkalan,nama_ambalan:profile.nama_ambalan};
+   if(profile.id_ambalan)result.id_ambalan=profile.id_ambalan;
+   if(profile.urutan_ambalan)result.urutan_ambalan=profile.urutan_ambalan;
+   if(profile.status_ambalan)result.status_ambalan=profile.status_ambalan;
    const {data:createdAccount,error:createdAccountError}=await admin.from("users").select("kode_unik").eq("id_user",userId).single();
    if(createdAccountError)throw createdAccountError;
    result.kode_unik=createdAccount.kode_unik;
