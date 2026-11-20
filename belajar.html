@@ -395,7 +395,7 @@ a[class*="rounded"]{
    <button class="tab rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="profile">Lengkapi Profil</button>
    <button class="tab rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="sku">Materi SKU</button>
    <button id="monitorTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="pantau">Pantau Peserta</button>
-   <button id="adminPangkalanTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="administrasi">Administrasi Pangkalan</button><button id="pangkalanRankingTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="peringkat">Peringkat Pangkalan</button><a href="dokumen.html" class="tab rounded-lg px-4 py-2 text-sm font-semibold inline-flex items-center justify-center">Pusat Dokumen</a>
+   <button id="adminPangkalanTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="administrasi">Data Pangkalan</button><button id="pangkalanRankingTab" class="tab hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold" data-tab="peringkat">Peringkat Pangkalan</button><a href="dokumen.html" class="tab rounded-lg px-4 py-2 text-sm font-semibold inline-flex items-center justify-center">Pusat Dokumen</a>
   </nav>
   <section id="view-profile" class="hidden space-y-4">
    <div class="panel p-4 md:p-6 space-y-4">
@@ -465,7 +465,7 @@ a[class*="rounded"]{
    </div>
   </section>
   <section id="view-administrasi" class="hidden space-y-4">
-   <div><h2 class="text-xl font-bold">Administrasi Pangkalan &amp; Gudep</h2><p class="text-sm muted">Diisi dan diperbarui oleh Pembina. Perubahan berlaku untuk pangkalan bersama.</p></div>
+   <div><h2 class="text-xl font-bold">Data Pangkalan &amp; Gudep</h2><p class="text-sm muted">Diisi dan diperbarui oleh Pembina. Perubahan berlaku untuk pangkalan bersama.</p></div>
    <div class="panel p-4 space-y-3">
     <div class="bg-amber-50 rounded-lg p-3"><p class="text-xs muted">Kode gabung pangkalan — digunakan saat pendaftaran pertama anggota baru</p><div class="flex items-center justify-between gap-2"><b id="pangkalanJoinCode" class="font-mono text-lg">Memuat...</b><button id="copyPangkalanJoinCode" class="text-sm font-semibold text-amber-900">Salin</button></div></div>
     <div class="grid md:grid-cols-2 gap-3">
@@ -823,7 +823,7 @@ async function loadPangkalanPending(){
   $('pangkalanMsg').textContent='Data pangkalan siap diperbarui.';
    await loadPangkalanPending();
     await loadSanggaAdmin();
- }catch(err){$('pangkalanMsg').textContent='Gagal memuat administrasi pangkalan: '+(err.message||'Kesalahan');}
+ }catch(err){$('pangkalanMsg').textContent='Gagal memuat data pangkalan: '+(err.message||'Kesalahan');}
 }
 $('savePangkalan').addEventListener('click',async()=>{
  const b=$('savePangkalan');b.disabled=true;b.textContent='Menyimpan...';$('pangkalanMsg').textContent='';
