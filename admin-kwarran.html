@@ -103,7 +103,11 @@ async function loadDashboard(){
   $('ranking-pangkalan-body').innerHTML=(data.ranking_pangkalan||[]).map(x=>'<tr class="border-t '+(x.layak_peringkat?'':'text-slate-400')+'"><td class="px-2 py-2 text-center">'+(x.peringkat_kwarran?'#'+x.peringkat_kwarran:'—')+'</td><td class="px-2 py-2">'+esc(x.nama_pangkalan)+'<div class="text-xs text-slate-500">Gudep '+esc(x.no_gudep||'-')+'</div></td><td class="px-2 py-2 text-center">'+Number(x.jumlah_ambalan_layak||0)+'/'+Number(x.jumlah_ambalan||0)+'</td><td class="px-2 py-2 text-center">'+Number(x.peserta_aktif||0)+'</td><td class="px-2 py-2 text-center font-bold">'+Number(x.total_poin||0)+'</td></tr>').join('')||'<tr><td colspan="5" class="text-center py-4">Belum ada data peringkat pangkalan.</td></tr>';
   $('compare-body').innerHTML=(data.comparison||[]).map(x=>'<tr class="'+(Number(x.id_kwarran)===Number(data.admin.id_kwarran)?'own':'')+'"><td>'+esc(x.nama_kwarran)+(Number(x.id_kwarran)===Number(data.admin.id_kwarran)?' · Wilayah Anda':'')+'</td><td>'+Number(x.jumlah_pangkalan||0)+'</td><td>'+Number(x.jumlah_ambalan||0)+'</td><td>'+Number(x.jumlah_peserta||0)+'</td><td>'+Number(x.peserta_aktif||0)+'</td><td>'+Number(x.bantara||0)+'</td><td>'+Number(x.laksana||0)+'</td><td>'+Number(x.garuda||0)+'</td><td class="font-bold">'+Number(x.total_poin||0)+'</td><td>'+(x.peringkat_kwarran?'#'+x.peringkat_kwarran:'—')+'</td></tr>').join('')||'<tr><td colspan="10" class="text-center py-4">Belum ada data Kwarran.</td></tr>';
  $('status').textContent='Data berhasil diperbarui.';
- // Modul Gudep Tergiat dinonaktifkan untuk Admin Kwarran.
+ try{
+  const {data:feature,error:featureError}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_feature_status'}});
+  if(featureError)throw featureError;
+  if(feature?.enabled){$('gudep-review-section').classList.remove('hidden');await loadGudepReviewList();}
+ }catch(err){console.warn('Status modul Gudep Tergiat tidak dapat dimuat:',err?.message||err);}
 }
 
 let gudepReviewCurrent=null;
