@@ -404,14 +404,14 @@ a[class*="rounded"]{
   const email=document.getElementById('email')?.value.trim()||'';
   const password=document.getElementById('password')?.value||'';
   if(!email||!password){msg.textContent='Email dan password wajib diisi.';return;}
-  if(!window.supabase?.createClient){msg.textContent='Layanan login belum termuat. Muat ulang halaman.';return;}
   btn.disabled=true;btn.textContent='Memeriksa...';msg.textContent='Menghubungkan ke server...';
   try{
-   const client=window.supabase.createClient('https://bopxmtxfrlrnywwhywne.supabase.co','sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0');
-   const {error}=await client.auth.signInWithPassword({email,password});
+   if(typeof sb==='undefined'||!sb)throw new Error('Komponen autentikasi belum siap. Muat ulang halaman.');
+   const {data,error}=await sb.auth.signInWithPassword({email,password});
    if(error)throw error;
    msg.textContent='Login berhasil. Membuka Ruang Belajar...';
-   window.location.reload();
+   if(typeof boot!=='function')throw new Error('Modul Ruang Belajar belum siap dimuat.');
+   await boot(data.user);
   }catch(error){msg.textContent='Login belum berhasil: '+(error.message||'Periksa email dan password.');}
   finally{btn.disabled=false;btn.textContent='Masuk';}
  },true);
