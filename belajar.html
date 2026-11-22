@@ -377,7 +377,7 @@ a[class*="rounded"]{
 <header class="brand text-white px-4 py-5">
  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 relative">
   <div class="rt-header-brand"><img class="rt-header-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div><div class="rt-header-name text-xl">RUANG TEGAK</div><p class="rt-header-sub text-sm">Ruang Belajar Pramuka Penegak</p><p id="roleSubtitle" class="text-amber-200 text-xs">Materi umum · SKU Bantara · SKU Laksana · Progres kecakapan</p></div></div>
-  <div id="headerActions" class="rt-account-actions"><div id="profileIdentity"><img id="headerProfileAvatar" class="rt-profile-mark" alt="Foto profil"><span id="who" class="text-sm text-amber-100"><span id="whoName"></span><span id="whoRole"></span></span></div><div id="headerButtons"><button id="refreshAppBtn" type="button" class="rounded-lg font-bold" aria-label="Perbarui halaman">↻ Perbarui</button><button id="installAppBtn" type="button" class="rounded-xl bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 border border-yellow-200 px-3 py-2 text-xs font-extrabold text-stone-950 shadow-md"><span aria-hidden="true">⬇</span> Unduh Aplikasi</button></div></div><button id="logout" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button>
+  <div id="headerActions" class="rt-account-actions"><div id="profileIdentity"><img id="headerProfileAvatar" class="rt-profile-mark" alt="Foto profil"><span id="who" class="text-sm text-amber-100"><span id="whoName"></span><span id="whoRole"></span></span></div><div id="headerButtons"><button id="refreshAppBtn" type="button" class="rounded-lg font-bold" aria-label="Perbarui halaman" onclick="window.location.reload()">↻ Perbarui</button><button id="installAppBtn" type="button" class="rounded-xl bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 border border-yellow-200 px-3 py-2 text-xs font-extrabold text-stone-950 shadow-md"><span aria-hidden="true">⬇</span> Unduh Aplikasi</button></div></div><button id="logout" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button>
   <p id="appCreatorCredit">Pembuat &amp; Pengembang Aplikasi: Yayan Hadiyanto, S.Pd.-MT.</p>
  </div>
 </header>
@@ -1633,20 +1633,8 @@ if(installButton){
   }
  });
 }
-document.getElementById('refreshAppBtn')?.addEventListener('click',async()=>{
- const button=document.getElementById('refreshAppBtn');
- if(button.disabled)return;
- button.disabled=true;
- button.textContent='Memperbarui…';
- try{
-  if('serviceWorker' in navigator){
-   const registration=await navigator.serviceWorker.getRegistration('./');
-   if(registration)await registration.update().catch(()=>{});
-  }
- }finally{
-  window.location.reload();
- }
-});
+// Tombol Perbarui menggunakan pemuatan ulang langsung agar tidak tertahan
+// oleh Service Worker yang lambat atau gagal memperbarui cache.
 </script>
 </body>
 </html>
