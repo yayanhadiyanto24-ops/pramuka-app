@@ -427,6 +427,47 @@ main{width:100%!important;max-width:none!important;box-sizing:border-box!importa
 @media(max-width:640px){main{padding:10px!important}#application{gap:12px!important}#application nav{width:100%;grid-template-columns:repeat(2,minmax(0,1fr))!important}#application nav .tab{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere}}
 @media(min-width:641px){main{padding:18px 22px!important}#application nav{width:100%}}
 </style>
+<style id="rt-header-layout-single-source">
+/* Header final: dua baris aksi yang terpisah, tanpa absolute positioning atau display:contents */
+header{position:relative!important;box-sizing:border-box!important;padding:10px 12px 14px!important}
+header .max-w-6xl{
+ display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+ grid-template-areas:"brand logout" "actions actions" "credit credit"!important;
+ align-items:center!important;column-gap:10px!important;row-gap:9px!important;
+ width:100%!important;max-width:1152px!important;margin-left:auto!important;margin-right:auto!important;
+}
+header .rt-header-brand{grid-area:brand!important;display:flex!important;align-items:center!important;gap:8px!important;min-width:0!important;width:auto!important;padding:0!important}
+header .rt-header-logo{width:46px!important;height:46px!important;flex:0 0 46px!important}
+header .rt-header-name{font-size:16px!important;line-height:1.05!important}
+header .rt-header-sub{font-size:11px!important;line-height:1.2!important;margin:3px 0 0!important}
+header #roleSubtitle{display:block!important;max-width:none!important;font-size:9px!important;line-height:1.2!important;margin:3px 0 0!important;white-space:normal!important}
+header #logout{grid-area:logout!important;position:static!important;top:auto!important;right:auto!important;justify-self:end!important;align-self:start!important;margin:0!important;transform:none!important}
+header #headerActions{grid-area:actions!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;justify-content:stretch!important;gap:8px!important;width:100%!important;min-width:0!important}
+header #profileIdentity{display:flex!important;align-items:center!important;gap:7px!important;min-width:0!important;max-width:100%!important}
+header #headerProfileAvatar{width:34px!important;height:34px!important;flex:0 0 34px!important}
+header #who{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:2px!important;width:auto!important;max-width:100%!important;min-width:0!important;height:auto!important;line-height:1.15!important;overflow:hidden!important}
+header #whoName,header #whoRole{display:block!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;text-overflow:clip!important;line-height:1.2!important}
+header #whoName{font-size:12px!important;font-weight:800!important}
+header #whoRole{font-size:10px!important}
+header #headerButtons{grid-area:auto!important;position:static!important;top:auto!important;right:auto!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:center!important;gap:6px!important;min-width:132px!important;width:132px!important;margin:0!important;transform:none!important}
+header #refreshAppBtn,header #installAppBtn{position:static!important;top:auto!important;right:auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:132px!important;min-width:132px!important;max-width:132px!important;min-height:32px!important;height:auto!important;margin:0!important;padding:6px 8px!important;transform:none!important;white-space:nowrap!important;font-size:11px!important;line-height:1.15!important}
+header #appCreatorCredit{grid-area:credit!important;position:static!important;left:auto!important;right:auto!important;bottom:auto!important;display:block!important;width:100%!important;margin:0!important;padding:0!important;text-align:center!important;white-space:normal!important;font-size:9px!important;line-height:1.2!important}
+@media(min-width:768px){
+ header{padding:12px 18px 16px!important}
+ header .rt-header-logo{width:54px!important;height:54px!important;flex-basis:54px!important}
+ header .rt-header-name{font-size:19px!important}
+ header #headerActions{grid-template-columns:minmax(0,1fr) auto!important}
+ header #headerButtons{flex-direction:row!important;width:auto!important;min-width:0!important;align-items:center!important}
+ header #refreshAppBtn,header #installAppBtn{width:auto!important;min-width:116px!important;max-width:none!important;padding:8px 12px!important;font-size:12px!important}
+}
+@media(max-width:360px){
+ header .rt-header-logo{width:40px!important;height:40px!important;flex-basis:40px!important}
+ header .rt-header-name{font-size:14px!important}
+ header .rt-header-sub{font-size:10px!important}
+ header #roleSubtitle{display:none!important}
+ header #headerButtons,header #refreshAppBtn,header #installAppBtn{width:116px!important;min-width:116px!important;max-width:116px!important}
+}
+</style>
 </head>
 <body class="min-h-screen">
 <header class="brand text-white px-4 py-5">
