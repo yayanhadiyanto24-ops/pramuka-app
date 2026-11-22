@@ -344,7 +344,7 @@ a[class*="rounded"]{
   line-height:1.2!important;
 }
 </style>
-<link rel="stylesheet" href="./assets/ruang-tegak-ui.css?v=1">
+<link rel="stylesheet" href="./assets/ruang-tegak-ui.css?v=2">
 </head>
 <body class="bg-amber-50 min-h-screen flex items-center justify-center p-4 font-sans">
     <div class="bg-white max-w-lg w-full rounded-2xl shadow-xl overflow-hidden border border-amber-200">
@@ -774,5 +774,21 @@ button.rt-registration-tab.rt-button-active{
 })();
 </script>
 <script src="./assets/ruang-tegak-ui.js?v=1"></script>
+<style id="rt-home-registration-final">
+#tab-peserta.rt-registration-tab:not(.is-active),
+#tab-pembina.rt-registration-tab:not(.is-active),
+#tab-admin-kwarran.rt-registration-tab:not(.is-active){
+ background:linear-gradient(120deg,#fff3ad 0%,#ffdc35 52%,#d6a400 100%)!important;
+ color:#382817!important;border:1px solid #bd941d!important;border-bottom:4px solid #9a740c!important;
+ text-shadow:0 1px 0 #ffffff80!important;box-shadow:0 2px 0 #9a740c,0 3px 7px #2d1e0826,inset 0 1px 0 #ffffffb8!important;font-weight:800!important
+}
+#tab-peserta.rt-registration-tab.is-active,
+#tab-pembina.rt-registration-tab.is-active,
+#tab-admin-kwarran.rt-registration-tab.is-active{
+ background:linear-gradient(120deg,#765638 0%,#60432d 46%,#392719 100%)!important;
+ color:#fff!important;border:1px solid #c7a574!important;border-bottom:4px solid #d8b77f!important;
+ text-shadow:0 1px 2px #21130999!important;box-shadow:0 3px 0 #2b1a10,0 5px 10px #21130940,inset 0 1px 0 #ffffff45!important;font-weight:850!important
+}
+</style>
 </body>
 </html>
