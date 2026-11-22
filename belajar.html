@@ -559,7 +559,8 @@ async function boot(user){
  }
  if(u.role==='peserta_didik'){
   const {data,error}=await sb.from('profil_peserta_didik').select('*').eq('id_user',user.id).maybeSingle();if(error)throw error;participant=data;
-  if(!participant)throw new Error('Profil peserta didik belum ditemukan.');\n  if(participant.tingkatan==='Bantara')$('levelFilter').value='Laksana';
+  if(!participant)throw new Error('Profil peserta didik belum ditemukan.');
+  if(participant.tingkatan==='Bantara')$('levelFilter').value='Laksana';
   let ambalan='-',namaPangkalan='-';try{const {data:p}=await sb.from('pangkalan').select('nama_pangkalan,nama_ambalan_putra,nama_ambalan_putri').eq('id_pangkalan',participant.id_pangkalan).maybeSingle();if(p){namaPangkalan=p.nama_pangkalan||'-';ambalan=(participant.jenis_kelamin==='L'?p.nama_ambalan_putra:p.nama_ambalan_putri)||'-';}}catch(_){}
   $('studentIdentity').classList.remove('hidden');
   $('studentIdentity').innerHTML='<b class="text-base">Identitas Peserta Didik</b><p>Pangkalan: '+esc(namaPangkalan)+'</p><p>Ambalan: '+esc(ambalan)+'</p><p id="studentTierLabel">Tingkatan: '+esc(participant.tingkatan||'Peserta Tamu')+'</p><p>Sangga: '+esc(participant.sangga||'-')+'</p><p>Kelas: '+esc(participant.kelas_sekolah||'-')+' · Jurusan: '+esc(participant.jurusan||'-')+'</p><p>Tahun pelajaran: '+esc(participant.tahun_pelajaran||'-')+'</p><p class="font-semibold '+(participant.status_keanggotaan==='alumni'?'text-amber-700':'text-emerald-700')+'">'+(participant.status_keanggotaan==='alumni'?'Alumni Ambalan'+(participant.tanggal_alumni?' sejak '+new Date(participant.tanggal_alumni+'T00:00:00').toLocaleDateString('id-ID'):''):'Anggota aktif Ambalan')+'</p>';
@@ -591,7 +592,8 @@ function renderProfile(){
  profilePhotoData=p?.foto_profil_data||'';
  const headerAvatar=$('headerProfileAvatar');if(headerAvatar){headerAvatar.src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"%3E%3Ccircle cx="40" cy="40" r="39" fill="%23f5c52b"/%3E%3Ccircle cx="40" cy="29" r="13" fill="%23704a1d"/%3E%3Cpath d="M15 70c2-17 12-25 25-25s23 8 25 25" fill="%23704a1d"/%3E%3C/svg%3E';}
  $('profilePhotoPreview').src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect width="100%25" height="100%25" fill="%23f1f5f9"/%3E%3Ctext x="50%25" y="54%25" text-anchor="middle" fill="%2364758b" font-size="12"%3EFoto%3C/text%3E%3C/svg%3E';
- $('profileNta').value=p?.nta||'';\n $('profileBirthDate').value=p?.tanggal_lahir||'';
+ $('profileNta').value=p?.nta||'';
+ $('profileBirthDate').value=p?.tanggal_lahir||'';
  const ktaStatus=p?.nta_status_verifikasi||'belum_ada';
  const ktaLabels={belum_ada:'Belum ada bukti KTA yang diunggah.',menunggu:'Bukti KTA sudah diunggah dan menunggu pemeriksaan.',disetujui_pembina:'Bukti KTA telah diperiksa Pembina.',terverifikasi_resmi:'KTA terverifikasi melalui kanal resmi.',ditolak:'Bukti KTA perlu diperbaiki atau diunggah ulang.'};
  if($('ktaEvidenceStatus'))$('ktaEvidenceStatus').textContent=ktaLabels[ktaStatus]||ktaLabels.belum_ada;
