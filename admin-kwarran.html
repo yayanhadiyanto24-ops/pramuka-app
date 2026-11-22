@@ -52,18 +52,6 @@ th{background:#fbf5e9;text-align:left}
    <div><h2 class="font-bold text-lg">Peringkat Pangkalan dalam Kwarran</h2><p class="text-xs text-slate-500">Peringkat dihitung dari poin Ambalan yang memenuhi syarat minimal 12 anggota aktif. Tamu masuk DATA POTENSI, tetapi tidak menambah poin.</p></div>
    <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th>Peringkat</th><th>Pangkalan</th><th>Ambalan layak</th><th>Peserta aktif</th><th>Total poin</th></tr></thead><tbody id="ranking-pangkalan-body"></tbody></table></div>
   </div>
-  <section id="gudep-review-section" class="hidden card p-4 space-y-3">
-   <div><h2 class="font-bold text-lg">Pemeriksaan Gudep Tergiat</h2><p class="text-xs text-slate-500">Periksa nilai usulan, bukti pendukung, tetapkan nilai verifikator, lalu teruskan hasil ke Admin Utama. Data yang tampil hanya dari Kwarran Anda.</p></div>
-   <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th>Pangkalan</th><th>Periode</th><th>Status</th><th>Nilai usulan</th><th>Nilai verifikasi</th><th>Aksi</th></tr></thead><tbody id="gudep-review-list"><tr><td colspan="6" class="text-center py-4 text-slate-500">Memuat penilaian...</td></tr></tbody></table></div>
-   <p id="gudep-review-list-msg" class="text-xs text-slate-500" role="status"></p>
-   <div id="gudep-review-detail" class="hidden border-t pt-4 space-y-3">
-    <div class="flex flex-wrap items-start justify-between gap-2"><div><h3 id="gudep-review-title" class="font-bold text-lg"></h3><p id="gudep-review-meta" class="text-xs text-slate-500"></p></div><button id="gudep-review-close" type="button" class="border">Tutup rincian</button></div>
-    <div id="gudep-review-criteria" class="space-y-3"></div>
-    <div class="space-y-2"><label class="block text-xs font-semibold" for="gudep-review-note">Catatan pemeriksaan Kwarran</label><textarea id="gudep-review-note" rows="3" maxlength="3000" class="w-full border rounded-lg p-2 text-sm" placeholder="Catatan untuk Pembina atau Admin Utama"></textarea></div>
-    <div id="gudep-review-actions" class="flex flex-wrap gap-2"><button id="gudep-review-save" type="button" class="primary">Simpan nilai verifikasi</button><button id="gudep-review-approve" type="button" class="bg-emerald-700 text-white">Verifikasi & teruskan</button><button id="gudep-review-return" type="button" class="bg-red-700 text-white">Kembalikan untuk perbaikan</button></div>
-    <p id="gudep-review-msg" class="text-xs text-slate-500" role="status"></p>
-   </div>
-  </section>
   <div class="card p-4 space-y-3">
    <div><h2 class="font-bold text-lg">Perbandingan Antarkwarran</h2><p class="text-xs text-slate-500">Kwarran lain hanya ditampilkan dalam bentuk ringkasan jumlah. Tidak ada nama, profil, atau bukti pribadi peserta didik.</p></div>
    <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th>Kwarran</th><th>Pangkalan</th><th>Ambalan</th><th>Peserta</th><th>Aktif</th><th>Bantara</th><th>Laksana</th><th>Garuda</th><th>Total poin</th><th>Peringkat</th></tr></thead><tbody id="compare-body"></tbody></table></div>
@@ -101,99 +89,7 @@ async function loadDashboard(){
   $('ranking-pangkalan-body').innerHTML=(data.ranking_pangkalan||[]).map(x=>'<tr class="border-t '+(x.layak_peringkat?'':'text-slate-400')+'"><td class="px-2 py-2 text-center">'+(x.peringkat_kwarran?'#'+x.peringkat_kwarran:'—')+'</td><td class="px-2 py-2">'+esc(x.nama_pangkalan)+'<div class="text-xs text-slate-500">Gudep '+esc(x.no_gudep||'-')+'</div></td><td class="px-2 py-2 text-center">'+Number(x.jumlah_ambalan_layak||0)+'/'+Number(x.jumlah_ambalan||0)+'</td><td class="px-2 py-2 text-center">'+Number(x.peserta_aktif||0)+'</td><td class="px-2 py-2 text-center font-bold">'+Number(x.total_poin||0)+'</td></tr>').join('')||'<tr><td colspan="5" class="text-center py-4">Belum ada data peringkat pangkalan.</td></tr>';
   $('compare-body').innerHTML=(data.comparison||[]).map(x=>'<tr class="'+(Number(x.id_kwarran)===Number(data.admin.id_kwarran)?'own':'')+'"><td>'+esc(x.nama_kwarran)+(Number(x.id_kwarran)===Number(data.admin.id_kwarran)?' · Wilayah Anda':'')+'</td><td>'+Number(x.jumlah_pangkalan||0)+'</td><td>'+Number(x.jumlah_ambalan||0)+'</td><td>'+Number(x.jumlah_peserta||0)+'</td><td>'+Number(x.peserta_aktif||0)+'</td><td>'+Number(x.bantara||0)+'</td><td>'+Number(x.laksana||0)+'</td><td>'+Number(x.garuda||0)+'</td><td class="font-bold">'+Number(x.total_poin||0)+'</td><td>'+(x.peringkat_kwarran?'#'+x.peringkat_kwarran:'—')+'</td></tr>').join('')||'<tr><td colspan="10" class="text-center py-4">Belum ada data Kwarran.</td></tr>';
  $('status').textContent='Data berhasil diperbarui.';
- try{
-  const {data:feature,error:featureError}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_feature_status'}});
-  if(featureError)throw featureError;
-  if(feature?.enabled){$('gudep-review-section').classList.remove('hidden');await loadGudepReviewList();}
- }catch(err){console.warn('Status modul Gudep Tergiat tidak dapat dimuat:',err?.message||err);}
 }
-
-let gudepReviewCurrent=null;
-const gudepStatusLabel={draft:'Draft Pembina',perlu_perbaikan:'Dikembalikan untuk perbaikan',diajukan:'Menunggu pemeriksaan',ditinjau_kwarran:'Sedang diperiksa',terverifikasi_kwarran:'Diteruskan ke Admin Utama',final:'Final',ditolak:'Ditolak'};
-async function callGudepReview(action,payload={}){
- const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action,...payload}});
- if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Permintaan penilaian gagal.');return data;
-}
-async function loadGudepReviewList(){
- const body=$('gudep-review-list'),msg=$('gudep-review-list-msg');
- if(!body)return;
- body.innerHTML='<tr><td colspan="6" class="text-center py-4 text-slate-500">Memuat penilaian...</td></tr>';
- try{
-  const data=await callGudepReview('gudep_penilaian_kwarran_data');
-  const rows=data.penilaian||[];
-  body.innerHTML=rows.map(p=>{
-   const name=p.pangkalan?.nama_pangkalan||'Pangkalan';
-   const period=p.gudep_penilaian_periode||{};
-   const canReview=['diajukan','ditinjau_kwarran'].includes(p.status);
-   return '<tr class="border-t"><td class="py-2">'+esc(name)+'<div class="text-xs text-slate-500">Gudep '+esc(p.pangkalan?.no_gudep||'-')+'</div></td><td class="py-2">'+esc(period.nama_periode||'')+' · '+Number(period.tahun||0)+'</td><td class="py-2">'+esc(gudepStatusLabel[p.status]||p.status)+'</td><td class="py-2 text-center">'+Number(p.poin_total_usulan||0)+'</td><td class="py-2 text-center">'+Number(p.poin_total_verifikasi||0)+'</td><td class="py-2"><button type="button" data-gudep-review="'+p.id_penilaian+'" class="border text-xs">'+(canReview?'Periksa':'Lihat')+'</button></td></tr>';
-  }).join('')||'<tr><td colspan="6" class="text-center py-4 text-slate-500">Belum ada penilaian yang diajukan oleh pangkalan di Kwarran ini.</td></tr>';
-  body.querySelectorAll('[data-gudep-review]').forEach(btn=>btn.onclick=()=>openGudepReview(Number(btn.dataset.gudepReview)));
-  msg.textContent=rows.length+' penilaian tercatat di wilayah ini.';
- }catch(err){body.innerHTML='<tr><td colspan="6" class="text-center py-4 text-red-700">'+esc(err.message||'Gagal memuat penilaian.')+'</td></tr>';msg.textContent='';}
-}
-async function openGudepReview(id){
- const box=$('gudep-review-detail'),criteriaBox=$('gudep-review-criteria'),msg=$('gudep-review-msg');
- box.classList.remove('hidden');criteriaBox.innerHTML='<p class="text-sm text-slate-500">Memuat rincian...</p>';msg.textContent='';
- try{
-  const d=await callGudepReview('gudep_penilaian_kwarran_detail',{id_penilaian:id});
-  gudepReviewCurrent=d;
-  const p=d.penilaian,period=p.gudep_penilaian_periode||{},base=p.pangkalan||{};
-  $('gudep-review-title').textContent=base.nama_pangkalan||'Penilaian Gudep';
-  $('gudep-review-meta').textContent='Gudep '+(base.no_gudep||'-')+' · '+(period.nama_periode||'')+' '+(period.tahun||'')+' · Status: '+(gudepStatusLabel[p.status]||p.status)+' · Usulan: '+Number(p.poin_total_usulan||0)+' poin';
-  $('gudep-review-note').value=p.catatan_kwarran||'';
-  const canReview=['diajukan','ditinjau_kwarran'].includes(p.status);
-  $('gudep-review-actions').classList.toggle('hidden',!canReview);
-  const cats=d.kategori||[],items=d.kriteria||[],parents=cats.filter(x=>!x.parent_id);
-  criteriaBox.innerHTML=parents.map(parent=>{
-   const children=cats.filter(x=>Number(x.parent_id)===Number(parent.id_kategori));
-   return '<section class="space-y-2"><h4 class="font-bold">'+esc(parent.kode)+'. '+esc(parent.nama)+'</h4>'+children.map(cat=>{
-    const ks=items.filter(k=>Number(k.id_kategori)===Number(cat.id_kategori));
-    return '<div class="border rounded-lg p-3 space-y-3"><b>'+esc(cat.kode)+'. '+esc(cat.nama)+'</b>'+ks.map(k=>{
-     const evid=k.bukti||[];
-     return '<div class="border-t pt-3 space-y-2"><div class="flex flex-wrap justify-between gap-2"><b>'+esc(k.kode)+' · '+esc(k.nama)+'</b><span class="text-xs border rounded-full px-2 py-1">Maks. '+Number(k.poin_maks)+' poin</span></div><p class="text-xs text-slate-500">'+esc(k.panduan_penilaian||'')+'</p><p class="text-xs">Nilai Pembina: <b>'+Number(k.nilai_usulan||0)+'</b> poin</p><label class="block text-xs font-semibold">Nilai verifikator</label><input data-review-score="'+k.id_kriteria+'" type="number" min="0" max="'+Number(k.poin_maks)+'" step="0.01" value="'+(k.nilai_verifikator===null?'':Number(k.nilai_verifikator))+'" '+(!canReview?'disabled':'')+' class="w-full border rounded-lg p-2 text-sm"><textarea data-review-note="'+k.id_kriteria+'" rows="2" maxlength="2000" placeholder="Catatan verifikator untuk indikator ini" '+(!canReview?'disabled':'')+' class="w-full border rounded-lg p-2 text-xs">'+esc(k.catatan_penilai||'')+'</textarea><div class="space-y-2"><p class="text-xs font-semibold">Bukti pendukung '+(k.bukti_wajib?'(wajib)':'(opsional)')+'</p>'+(evid.map(b=>'<div class="border rounded-lg p-2 space-y-2"><div class="flex flex-wrap justify-between gap-2"><a class="underline text-xs" target="_blank" rel="noopener" href="'+esc(b.url||'#')+'">'+esc(b.nama_file)+'</a><span class="text-xs font-semibold">'+esc(b.status_verifikasi||'menunggu')+'</span></div>'+(b.catatan_verifikasi?'<p class="text-xs text-slate-500">'+esc(b.catatan_verifikasi)+'</p>':'')+(canReview?'<textarea data-evidence-note="'+b.id_bukti+'" rows="2" maxlength="2000" placeholder="Catatan verifikasi (wajib jika tidak valid)" class="w-full border rounded-lg p-2 text-xs">'+esc(b.catatan_verifikasi||'')+'</textarea><div class="flex flex-wrap gap-2"><button type="button" data-evidence-status="valid" data-evidence-id="'+b.id_bukti+'" class="text-xs bg-emerald-700 text-white">Nyatakan valid</button><button type="button" data-evidence-status="tidak_valid" data-evidence-id="'+b.id_bukti+'" class="text-xs bg-red-700 text-white">Tidak valid</button></div>':'')+'</div>').join('')||'<p class="text-xs text-slate-500">Belum ada bukti.</p>')+'</div></div>';
-    }).join('')+'</div>';
-   }).join('')+'</section>';
-  }).join('')||'<p class="text-sm text-slate-500">Belum ada indikator aktif.</p>';
-  criteriaBox.querySelectorAll('[data-evidence-status]').forEach(btn=>btn.onclick=async()=>{
-   const idBukti=Number(btn.dataset.evidenceId),status=btn.dataset.evidenceStatus;
-   const note=criteriaBox.querySelector('[data-evidence-note="'+idBukti+'"]')?.value||'';
-   if(status==='tidak_valid'&&note.trim().length<3){msg.textContent='Alasan bukti tidak valid minimal 3 karakter.';return;}
-   btn.disabled=true;
-   try{await callGudepReview('gudep_penilaian_kwarran_verifikasi_bukti',{id_bukti:idBukti,status_verifikasi:status,catatan:note});await openGudepReview(id);}
-   catch(err){msg.textContent=err.message||'Verifikasi bukti gagal.';btn.disabled=false;}
-  });
-  $('gudep-review-save').onclick=async()=>{
-   const values=Array.from(criteriaBox.querySelectorAll('[data-review-score]')).map(input=>{
-    const id=input.dataset.reviewScore,note=criteriaBox.querySelector('[data-review-note="'+id+'"]');
-    return {id_kriteria:Number(id),nilai_verifikator:input.value===''?null:Number(input.value),catatan_penilai:note?.value||''};
-   });
-   if(values.some(x=>x.nilai_verifikator===null)){msg.textContent='Isi nilai verifikator untuk seluruh indikator.';return;}
-   const btn=$('gudep-review-save');btn.disabled=true;msg.textContent='Menyimpan nilai...';
-   try{await callGudepReview('gudep_penilaian_kwarran_simpan',{id_penilaian:id,nilai:values,catatan:$('gudep-review-note').value});msg.textContent='Nilai verifikasi tersimpan.';await openGudepReview(id);await loadGudepReviewList();}
-   catch(err){msg.textContent=err.message||'Nilai gagal disimpan.';btn.disabled=false;}
-  };
-  $('gudep-review-approve').onclick=async()=>{
-   if(!confirm('Verifikasi penilaian ini dan teruskan ke Admin Utama untuk penetapan akhir?'))return;
-   const btn=$('gudep-review-approve');btn.disabled=true;msg.textContent='Menyimpan nilai terakhir...';
-   try{
-    const values=Array.from(criteriaBox.querySelectorAll('[data-review-score]')).map(input=>{const id=input.dataset.reviewScore,note=criteriaBox.querySelector('[data-review-note="'+id+'"]');return {id_kriteria:Number(id),nilai_verifikator:input.value===''?null:Number(input.value),catatan_penilai:note?.value||''};});
-    if(values.some(x=>x.nilai_verifikator===null))throw new Error('Isi nilai verifikator untuk seluruh indikator.');
-    await callGudepReview('gudep_penilaian_kwarran_simpan',{id_penilaian:id,nilai:values,catatan:$('gudep-review-note').value});
-    await callGudepReview('gudep_penilaian_kwarran_keputusan',{id_penilaian:id,keputusan:'verifikasi',catatan:$('gudep-review-note').value});
-    msg.textContent='Penilaian diteruskan ke Admin Utama.';await openGudepReview(id);await loadGudepReviewList();
-   }catch(err){msg.textContent=err.message||'Keputusan gagal disimpan.';btn.disabled=false;}
-  };
-  $('gudep-review-return').onclick=async()=>{
-   const note=$('gudep-review-note').value.trim();
-   if(note.length<3){msg.textContent='Catatan perbaikan wajib diisi minimal 3 karakter.';return;}
-   if(!confirm('Kembalikan penilaian kepada Pembina untuk diperbaiki?'))return;
-   const btn=$('gudep-review-return');btn.disabled=true;
-   try{await callGudepReview('gudep_penilaian_kwarran_keputusan',{id_penilaian:id,keputusan:'perlu_perbaikan',catatan:note});msg.textContent='Penilaian dikembalikan kepada Pembina.';await openGudepReview(id);await loadGudepReviewList();}
-   catch(err){msg.textContent=err.message||'Pengembalian gagal.';btn.disabled=false;}
-  };
- }catch(err){criteriaBox.innerHTML='<p class="text-sm text-red-700">'+esc(err.message||'Rincian gagal dimuat.')+'</p>';}
-}
-$('gudep-review-close')?.addEventListener('click',()=>$('gudep-review-detail').classList.add('hidden'));
 
 async function showDashboard(){$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');await loadDashboard();}
 $('login-form').addEventListener('submit',async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;$('login-msg').textContent='Memeriksa akun...';try{await ensureSb();const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await showDashboard();}catch(err){if(sb)await sb.auth.signOut().catch(()=>{});$('login-msg').textContent='Login gagal: '+(err.message||'Akun tidak dapat masuk.');}finally{b.disabled=false;}});
