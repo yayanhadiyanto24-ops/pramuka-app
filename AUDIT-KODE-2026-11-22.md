@@ -35,6 +35,8 @@ Pemeriksaan dilakukan dengan membaca berkas dari branch utama, penelusuran alur 
 
 | 14 | Database Supabase · RLS `ruang_tegak_admin_devices` | Ada tiga policy lama yang menduplikasi policy Admin Utama terbaru dan memakai pemeriksaan identitas statis, sehingga akses tidak sepenuhnya mengikuti konfigurasi Admin Utama yang aktif. | Tiga policy lama dihapus. Empat policy yang tersisa (SELECT/INSERT/UPDATE/DELETE) memeriksa identitas dan role Admin Utama melalui `app_admin_config` dan tabel `users`. Verifikasi katalog memastikan hanya policy dinamis yang tersisa. Migrasi `20261122152436_remove_legacy_admin_device_policies`. Commit `77f6187`. |
 
+| 15 | Database Supabase · policy `ruang_tegak_admin_devices` | Tiga policy lama juga menyebabkan peringatan evaluasi `auth.uid()` berulang per baris. | Penghapusan tiga policy lama menghilangkan peringatan `auth_rls_initplan` dan menurunkan temuan multiple-permissive-policy dari 5 menjadi 2. Dua kelompok policy lain (`sku_completion_plans` dan `sku_subpoints`) dipertahankan karena mengatur jalur hak akses berbeda (peserta vs Pembina; publik vs Pembina/Admin). |
+
 ## Temuan yang perlu tindak lanjut sebelum dinyatakan tuntas
 
 1. **Gejala kolom email/kata sandi pada halaman Belajar belum terbukti akar masalahnya.** Pada kode login yang diperiksa, tidak ditemukan pemanggilan `form.reset()` atau assignment yang sengaja mengosongkan kolom login. Handler login juga menyimpan nilai sebelum permintaan dan mengembalikannya jika formulir tetap ditampilkan. Atribut autofill sudah diperbaiki, tetapi perlu pengujian langsung di browser Android/WebView untuk membedakan autofill yang tidak mengisi dari nilai yang terhapus akibat reload/navigasi.
