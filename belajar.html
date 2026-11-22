@@ -608,12 +608,14 @@ function renderProfile(){
  $('teacherProfileFields').classList.toggle('hidden',!isTeacher);
  $('studentProfileFields').classList.toggle('hidden',!isStudent);
  const p=isTeacher?teacher:(isStudent?participant:account);
- $('ntaProfileField').classList.toggle('hidden',!isTeacher&&!isStudent);\n $('qrKtaProfileField').classList.toggle('hidden',!isTeacher&&!isStudent);
+ $('ntaProfileField').classList.toggle('hidden',!isTeacher&&!isStudent);
+ $('qrKtaProfileField').classList.toggle('hidden',!isTeacher&&!isStudent);
  if(isTeacher){const ambalan=Math.max(0,Number(teacher.jumlah_ambalan_berbayar||0));const hasNtaKta=!!teacher.nta&&!!teacher.nta_bukti_kta?.path;const kuota=!hasNtaKta?5:(ambalan>0?ambalan*32:10);$('teacherQuotaInfo').textContent='Kuota penerimaan saat ini: '+kuota+' peserta. '+(!hasNtaKta?'Kuota dibatasi 5 peserta sampai NTA diisi dan foto KTA diunggah. Lengkapi keduanya agar dapat menerima peserta ke-6.':ambalan>0?'Anda memiliki '+ambalan+' ambalan aktif. Setiap penambahan ambalan membuka 32 peserta didik.':'Kuota awal 10 peserta didik. Transfer seikhlasnya dan konfirmasi kepada Admin Utama untuk membuka ambalan pertama (32 peserta).');$('accessCodeInput').disabled=!hasNtaKta;$('activateAccessCode').disabled=!hasNtaKta;}
  profilePhotoData=p?.foto_profil_data||'';
  const headerAvatar=$('headerProfileAvatar');if(headerAvatar){headerAvatar.src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"%3E%3Ccircle cx="40" cy="40" r="39" fill="%23f5c52b"/%3E%3Ccircle cx="40" cy="29" r="13" fill="%23704a1d"/%3E%3Cpath d="M15 70c2-17 12-25 25-25s23 8 25 25" fill="%23704a1d"/%3E%3C/svg%3E';}
  $('profilePhotoPreview').src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect width="100%25" height="100%25" fill="%23f1f5f9"/%3E%3Ctext x="50%25" y="54%25" text-anchor="middle" fill="%2364758b" font-size="12"%3EFoto%3C/text%3E%3C/svg%3E';
- $('profileNta').value=p?.nta||'';\n $('profileQrKtaId').value=p?.id_qr_kta||'';
+ $('profileNta').value=p?.nta||'';
+ $('profileQrKtaId').value=p?.id_qr_kta||'';
  $('profileBirthDate').value=p?.tanggal_lahir||'';
   renderNtaParseInfo();
  const ktaStatus=p?.nta_status_verifikasi||'belum_ada';
@@ -655,7 +657,9 @@ $('profilePhotoInput').addEventListener('change',async e=>{
 async function saveProfile(extra={}){
  const isTeacher=account.role==='pembina',isStudent=account.role==='peserta_didik';
  const payload={action:'save_profile',nta:$('profileNta').value.trim(),id_qr_kta:$('profileQrKtaId')?.value.trim()||'',tanggal_lahir:$('profileBirthDate')?.value||null,foto_profil_data:profilePhotoData,...extra};
- if((isStudent||isTeacher)&&!/^\d{9}$/.test(payload.id_qr_kta)){$('profileMsg').textContent='Pindai QR KTA Nasional terlebih dahulu. ID QR harus tepat 9 digit.';return false;}\n if((isStudent||isTeacher)&&!payload.nta){$('profileMsg').textContent='Nomor NTA wajib diisi terpisah dari ID QR KTA.';return false;}\n if(isStudent&&payload.nta){
+ if((isStudent||isTeacher)&&!/^\d{9}$/.test(payload.id_qr_kta)){$('profileMsg').textContent='Pindai QR KTA Nasional terlebih dahulu. ID QR harus tepat 9 digit.';return false;}
+ if((isStudent||isTeacher)&&!payload.nta){$('profileMsg').textContent='Nomor NTA wajib diisi terpisah dari ID QR KTA.';return false;}
+ if(isStudent&&payload.nta){
   const m=payload.nta.match(/^(\d{2})\.(\d{2})\.(\d{2})\.(\d{6})\.(\d{4})$/);
   if(!m){$('profileMsg').textContent='Format NTA harus lima kelompok angka, misalnya 09.03.30.200780.0001 untuk Kwarran Leles, Cianjur.';return false;}
   if(!payload.tanggal_lahir){$('profileMsg').textContent='Isi tanggal lahir sesuai KTA terlebih dahulu.';return false;}
