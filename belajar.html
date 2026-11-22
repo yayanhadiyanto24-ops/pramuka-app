@@ -390,33 +390,7 @@ a[class*="rounded"]{
    <button id="loginBtn" type="submit" class="w-full rounded-lg bg-amber-800 text-white font-bold p-3">Masuk</button>
   </form>
 <p id="loginMsg" class="text-sm mt-3" role="status"></p>
-<script>
-/* Penjaga login: tangani submit lebih awal agar formulir tidak terkirim ulang
-   bila skrip utama mengalami gangguan sebelum memasang event handler. */
-(()=>{
- const form=document.getElementById('loginForm');
- if(!form)return;
- form.addEventListener('submit',async event=>{
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  const msg=document.getElementById('loginMsg');
-  const btn=document.getElementById('loginBtn');
-  const email=document.getElementById('email')?.value.trim()||'';
-  const password=document.getElementById('password')?.value||'';
-  if(!email||!password){msg.textContent='Email dan password wajib diisi.';return;}
-  btn.disabled=true;btn.textContent='Memeriksa...';msg.textContent='Menghubungkan ke server...';
-  try{
-   if(typeof sb==='undefined'||!sb)throw new Error('Komponen autentikasi belum siap. Muat ulang halaman.');
-   const {data,error}=await sb.auth.signInWithPassword({email,password});
-   if(error)throw error;
-   msg.textContent='Login berhasil. Membuka Ruang Belajar...';
-   if(typeof boot!=='function')throw new Error('Modul Ruang Belajar belum siap dimuat.');
-   await boot(data.user);
-  }catch(error){msg.textContent='Login belum berhasil: '+(error.message||'Periksa email dan password.');}
-  finally{btn.disabled=false;btn.textContent='Masuk';}
- },true);
-})();
-</script>
+
  </section>
  <section id="application" class="hidden space-y-5">
   <div id="accountNotice" class="hidden panel p-4 text-sm"></div>
@@ -584,7 +558,7 @@ function renderNtaParseInfo(){
 window.addEventListener('error',e=>{const m=$('loginMsg');if(m&&!currentUser)m.textContent='Aplikasi mengalami kendala saat dimuat: '+(e.message||'Kesalahan JavaScript. Muat ulang halaman.');});
 window.addEventListener('unhandledrejection',e=>{const m=$('loginMsg');if(m&&!currentUser)m.textContent='Koneksi aplikasi bermasalah: '+(e.reason?.message||'Silakan muat ulang halaman.');});
 const SUPABASE_KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
-const sb=window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+const sb=window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:'sb-bopxmtxfrlrnywwhywne-auth-token'}}):null;
 if(!sb){$('loginMsg').textContent='Layanan login belum termuat. Periksa koneksi internet, lalu muat ulang halaman.';}
 let currentUser=null, account=null, participant=null, teacher=null, items=[], lessons=[], progress=[], general=[], examRecords=[], subpoints=[], subpointProgress=[], completionPlans=[], monitorReportHtml='', monitorStudents=[], monitorPangkalan=[], monitorProgressRows=[], monitorSubpointRows=[];
 let selectedItem=null;
