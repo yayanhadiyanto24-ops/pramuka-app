@@ -345,10 +345,26 @@ header .rt-admin-brand{width:100%;padding-right:112px;min-height:62px}
  #logout{top:9px;right:12px;padding:5px 8px!important;font-size:12px!important}
 }
 
-/* Tiga baris identitas dirapatkan setinggi logo agar tepi atas-bawah sejajar. */
-header .rt-admin-heading{height:68px;min-height:68px;display:flex;flex-direction:column;justify-content:space-between;}
-@media(max-width:639px){header .rt-admin-heading{height:54px;min-height:54px;}}
-@media(max-width:600px){header .rt-admin-heading{height:50px;min-height:50px;}}
+/* Teks dibuat rapat, tetapi tinggi blok tetap persis mengikuti tinggi logo. */
+header .rt-admin-heading{height:68px;min-height:68px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:0;}
+header .rt-admin-heading .rt-admin-name,
+header .rt-admin-heading h1,
+header .rt-admin-heading p{margin:0!important;line-height:1.05!important;}
+header .rt-admin-heading .rt-admin-name{font-size:20px;line-height:1.05!important;}
+header .rt-admin-heading h1{font-size:18px;line-height:1.05!important;}
+header .rt-admin-heading p{font-size:14px;line-height:1.1!important;}
+@media(max-width:639px){
+ header .rt-admin-heading{height:54px;min-height:54px;}
+ header .rt-admin-heading .rt-admin-name{font-size:16px;}
+ header .rt-admin-heading h1{font-size:17px;}
+ header .rt-admin-heading p{font-size:12px;}
+}
+@media(max-width:600px){
+ header .rt-admin-heading{height:50px;min-height:50px;}
+ header .rt-admin-heading .rt-admin-name{font-size:15px;}
+ header .rt-admin-heading h1{font-size:16px;}
+ header .rt-admin-heading p{font-size:11px;}
+}
 </style>
 <link rel="stylesheet" href="./assets/ruang-tegak-ui.css?v=1>
 </head>
