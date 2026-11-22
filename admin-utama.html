@@ -444,7 +444,9 @@ $('open-belajar-sku')?.addEventListener('click',async event=>{
     try{sessionStorage.setItem('ruang-tegak-auth-bridge',authBridge);}catch(_){}
     const savedBridge=localStorage.getItem('ruang-tegak-auth-bridge')||sessionStorage.getItem('ruang-tegak-auth-bridge');
     if(!savedBridge)throw new Error('Sesi login tidak dapat diteruskan oleh penyimpanan browser.');
-    window.location.assign(link.href);
+    const targetUrl=new URL(link.href,window.location.href);
+    targetUrl.searchParams.set('admin_handoff','1');
+    window.location.assign(targetUrl.toString());
   }catch(error){
     $('status').textContent='Belum dapat membuka Belajar & SKU: '+(error?.message||'Sesi login tidak dapat diteruskan.');
     link.textContent=original;
