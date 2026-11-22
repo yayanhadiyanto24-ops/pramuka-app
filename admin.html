@@ -100,7 +100,9 @@ button.tab.active,[role="tab"][aria-selected="true"]{
   document.querySelectorAll('nav a[href], .rt-account-actions a[href]').forEach(a=>{
    let target;try{target=new URL(a.getAttribute('href'),here.href)}catch(_){return}
    if(target.origin!==here.origin)return;
-   const samePage=target.pathname.replace(/\\/$/,'')===here.pathname.replace(/\\/$/,'');
+   const targetPath=target.pathname.endsWith('/')?target.pathname.slice(0,-1):target.pathname;
+   const herePath=here.pathname.endsWith('/')?here.pathname.slice(0,-1):here.pathname;
+   const samePage=targetPath===herePath;
    const sameHash=!!target.hash&&target.hash===here.hash;
    const active=samePage&&(target.hash?sameHash:!here.hash);
    a.classList.toggle('rt-nav-active',active);
