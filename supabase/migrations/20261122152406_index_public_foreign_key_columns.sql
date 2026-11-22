@@ -1,0 +1,14 @@
+create index if not exists idx_kwarran_admin_invites_created_by_fk on public.kwarran_admin_invites(created_by);
+create index if not exists idx_kwarran_admin_invites_used_by_fk on public.kwarran_admin_invites(used_by);
+create index if not exists idx_pangkalan_change_audit_changed_by_fk on public.pangkalan_change_audit(changed_by);
+create index if not exists idx_pangkalan_change_audit_id_pangkalan_fk on public.pangkalan_change_audit(id_pangkalan);
+create index if not exists idx_pembina_access_codes_id_pembina_fk on public.pembina_access_codes(id_pembina);
+create index if not exists idx_qr_login_approvals_user_id_fk on public.qr_login_approvals(user_id);
+create index if not exists idx_ruang_tegak_admin_devices_user_id_fk on public.ruang_tegak_admin_devices(user_id);
+create index if not exists idx_ruang_tegak_documents_created_by_fk on public.ruang_tegak_documents(created_by);
+create index if not exists idx_ruang_tegak_notification_outbox_pangkalan_id_fk on public.ruang_tegak_notification_outbox(pangkalan_id);
+create index if not exists idx_sekretaris_kwarcab_invites_created_by_fk on public.sekretaris_kwarcab_invites(created_by);
+create index if not exists idx_sekretaris_kwarcab_invites_used_by_fk on public.sekretaris_kwarcab_invites(used_by);
+create index if not exists idx_sku_completion_plans_ditanggapi_oleh_fk on public.sku_completion_plans(ditanggapi_oleh);
+create index if not exists idx_sku_exam_referrals_id_progress_fk on public.sku_exam_referrals(id_progress);
+create index if not exists idx_sku_exam_referrals_pembina_reviewed_by_fk on public.sku_exam_referrals(pembina_reviewed_by);
