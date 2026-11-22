@@ -1536,25 +1536,23 @@ async function review(id,status){
 sbReady.then(async client=>{
  let {data,error}=await client.auth.getSession();
  if(error)throw error;
- if(!data.session){
-  const candidates=[];
-  for(const store of [sessionStorage,localStorage]){
-   try{
-    const candidate=JSON.parse(store.getItem('ruang-tegak-auth-bridge')||'null');
-    if(candidate?.access_token&&candidate?.refresh_token&&Date.now()-Number(candidate.created_at||0)<600000)candidates.push(candidate);
-   }catch(_){}
-  }
-  candidates.sort((a,b)=>Number(b.created_at||0)-Number(a.created_at||0));
-  const bridge=candidates[0];
-  if(bridge){
-   const restored=await client.auth.setSession({access_token:bridge.access_token,refresh_token:bridge.refresh_token});
-   if(restored.error)throw restored.error;
-   const check=await client.auth.getSession();
-   if(check.error)throw check.error;
-   data=check.data;
-   if(!data.session)throw new Error('Sesi Admin Utama belum berhasil dipulihkan. Silakan masuk kembali dari halaman Admin Utama.');
-   try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
-  }
+ const candidates=[];
+ for(const store of [sessionStorage,localStorage]){
+  try{
+   const candidate=JSON.parse(store.getItem('ruang-tegak-auth-bridge')||'null');
+   if(candidate?.access_token&&candidate?.refresh_token&&Date.now()-Number(candidate.created_at||0)<600000)candidates.push(candidate);
+  }catch(_){}
+ }
+ candidates.sort((a,b)=>Number(b.created_at||0)-Number(a.created_at||0));
+ const bridge=candidates[0];
+ if(bridge){
+  const restored=await client.auth.setSession({access_token:bridge.access_token,refresh_token:bridge.refresh_token});
+  if(restored.error)throw restored.error;
+  const check=await client.auth.getSession();
+  if(check.error)throw check.error;
+  data=check.data;
+  if(!data.session)throw new Error('Sesi Admin Utama belum berhasil dipulihkan. Silakan masuk kembali dari halaman Admin Utama.');
+  try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
  }
  $('sessionLoading')?.classList.add('hidden');
  if(data.session){
