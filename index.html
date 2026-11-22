@@ -663,14 +663,14 @@ toggleModePembina();
 // Pemeriksaan versi otomatis dan pemberitahuan jika pembaruan perlu tindakan pengguna.
 (()=>{
  if(!('serviceWorker' in navigator))return;
- let reloading=false,registrationRef=null,notice=null;
+ let reloading=false,registrationRef=null,notice=null,userRequestedReload=false;
  const reloadPage=()=>{
   if(reloading)return;
   reloading=true;
   window.location.reload();
  };
  navigator.serviceWorker.addEventListener('controllerchange',()=>{
-  if(registrationRef)reloadPage();
+  if(userRequestedReload)reloadPage();
  });
  function showUpdateNotice(registration){
   if(notice||!registration.waiting)return;
@@ -684,6 +684,7 @@ toggleModePembina();
   button.style.cssText='flex:none;border:0;border-radius:8px;padding:9px 13px;background:#a51e2b;color:white;font-weight:700';
   button.addEventListener('click',()=>{
    button.disabled=true;button.textContent='Memperbarui…';
+   userRequestedReload=true;
    registration.waiting?.postMessage({type:'SKIP_WAITING'});
    window.setTimeout(()=>{if(!reloading)reloadPage();},1800);
   });
