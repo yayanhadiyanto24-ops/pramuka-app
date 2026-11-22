@@ -394,16 +394,10 @@ a[class*="rounded"]{
    <button id="loginBtn" type="submit" class="w-full rounded-lg bg-amber-800 text-white font-bold p-3">Masuk</button>
   </form>
   <section id="qrLoginPanel" class="hidden space-y-3">
-   <p class="text-sm muted">Pindai QR KTA Nasional yang berisi ID registrasi 9 digit. Setelah terbaca, kode OTP akan dikirim ke email yang terdaftar pada akun tersebut.</p>
+   <p class="text-sm muted">Pindai langsung QR KTA Nasional menggunakan kamera. Jika ID 9 digit cocok dengan profil anggota yang aktif, sistem akan masuk otomatis.</p>
    <button id="loginQrStart" type="button" class="w-full rounded-lg bg-amber-800 text-white font-bold p-3">📷 Pindai QR KTA</button>
    <div id="loginQrReader" class="hidden w-full max-w-sm mx-auto overflow-hidden rounded-lg bg-black"></div>
    <p id="loginQrStatus" class="text-sm muted" role="status">Belum ada QR yang dipindai.</p>
-   <div id="loginOtpArea" class="hidden space-y-2">
-    <label for="loginOtp" class="block text-sm font-semibold">Kode OTP dari email</label>
-    <input id="loginOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Masukkan kode OTP" class="w-full border rounded-lg p-3 text-center tracking-widest">
-    <button id="loginOtpVerify" type="button" class="w-full rounded-lg bg-amber-800 text-white font-bold p-3">Verifikasi &amp; Masuk</button>
-    <button id="loginOtpResend" type="button" class="w-full rounded-lg border border-amber-300 font-semibold p-2">Kirim ulang kode OTP</button>
-   </div>
   </section>
   <p id="loginMsg" class="text-sm mt-3" role="status"></p>
  </section>
@@ -607,10 +601,10 @@ const setLoginMode=mode=>{
 $('loginModeEmail').onclick=()=>setLoginMode('email');$('loginModeQr').onclick=()=>setLoginMode('qr');
 let loginQrScanner=null,loginQrId='';
 async function stopLoginQrScanner(){if(loginQrScanner){try{await loginQrScanner.stop();}catch(_){}try{await loginQrScanner.clear();}catch(_){}loginQrScanner=null;}$('loginQrReader').classList.add('hidden');$('loginQrStart').disabled=false;}
-async function requestLoginOtp(id){
- $('loginQrStatus').textContent='Memeriksa ID QR dan mengirim kode ke email terdaftar...';$('loginQrStart').disabled=true;
- try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'qr_login_start',id_qr_kta:id}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Permintaan OTP belum berhasil.');$('loginOtpArea').classList.remove('hidden');$('loginQrStatus').textContent=data.message||'Jika ID QR terdaftar, kode OTP akan dikirim ke email anggota.';}
- catch(err){$('loginQrStatus').textContent=err.message||'Tidak dapat mengirim OTP. Coba kembali.';$('loginQrStart').disabled=false;}
+async function requestQrLogin(id){
+ $('loginQrStatus').textContent='Memeriksa ID QR dan profil anggota...';$('loginQrStart').disabled=true;
+ try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'qr_login',id_qr_kta:id}});if(error)throw error;if(!data?.ok||!data.session)throw new Error(data?.message||'Login QR belum berhasil.');const {data:sessionData,error:setError}=await sb.auth.setSession(data.session);if(setError)throw setError;await boot(sessionData.user||data.user);}
+ catch(err){$('loginQrStatus').textContent=err.message||'QR tidak cocok atau akun belum aktif.';$('loginQrStart').disabled=false;}
 }
 $('loginQrStart').onclick=async()=>{
  if(!window.Html5Qrcode){$('loginQrStatus').textContent='Modul pemindai QR belum termuat. Muat ulang halaman.';return;}
@@ -618,18 +612,10 @@ $('loginQrStart').onclick=async()=>{
  await loginQrScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:230,height:230},aspectRatio:1.0},async decoded=>{
   await stopLoginQrScanner();const id=String(decoded||'').trim();
   if(!/^\d{9}$/.test(id)){$('loginQrStatus').textContent='QR tidak sesuai. KTA harus berisi ID registrasi tepat 9 digit.';return;}
-  loginQrId=id;$('loginOtpArea').classList.add('hidden');$('loginOtp').value='';await requestLoginOtp(id);
+  loginQrId=id;await requestQrLogin(id);
  },()=>{});
  }catch(err){await stopLoginQrScanner();$('loginQrStatus').textContent='Kamera tidak dapat dibuka: '+(err.message||'Periksa izin kamera.');}
 };
-$('loginOtpVerify').onclick=async()=>{
- const otp=$('loginOtp').value.trim();if(!loginQrId||!/^\\d{6,8}$/.test(otp)){$('loginQrStatus').textContent='Masukkan kode OTP 6–8 digit dari email.';return;}
- const btn=$('loginOtpVerify');btn.disabled=true;btn.textContent='Memverifikasi...';
- try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'qr_login_verify',id_qr_kta:loginQrId,otp}});if(error)throw error;if(!data?.ok||!data.session)throw new Error(data?.message||'Verifikasi OTP gagal.');const {data:sessionData,error:setError}=await sb.auth.setSession(data.session);if(setError)throw setError;await boot(sessionData.user||data.user);}
- catch(err){$('loginQrStatus').textContent=err.message||'OTP tidak cocok atau sudah kedaluwarsa.';}
- finally{btn.disabled=false;btn.textContent='Verifikasi & Masuk';}
-};
-$('loginOtpResend').onclick=async()=>{if(loginQrId)await requestLoginOtp(loginQrId);};
 
 $('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
 async function boot(user){
