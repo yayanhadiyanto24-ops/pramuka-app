@@ -799,6 +799,8 @@ button.tab.active,[role="tab"][aria-selected="true"]{
  font-weight:900 !important;
 }
 nav a.rt-nav-active::before{content:"";display:inline-block;width:6px;height:6px;margin-right:7px;border-radius:50%;background:#f1d39a;box-shadow:0 0 6px rgba(255,226,170,.8);vertical-align:1px}
+/* Tombol Logo adalah pintasan identitas, bukan menu bertitik */
+#admin-header-nav a:first-child.rt-nav-active::before{content:none!important;display:none!important}
 button.tab.active,[role="tab"][aria-selected="true"]{border-bottom:2px solid #d8b77f!important}
 button,nav a,[role="button"]{transition:background .2s ease,box-shadow .2s ease,transform .16s ease,filter .2s ease}
 button:focus-visible,a:focus-visible{outline:3px solid #c9a875!important;outline-offset:2px}
