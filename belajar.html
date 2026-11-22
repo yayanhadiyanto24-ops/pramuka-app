@@ -686,29 +686,30 @@ async function saveProfile(extra={}){
   if(!allowed.includes(ktaFile.type)||ktaFile.size>10*1024*1024){$('profileMsg').textContent=isTeacher?'Foto KTA Pembina harus JPG/PNG/WEBP maksimal 10 MB agar dapat dibaca otomatis.':'Bukti KTA harus PDF/JPG/PNG/WEBP maksimal 10 MB.';return false;}
   if(isTeacher){
    if(!payload.nta){$('profileMsg').textContent='Isi NTA Pembina terlebih dahulu sebelum mengunggah foto KTA.';return false;}
-   if(!window.Tesseract?.recognize){$('profileMsg').textContent='Mesin pembaca NTA belum termuat. Periksa koneksi internet lalu muat ulang halaman.';return false;}
-   $('profileMsg').textContent='Membaca NTA pada foto KTA secara otomatis...';
-   try{
-    const target=payload.nta.replace(/\D/g,'');
-    // Perbesar dan tingkatkan kontras agar angka kecil pada KTA lebih mudah dikenali.
-    const bitmap=await createImageBitmap(ktaFile);
-    const scale=Math.min(2.5,2600/Math.max(bitmap.width,bitmap.height));
-    const canvas=document.createElement('canvas');
-    canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
-    const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
-    for(let i=0;i<pixels.data.length;i+=4){const gray=Math.round(pixels.data[i]*.299+pixels.data[i+1]*.587+pixels.data[i+2]*.114);const contrast=Math.max(0,Math.min(255,(gray-128)*1.35+128));pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=contrast;}
-    ctx.putImageData(pixels,0,0);
-    const normalizeOcr=value=>String(value||'').toUpperCase().replace(/[OQ]/g,'0').replace(/[IL|]/g,'1').replace(/[^0-9]/g,'');
-    let recognized='';
-    for(const pageMode of [6,11,4]){
-     const result=await Tesseract.recognize(canvas,'eng',{tessedit_pageseg_mode:pageMode,tessedit_char_whitelist:'0123456789.OQIL| -'});
-     recognized=normalizeOcr(result?.data?.text);
-     if(recognized.includes(target))break;
-    }
-    if(!recognized.includes(target)){$('profileMsg').textContent='NTA belum berhasil dicocokkan oleh pembaca otomatis. Pastikan seluruh nomor NTA terlihat; jika tetap gagal, kirimkan hasil pemeriksaan agar metode OCR kami perbaiki.';return false;}
-    payload.kta_ocr_nta=payload.nta;
-   }catch(ocrError){$('profileMsg').textContent='Foto KTA gagal dibaca otomatis. Coba foto ulang dengan pencahayaan yang baik.';return false;}
+   // OCR hanya pemeriksaan bantu. Kegagalan membaca tidak boleh menghalangi unggah;
+   // bukti tetap disimpan dan diteruskan ke Pembina untuk validasi akhir.
+   if(window.Tesseract?.recognize){
+    $('profileMsg').textContent='Memeriksa NTA pada foto KTA...';
+    try{
+     const target=payload.nta.replace(/\D/g,'');
+     const bitmap=await createImageBitmap(ktaFile);
+     const scale=Math.min(2.5,2600/Math.max(bitmap.width,bitmap.height));
+     const canvas=document.createElement('canvas');
+     canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+     const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
+     const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
+     for(let i=0;i<pixels.data.length;i+=4){const gray=Math.round(pixels.data[i]*.299+pixels.data[i+1]*.587+pixels.data[i+2]*.114);const contrast=Math.max(0,Math.min(255,(gray-128)*1.35+128));pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=contrast;}
+     ctx.putImageData(pixels,0,0);
+     const normalizeOcr=value=>String(value||'').toUpperCase().replace(/[OQ]/g,'0').replace(/[IL|]/g,'1').replace(/[^0-9]/g,'');
+     let recognized='';
+     for(const pageMode of [6,11,4]){
+      const result=await Tesseract.recognize(canvas,'eng',{tessedit_pageseg_mode:pageMode,tessedit_char_whitelist:'0123456789.OQIL| -'});
+      recognized=normalizeOcr(result?.data?.text);
+      if(recognized.includes(target))break;
+     }
+     if(recognized.includes(target))payload.kta_ocr_nta=payload.nta;
+    }catch(ocrError){console.warn('OCR NTA tidak berhasil; bukti tetap diteruskan ke Pembina.',ocrError);}
+   }
   }
   $('profileMsg').textContent='Mengunggah bukti KTA...';
   const ext=ktaFile.type==='application/pdf'?'pdf':ktaFile.type==='image/png'?'png':ktaFile.type==='image/webp'?'webp':'jpg';
@@ -721,7 +722,7 @@ async function saveProfile(extra={}){
  if(isStudent){const ambalanChoice=$('studentJabatanAmbalan').value,ambalanOther=$('studentJabatanAmbalanOther').value.trim();if(ambalanChoice==='Lainnya'&&!ambalanOther){$('profileMsg').textContent='Tuliskan jabatan lainnya di ambalan.';return false;}Object.assign(payload,{jabatan_ambalan:ambalanChoice==='Lainnya'?ambalanOther:ambalanChoice,jabatan_sangga:$('studentJabatanSangga').value,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows});}
  $('profileMsg').textContent='Menyimpan profil...';$('saveProfile').disabled=true;
  try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:payload});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Profil gagal disimpan.');
-  if(isTeacher)teacher={...teacher,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'terverifikasi_otomatis'}:(teacher.nta!==payload.nta?{nta_status_verifikasi:'belum_ada'}:{}))};
+  if(isTeacher)teacher={...teacher,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:(teacher.nta!==payload.nta?{nta_status_verifikasi:'belum_ada'}:{}))};
   if(isStudent){const nextLevel=participant.tingkatan;participant={...participant,nta:payload.nta,tanggal_lahir:payload.tanggal_lahir,tingkatan:nextLevel,foto_profil_data:profilePhotoData,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows,jabatan_ambalan:payload.jabatan_ambalan,jabatan_sangga:payload.jabatan_sangga,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:((participant.nta!==payload.nta||participant.tanggal_lahir!==payload.tanggal_lahir)?{nta_status_verifikasi:'belum_ada'}:{}))};}if($('studentTierLabel'))$('studentTierLabel').textContent='Tingkatan: '+participant.tingkatan;
   if(!isTeacher&&!isStudent)account={...account,foto_profil_data:profilePhotoData};
   renderProfile();
