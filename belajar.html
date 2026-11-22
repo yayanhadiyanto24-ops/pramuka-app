@@ -729,12 +729,6 @@ function showTab(name){
  if((name==='administrasi'||name==='peringkat')&&account?.role==='pembina')loadPangkalanAdmin();}
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
 const loginForm=$('loginForm'),loginButton=$('loginBtn');
- let loginButtonExplicitlyPressed=false;
- loginButton.addEventListener('click',e=>{loginButtonExplicitlyPressed=e.isTrusted===true;});
- loginForm.addEventListener('submit',e=>{
-  if(!loginButtonExplicitlyPressed){e.preventDefault();e.stopImmediatePropagation();return;}
-  loginButtonExplicitlyPressed=false;
- },true);
  $('loginForm').addEventListener('submit',async e=>{
  e.preventDefault();
  const emailValue=$('email').value.trim(),passwordValue=$('password').value;
@@ -1736,7 +1730,7 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
   try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
  }
  $('sessionLoading')?.classList.add('hidden');
- if(bridge&&data.session){
+ if(allowAdminHandoff&&data.session){
   $('login').classList.add('hidden');$('application').classList.remove('hidden');
   try{await boot(data.session.user);}
   catch(err){
