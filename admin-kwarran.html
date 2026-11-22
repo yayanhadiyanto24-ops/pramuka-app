@@ -93,9 +93,9 @@ async function loadDashboard(){
 }
 
 async function showDashboard(){$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');await loadDashboard();}
-$('login-form').addEventListener('submit',async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;$('login-msg').textContent='Memeriksa akun...';try{await ensureSb();const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await showDashboard();}catch(err){if(sb)await sb.auth.signOut().catch(()=>{});$('login-msg').textContent='Login gagal: '+(err.message||'Akun tidak dapat masuk.');}finally{b.disabled=false;}});
+$('login-form').addEventListener('submit',async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;$('login-msg').textContent='Memeriksa akun...';try{await ensureSb();const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await showDashboard();}catch(err){const {data}=sb?await sb.auth.getSession():{data:{session:null}};if(data?.session){$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');$('status').textContent='Login berhasil, tetapi data belum dapat dimuat: '+(err.message||'Periksa koneksi lalu tekan Perbarui Data.');}else{$('login-msg').textContent='Login gagal: '+(err.message||'Akun tidak dapat masuk.');}}finally{b.disabled=false;}});
 $('logout').onclick=async()=>{if(sb)await sb.auth.signOut();location.reload();};
-(async()=>{try{await ensureSb();const {data}=await sb.auth.getSession();if(data.session){try{await showDashboard();}catch(err){$('login-msg').textContent=err.message;await sb.auth.signOut();}}}catch(err){$('login-msg').textContent=err.message;}})();
+(async()=>{try{await ensureSb();const {data}=await sb.auth.getSession();if(data.session){try{await showDashboard();}catch(err){$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');$('status').textContent='Sesi masih aktif, tetapi data belum dapat dimuat: '+(err.message||'Periksa koneksi lalu tekan Perbarui Data.');}}}catch(err){$('login-msg').textContent=err.message||'Layanan login belum dapat dimuat.';}})();
 </script>
 
 <style id="rt-active-navigation-style">
