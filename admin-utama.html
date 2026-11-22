@@ -350,7 +350,7 @@ header .rt-admin-brand{width:100%;padding-right:112px;min-height:62px}
 <body class="min-h-screen bg-amber-50 text-slate-800">
 <header class="bg-amber-950 text-white px-4 sm:px-5 py-4 sm:py-5"><div class="max-w-6xl mx-auto flex flex-col gap-3"><div class="rt-admin-brand min-w-0"><img class="rt-admin-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div class="min-w-0"><div class="rt-admin-name text-xl">RUANG TEGAK</div><h1 class="text-lg font-bold">Admin Utama</h1><p class="text-amber-200 text-sm">Pemantauan pangkalan dan perkembangan ambalan</p></div></div><nav id="admin-header-nav" aria-label="Akses cepat Admin Utama"><a href="#brand-logo-settings" class="quick-link">Logo</a><a href="#poster-manager" class="quick-link">Poster</a><a href="#dashboard-summary" class="quick-link">Ringkasan</a><a href="#ambalan-progress" class="quick-link">Ambalan</a><a href="#peserta-detail" class="quick-link">Peserta</a><a href="#pangkalan-directory" class="quick-link">Pangkalan</a><a href="#pembina-activation" class="quick-link">Aktivasi</a><a href="#kwarran-manager" class="quick-link">Kwarran</a><a id="open-belajar-sku" href="belajar.html" class="rounded-lg bg-amber-700 px-2.5 py-2 text-xs font-semibold">Belajar &amp; SKU</a><a href="dokumen.html" class="rounded-lg bg-amber-500 px-2.5 py-2 text-xs font-bold text-stone-950">Dokumen</a><a href="#ranking-kwarran" class="quick-link">Peringkat Kwarran</a><a href="#ranking-pangkalan" class="quick-link">Peringkat Pangkalan</a></nav></div><button id="logout" class="hidden rounded-lg px-3 py-2 text-xs font-bold">Keluar</button></header>
 <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
-<section id="login-box" class="max-w-md mx-auto bg-white rounded-2xl shadow p-6 mt-8"><h2 class="text-xl font-bold mb-1">Masuk Admin</h2><p class="text-sm text-slate-500 mb-4">Hanya akun Admin Utama yang telah didaftarkan dapat masuk.</p><form id="login-form" class="space-y-3"><input id="email" type="email" required autocomplete="username" placeholder="Email admin" class="w-full border rounded-lg p-3"><input id="password" type="password" required autocomplete="current-password" placeholder="Password" class="w-full border rounded-lg p-3"><button class="w-full bg-amber-800 text-white font-bold rounded-lg p-3">Masuk</button></form><p id="login-msg" class="text-sm mt-3"></p></section>
+<section id="login-box" class="max-w-md mx-auto bg-white rounded-2xl shadow p-6 mt-8"><h2 class="text-xl font-bold mb-1">Masuk Admin</h2><p class="text-sm text-slate-500 mb-4">Hanya akun Admin Utama yang telah didaftarkan dapat masuk.</p><form id="login-form" class="space-y-3"><input id="email" name="email" type="email" required autocomplete="username" placeholder="Email admin" class="w-full border rounded-lg p-3"><input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Password" class="w-full border rounded-lg p-3"><button class="w-full bg-amber-800 text-white font-bold rounded-lg p-3">Masuk</button></form><p id="login-msg" class="text-sm mt-3"></p></section>
 <section id="dashboard" class="hidden space-y-6"><section id="brand-logo-settings" class="bg-white rounded-2xl shadow-sm p-4 space-y-3">
  <div><h2 class="font-bold text-lg">Logo Aplikasi Ruang Tegak</h2><p class="text-sm text-slate-600">Unggah logo pilihanmu. Logo akan digunakan di halaman utama, belajar, admin, dan pengujian SKU. Gunakan gambar persegi PNG, JPG, atau WebP maksimal 5 MB.</p></div>
  <div class="flex flex-wrap items-center gap-4">
@@ -485,25 +485,31 @@ async function callApi(payload){await ensureSb();const {data,error}=await sb.fun
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 $('login-form').addEventListener('submit',async e=>{
-  e.preventDefault();
-  const button=$('login-form').querySelector('button[type="submit"],button:not([type])');
-  $('login-msg').textContent='Menghubungkan ke layanan login...';
-  if(button){button.disabled=true;button.textContent='Memeriksa...';}
-  try{
-    await ensureSb();
-    $('login-msg').textContent='Memeriksa akun...';
-    const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
-    if(error) throw error;
-    await callApi({action:'bootstrap_admin'});
-    await simpanTokenNotifikasiRuangTegak();
-    await showDashboard();
-  }catch(err){
-    if(sb) await sb.auth.signOut().catch(()=>{});
-    $('login-msg').textContent='Login belum berhasil: '+(err?.message||'Terjadi kesalahan. Silakan coba lagi.');
-  }finally{
-    if(button){button.disabled=false;button.textContent='Masuk';}
-  }
-});
+   e.preventDefault();
+   const button=$('login-form').querySelector('button[type="submit"],button:not([type])');
+   $('login-msg').textContent='Menghubungkan ke layanan login...';
+   if(button){button.disabled=true;button.textContent='Memeriksa...';}
+   let adminVerified=false;
+   try{
+     await ensureSb();
+     $('login-msg').textContent='Memeriksa akun...';
+     const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+     if(error) throw error;
+     await callApi({action:'bootstrap_admin'});
+     adminVerified=true;
+     await simpanTokenNotifikasiRuangTegak();
+     try{await showDashboard();}
+     catch(loadError){
+       $('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');
+       $('dashboard-message').textContent='Login Admin Utama berhasil, tetapi data belum dapat dimuat: '+(loadError?.message||'Periksa koneksi lalu tekan Perbarui Data.');
+     }
+   }catch(err){
+     if(sb&&!adminVerified) await sb.auth.signOut().catch(()=>{});
+     $('login-msg').textContent='Login belum berhasil: '+(err?.message||'Terjadi kesalahan. Silakan coba lagi.');
+   }finally{
+     if(button){button.disabled=false;button.textContent='Masuk';}
+   }
+ });
 let pesertaAdminCache=[];
 function renderPesertaDetail(rows){
  pesertaAdminCache=Array.isArray(rows)?rows:[];
@@ -626,13 +632,19 @@ $('kwarran-invite-list').addEventListener('click',async e=>{
  catch(err){$('kwarran-manager-status').textContent='Tidak dapat menyalin otomatis. Salin kode yang tampil secara manual.';}
 });
 
-$('refresh').type='button';$('refresh').onclick=async()=>{const b=$('refresh');b.disabled=true;const old=b.textContent;b.textContent='Memuat...';try{await loadDashboard();}finally{b.disabled=false;b.textContent=old;}};
+$('refresh').type='button';$('refresh').onclick=async()=>{const b=$('refresh');b.disabled=true;const old=b.textContent;b.textContent='Memuat...';try{await loadDashboard();}catch(err){$('dashboard-message').textContent='Data belum dapat diperbarui: '+(err?.message||'Periksa koneksi dan coba lagi.');}finally{b.disabled=false;b.textContent=old;}};
 $('logout').onclick=async()=>{const {error}=await sb.auth.signOut();if(error){$('login-msg').textContent='Keluar belum berhasil: '+error.message;return;}window.location.replace('./index.html');};
 (async()=>{
   try{
     await ensureSb();
-    const {data}=await sb.auth.getSession();
-    if(data.session){try{await callApi({action:'bootstrap_admin'});await showDashboard();}catch{await sb.auth.signOut();}}
+    const {data,error}=await sb.auth.getSession();
+    if(error)throw error;
+    if(data.session){
+      try{await callApi({action:'bootstrap_admin'});}
+      catch(err){await sb.auth.signOut();$('login-msg').textContent=err?.message||'Akun ini bukan Admin Utama yang terdaftar.';return;}
+      try{await showDashboard();}
+      catch(err){$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');$('dashboard-message').textContent='Sesi Admin Utama masih aktif, tetapi data belum dapat dimuat: '+(err?.message||'Periksa koneksi lalu tekan Perbarui Data.');}
+    }
   }catch(err){$('login-msg').textContent=err?.message||'Layanan login belum dapat dimuat.';}
 })();
 
