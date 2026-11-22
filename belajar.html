@@ -876,6 +876,7 @@ async function loadPangkalanPending(){
       catch(err){$('sanggaMsg').textContent=err.message||'Pemindahan gagal.';b.disabled=false;b.textContent='Pindahkan';}
     });
    }catch(err){names.textContent='Gagal memuat sangga: '+(err.message||'Kesalahan');students.textContent='';ambalanNames.textContent='Gagal memuat Ambalan: '+(err.message||'Kesalahan');ambalanStudents.textContent='';}
+ }
 const STRUKTUR_GUDEP_GROUPS=[
  {id:'mabigus',title:'Majelis Pembimbing Gudep (Mabigus)',note:'Sekurang-kurangnya Ketua, Sekretaris, dan beberapa anggota.',defaults:['Ketua','Sekretaris','Anggota']},
  {id:'pengurus_gudep',title:'Pengurus Gugus Depan',note:'Sekurang-kurangnya Ketua Gudep, Wakil Ketua Gudep, dan Pembina Satuan.',defaults:['Ketua Gudep','Wakil Ketua Gudep','Pembina Satuan Putra','Pembina Satuan Putri']},
