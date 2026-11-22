@@ -536,8 +536,8 @@ header #appCreatorCredit{grid-area:credit!important}
   </div>
   <div class="rt-login-divider"></div>
   <form id="loginForm" class="rt-login-form" autocomplete="on" novalidate>
-   <label class="rt-login-field" for="email"><span>Email akun</span><input id="email" type="email" required autocomplete="username" placeholder="nama@email.com" class="w-full border rounded-lg p-3"></label>
-   <label class="rt-login-field" for="password"><span>Kata sandi</span><input id="password" type="password" required autocomplete="current-password" placeholder="Masukkan kata sandi" class="w-full border rounded-lg p-3"></label>
+   <label class="rt-login-field" for="email"><span>Email akun</span><input id="email" name="email" type="email" inputmode="email" autocapitalize="none" spellcheck="false" required autocomplete="username" placeholder="nama@email.com" class="w-full border rounded-lg p-3"></label>
+   <label class="rt-login-field" for="password"><span>Kata sandi</span><input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Masukkan kata sandi" class="w-full border rounded-lg p-3"></label>
    <button id="loginBtn" type="submit" class="rt-login-submit w-full rounded-lg font-bold p-3">Masuk</button>
   </form>
   <p id="loginMsg" class="rt-login-message text-sm mt-3" role="status"></p>
