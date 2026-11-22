@@ -1,4 +1,4 @@
-const CACHE_NAME='ruang-tegak-shell-v5';
+const CACHE_NAME='ruang-tegak-shell-v6';
 const APP_SHELL=['./','./index.html','./admin-utama.html','./belajar.html','./login-confirm.html','./dokumen.html','./uji.html','./admin-kwarran.html','./sekretaris-daftar.html','./sekretaris-kwarcab.html','./manifest.webmanifest','./assets/ruang-tegak-icon.svg','./assets/ruang-tegak-ui.css','./assets/ruang-tegak-ui.js'];
 // Mendukung tombol Perbarui pada pemberitahuan aplikasi.
 self.addEventListener('message',event=>{
@@ -30,7 +30,11 @@ self.addEventListener('fetch',event=>{
     return response;
    }catch(error){
     const cache=await caches.open(CACHE_NAME);
-    return await cache.match(request)||await cache.match('./belajar.html')||Response.error();
+    // Fallback harus tetap ke URL/halaman yang diminta. Jangan pernah
+    // menampilkan belajar.html untuk permintaan halaman lain saat offline.
+    const requestedUrl=new URL(request.url);
+    requestedUrl.search='';
+    return await cache.match(request)||await cache.match(requestedUrl.toString())||Response.error();
    }
   })());
  }
