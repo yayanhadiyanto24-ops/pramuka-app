@@ -628,5 +628,38 @@ populateSchoolYears();
 updatePembinaType();
 toggleModePembina();
 </script>
+<script>
+// Pemeriksaan versi otomatis Ruang Tegak.
+// Versi baru diaktifkan oleh sw.js; halaman lama dimuat ulang satu kali.
+(()=>{
+ if(!('serviceWorker' in navigator))return;
+ const hadController=!!navigator.serviceWorker.controller;
+ let reloading=false;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{
+  if(!hadController||reloading)return;
+  reloading=true;
+  window.location.reload();
+ });
+ let updateTimer=null;
+ const checkForAppUpdate=async()=>{
+  if(document.visibilityState==='hidden')return;
+  try{
+   const registration=await navigator.serviceWorker.getRegistration('./')||
+    await navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'});
+   await registration.update();
+   if(!updateTimer)updateTimer=window.setInterval(()=>{
+    if(document.visibilityState==='visible')registration.update().catch(()=>{});
+   },5*60*1000);
+  }catch(error){
+   console.warn('Pemeriksaan pembaruan Ruang Tegak belum berhasil:',error);
+  }
+ };
+ if(document.readyState==='complete')checkForAppUpdate();
+ else window.addEventListener('load',checkForAppUpdate,{once:true});
+ document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible')checkForAppUpdate();
+ });
+})();
+</script>
 </body>
 </html>
