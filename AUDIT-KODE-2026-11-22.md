@@ -20,6 +20,8 @@ Pemeriksaan dilakukan dengan membaca berkas dari branch utama, penelusuran alur 
 
 | 6 | `android/app/src/main/java/id/ruangtegak/app/MainActivity.java` | Jika Android memulihkan Activity tetapi `WebView.restoreState()` tidak menghasilkan riwayat yang valid, WebView dapat tetap tanpa halaman awal. | Hasil pemulihan sekarang diperiksa; jika gagal/kosong, aplikasi memuat `APP_URL` sebagai fallback. Commit `f272a06`. |
 
+| 7 | `admin-kwarran.html` | Handler login menganggap `SubmitEvent.submitter` selalu tersedia. Pada jalur submit tertentu di WebView/keyboard, nilainya dapat `null`, sehingga handler gagal sebelum autentikasi. | Handler sekarang memakai tombol submit sebagai fallback, menjaga tombol tetap aman saat `submitter` null, dan menangani kegagalan pembacaan sesi tanpa melempar error baru. Atribut `name` email/kata sandi juga ditambahkan untuk autofill. Commit `89f55a1`. |
+
 ## Temuan yang perlu tindak lanjut sebelum dinyatakan tuntas
 
 1. **Gejala kolom email/kata sandi pada halaman Belajar belum terbukti akar masalahnya.** Pada kode login yang diperiksa, tidak ditemukan pemanggilan `form.reset()` atau assignment yang sengaja mengosongkan kolom login. Handler login juga menyimpan nilai sebelum permintaan dan mengembalikannya jika formulir tetap ditampilkan. Atribut autofill sudah diperbaiki, tetapi perlu pengujian langsung di browser Android/WebView untuk membedakan autofill yang tidak mengisi dari nilai yang terhapus akibat reload/navigasi.
