@@ -277,8 +277,11 @@ Deno.serve(async(req:Request)=>{
     const years={tahun_kmd:body.tahun_kmd,tahun_kml:body.tahun_kml,tahun_kpd:body.tahun_kpd,tahun_kpl:body.tahun_kpl};
     for(const [k,v] of Object.entries(years))if(v!==null&&v!==undefined&&v!==""&&(!Number.isInteger(Number(v))||Number(v)<1950||Number(v)>new Date().getFullYear()+1))return reply({ok:false,message:"Tahun pendidikan Pembina tidak valid."},400);
     const patch={nta:teacherNta,foto_profil_data:photo||null,tahun_kmd:years.tahun_kmd?Number(years.tahun_kmd):null,tahun_kml:years.tahun_kml?Number(years.tahun_kml):null,tahun_kpd:years.tahun_kpd?Number(years.tahun_kpd):null,tahun_kpl:years.tahun_kpl?Number(years.tahun_kpl):null,tanda_tangan_data:typeof body.tanda_tangan_data==="string"&&body.tanda_tangan_data.startsWith("data:image/")&&body.tanda_tangan_data.length<300000?body.tanda_tangan_data:null,paraf_data:typeof body.paraf_data==="string"&&body.paraf_data.startsWith("data:image/")&&body.paraf_data.length<150000?body.paraf_data:null};
-    if(ktaEvidence){patch.nta_bukti_kta=ktaEvidence;patch.nta_status_verifikasi="menunggu";}
-    else if(currentTeacher.nta!==teacherNta)patch.nta_status_verifikasi="belum_ada";
+    if(ktaEvidence){
+     const ocrNta=clean(body.kta_ocr_nta,80);
+     if(!teacherNta||!ocrNta||ocrNta.replace(/\\D/g,"")!==teacherNta.replace(/\\D/g,""))return reply({ok:false,message:"Hasil pembacaan NTA pada foto KTA tidak cocok dengan NTA profil."},400);
+     patch.nta_bukti_kta=ktaEvidence;patch.nta_status_verifikasi="terverifikasi_otomatis";
+    }else if(currentTeacher.nta!==teacherNta)patch.nta_status_verifikasi="belum_ada";
     const {error}=await admin.from("profil_pembina").update(patch).eq("id_user",authData.user.id);if(error)throw error;
    }else if(me.role==="admin_kwarcab"){
     const {error}=await admin.from("users").update({foto_profil_data:photo||null}).eq("id_user",authData.user.id);if(error)throw error;
@@ -649,15 +652,6 @@ Deno.serve(async(req:Request)=>{
    const {data:kwarran,error:kwarranError}=await admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran");if(kwarranError)throw kwarranError;
    const pembinaDetail=await Promise.all((pembina.data||[]).map(async p=>{let ktaUrl=null;if(p.nta_bukti_kta?.path){const {data:signed}=await admin.storage.from("sku-bukti").createSignedUrl(p.nta_bukti_kta.path,300);ktaUrl=signed?.signedUrl||null;}return {...p,nta_bukti_kta_url:ktaUrl};}));
    return reply({ok:true,pangkalan:pangkalan.data,rekap:rekapDenganKwarran,peringkat_pangkalan:peringkatPangkalan.data||[],peringkat_kwarran:peringkatKwarran.data||[],kwarran:kwarran||[],pembina:pembinaDetail,peserta:pesertaDetail,pending:pending.data||[]});
-  }
-  if(action==="review_pembina_kta"){
-   const targetId=clean(body.id_pembina,50),status=clean(body.status,30);
-   if(!targetId||!["disetujui_admin","ditolak"].includes(status))return reply({ok:false,message:"Data validasi KTA Pembina tidak valid."},400);
-   const {data:target,error:targetError}=await admin.from("profil_pembina").select("id_user,nta,nta_bukti_kta").eq("id_user",targetId).maybeSingle();if(targetError)throw targetError;
-   if(!target||!clean(target.nta,80)||!target.nta_bukti_kta?.path)return reply({ok:false,message:"Pembina harus melengkapi NTA dan mengunggah bukti KTA terlebih dahulu."},400);
-   if(status==="disetujui_admin"&&!/^\d{2}\.\d{2}\.\d{2}\.\d{6}\.\d{4}$/.test(target.nta))return reply({ok:false,message:"Format NTA Pembina tidak valid."},400);
-   const {error:updateError}=await admin.from("profil_pembina").update({nta_status_verifikasi:status}).eq("id_user",targetId);if(updateError)throw updateError;
-   return reply({ok:true,message:status==="disetujui_admin"?"KTA Pembina disetujui. Pembina kini berwenang melakukan validasi akhir NTA peserta.":"KTA Pembina ditolak. Pembina belum berwenang melakukan validasi akhir."});
   }
   if(action==="buat_kode_akses"){
    const targetId=clean(body.id_pembina,50);if(!targetId)return reply({ok:false,message:"Pilih akun Pembina."},400);
