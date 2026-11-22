@@ -523,17 +523,17 @@ a[class*="rounded"]{
 const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
 const $=id=>document.getElementById(id);
 function formatNtaInput(value){
- const digits=String(value||'').replace(/\\D/g,'').slice(0,16);
+ const digits=String(value||'').replace(/\D/g,'').slice(0,16);
  const groups=[2,2,2,6,4];let out='',offset=0;
  for(const size of groups){if(offset>=digits.length)break;const part=digits.slice(offset,offset+size);out+=(out?'.':'')+part;offset+=size;}
  return out;
 }
 function setNtaInputFormatted(input){
  if(!input)return;
- const raw=input.value,caret=input.selectionStart??raw.length,digitsBefore=raw.slice(0,caret).replace(/\\D/g,'').length;
+ const raw=input.value,caret=input.selectionStart??raw.length,digitsBefore=raw.slice(0,caret).replace(/\D/g,'').length;
  input.value=formatNtaInput(raw);
  let pos=0,count=0;
- while(pos<input.value.length&&count<digitsBefore){if(/\\d/.test(input.value[pos]))count++;pos++;}
+ while(pos<input.value.length&&count<digitsBefore){if(/\d/.test(input.value[pos]))count++;pos++;}
  input.setSelectionRange(pos,pos);
 }
 function parseNtaNumber(value){
