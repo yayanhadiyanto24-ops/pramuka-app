@@ -413,6 +413,14 @@ a[class*="rounded"]{
 @media(max-width:480px){#login.rt-login-card{margin-top:14px;padding:19px!important;border-radius:18px}.rt-login-logo{width:49px;height:49px;flex-basis:49px}.rt-login-heading{gap:11px}.rt-login-heading h1{font-size:19px}}
 </style>
 <link rel="stylesheet" href="./assets/ruang-tegak-ui.css?v=1">
+<style id="rt-belajar-layout-repair">
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+main{width:100%!important;max-width:none!important;box-sizing:border-box!important;margin-left:0!important;margin-right:0!important}
+#login,#sessionLoading,#application{width:100%;max-width:none;box-sizing:border-box}
+#application>section,.panel{box-sizing:border-box;min-width:0}
+@media(max-width:640px){main{padding:10px!important}#application{gap:12px!important}#application nav{width:100%;grid-template-columns:repeat(2,minmax(0,1fr))!important}#application nav .tab{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere}}
+@media(min-width:641px){main{padding:18px 22px!important}#application nav{width:100%}}
+</style>
 </head>
 <body class="min-h-screen">
 <header class="brand text-white px-4 py-5">
@@ -1346,7 +1354,7 @@ setupSavedReportSignature('mabigus');
 
 function exportMonitorReport(kind){
  if(!monitorReportHtml){setMsg('Data laporan belum tersedia. Muat ulang halaman pantau.');return;}
- const full='<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Perkembangan SKU</title><style>body{font-family:Arial,sans-serif;color:#222;padding:24px}h1,h2{color:#78350f}table{width:100%;border-collapse:collapse;margin:12px 0 24px;font-size:12px}th,td{border:1px solid #bbb;padding:6px;text-align:left;vertical-align:top}th{background:#fef3c7}.muted{color:#555}.group{page-break-inside:avoid;margin-bottom:24px}img{object-fit:contain}@media print{body{padding:0}h2{page-break-after:avoid}}</style></head><body>'+monitorReportHtml+reportApprovalHtml()+'<script src="./assets/ruang-tegak-ui.js?v=1"></script>
+ const full='<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Perkembangan SKU</title><style>body{font-family:Arial,sans-serif;color:#222;padding:24px}h1,h2{color:#78350f}table{width:100%;border-collapse:collapse;margin:12px 0 24px;font-size:12px}th,td{border:1px solid #bbb;padding:6px;text-align:left;vertical-align:top}th{background:#fef3c7}.muted{color:#555}.group{page-break-inside:avoid;margin-bottom:24px}img{object-fit:contain}@media print{body{padding:0}h2{page-break-after:avoid}}</style></head><body>'+monitorReportHtml+reportApprovalHtml()+'<script src="./assets/ruang-tegak-ui.js?v=1"><\/script>
 </body></html>';
  if(kind==='word'){
   const blob=new Blob(['\ufeff',full],{type:'application/msword'});
