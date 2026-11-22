@@ -366,39 +366,6 @@ header nav button{
  <div><h3 class="font-semibold mb-2">Akun Admin Kwarran Terdaftar</h3><div id="kwarran-admin-list" class="space-y-2"></div></div>
  <p id="kwarran-manager-status" class="text-sm text-slate-500" role="status"></p>
 </section>
-<section id="gudep-assessment-manager" class="bg-white rounded-2xl shadow-sm p-4 space-y-4">\n <div class="rounded-xl border border-amber-300 bg-amber-50 p-3 space-y-2"><div class="flex flex-wrap items-center justify-between gap-2"><div><b>Modul Gudep Tergiat</b><p id="gudep-feature-state" class="text-xs text-slate-600">Memeriksa status...</p></div><button id="gudep-feature-toggle" type="button" class="rounded-lg bg-slate-800 text-white px-4 py-2 text-sm font-semibold">Memuat...</button></div><p class="text-xs text-slate-600">Hanya Admin Utama yang dapat melihat dan mengaktifkan modul ini. Saat nonaktif, Pembina dan Admin Kwarran tidak melihat menu atau dapat mengakses proses penilaiannya. Seluruh indikator, periode, nilai, dan bukti tetap tersimpan.</p></div>
- <div><h2 class="font-bold text-lg">Pengaturan Penilaian Gudep Tergiat</h2><p class="text-sm text-slate-600">Admin Utama mengatur indikator dan bobot penilaian sebelum periode dibuka untuk Pembina. Template referensi tetap berstatus draft sampai semua komponen memiliki indikator.</p></div>
- <div class="rounded-xl border p-3 space-y-2"><div id="gudep-template-summary" class="text-sm">Memuat template penilaian...</div><button id="gudep-template-activate" type="button" class="rounded-lg bg-amber-500 text-stone-950 font-bold px-4 py-2 text-sm" disabled>Aktifkan Template</button><p class="text-xs text-slate-500">Template aktif tidak dapat diubah. Perubahan instrumen berikutnya harus menggunakan versi template baru.</p></div>
- <form id="gudep-criteria-form" class="border rounded-xl p-3 space-y-2">
-  <h3 class="font-semibold">Tambah / Ubah Indikator Penilaian</h3>
-  <select id="gudep-criteria-category" class="w-full border rounded-lg p-2 text-sm" required><option value="">Pilih komponen penilaian</option></select>
-  <div class="grid sm:grid-cols-2 gap-2"><input id="gudep-criteria-code" maxlength="40" placeholder="Kode indikator, mis. B1.01" class="border rounded-lg p-2 text-sm" required><input id="gudep-criteria-name" maxlength="180" placeholder="Nama indikator" class="border rounded-lg p-2 text-sm" required></div>
-  <div class="grid sm:grid-cols-2 gap-2"><input id="gudep-criteria-max" type="number" min="0.01" max="10000" step="0.01" placeholder="Nilai maksimum" class="border rounded-lg p-2 text-sm" required><label class="flex items-center gap-2 text-sm"><input id="gudep-criteria-evidence" type="checkbox" checked> Bukti pendukung wajib</label></div>
-  <textarea id="gudep-criteria-guide" rows="3" maxlength="3000" placeholder="Panduan pemberian skor dan bukti yang harus diperiksa" class="w-full border rounded-lg p-2 text-sm"></textarea>
-  <div class="flex flex-wrap gap-2"><button id="gudep-criteria-save" type="submit" class="rounded-lg bg-amber-500 text-stone-950 font-bold px-4 py-2 text-sm">Simpan Indikator</button><button id="gudep-criteria-reset" type="button" class="rounded-lg border px-4 py-2 text-sm">Batal Ubah</button></div>
- </form>
- <div><h3 class="font-semibold mb-2">Daftar Indikator</h3><div id="gudep-criteria-list" class="space-y-2 text-sm"><p class="text-slate-500">Memuat indikator...</p></div></div>
- <form id="gudep-period-form" class="border rounded-xl p-3 space-y-2">
-  <h3 class="font-semibold">Buat Periode Penilaian</h3>
-  <input id="gudep-period-name" maxlength="180" placeholder="Nama periode, mis. Gudep Tergiat Kwarcab Cianjur 2026" class="w-full border rounded-lg p-2 text-sm" required>
-  <div class="grid sm:grid-cols-3 gap-2"><input id="gudep-period-year" type="number" min="2020" max="2100" value="2026" class="border rounded-lg p-2 text-sm" required><input id="gudep-period-start" type="date" class="border rounded-lg p-2 text-sm"><input id="gudep-period-end" type="date" class="border rounded-lg p-2 text-sm"></div>
-  <button type="submit" class="rounded-lg bg-amber-500 text-stone-950 font-bold px-4 py-2 text-sm">Buat Periode Draft</button>
- </form>
- <div><h3 class="font-semibold mb-2">Daftar Periode</h3><div id="gudep-period-list" class="space-y-2 text-sm"><p class="text-slate-500">Memuat periode...</p></div></div>
- <section class="border-t pt-4 space-y-3">
-  <div><h3 class="font-bold text-lg">Penetapan Nilai Final Gudep Tergiat</h3><p class="text-sm text-slate-600">Daftar penilaian yang sudah diverifikasi Kwarran. Admin Utama memeriksa kembali dan menetapkan nilai final sebagai hasil resmi.</p></div>
-  <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th class="text-left">Pangkalan</th><th class="text-left">Kwarran</th><th class="text-left">Periode</th><th>Status</th><th>Nilai Kwarran</th><th>Nilai Final</th><th>Peringkat</th><th>Aksi</th></tr></thead><tbody id="gudep-final-list"><tr><td colspan="8" class="text-center py-3 text-slate-500">Memuat daftar...</td></tr></tbody></table></div>
-  <p id="gudep-final-list-msg" class="text-xs text-slate-500" role="status"></p>
-  <div id="gudep-final-detail" class="hidden border rounded-xl p-3 space-y-3">
-   <div class="flex flex-wrap items-start justify-between gap-2"><div><h4 id="gudep-final-title" class="font-bold"></h4><p id="gudep-final-meta" class="text-xs text-slate-500"></p></div><button id="gudep-final-close" type="button" class="border rounded-lg px-3 py-2 text-xs">Tutup rincian</button></div>
-   <div id="gudep-final-criteria" class="space-y-3"></div>
-   <label class="block text-xs font-semibold" for="gudep-final-note">Catatan Admin Utama</label><textarea id="gudep-final-note" rows="3" maxlength="3000" class="w-full border rounded-lg p-2 text-sm" placeholder="Catatan penetapan akhir"></textarea>
-   <button id="gudep-final-submit" type="button" class="rounded-lg bg-amber-500 text-stone-950 font-bold px-4 py-2 text-sm">Tetapkan Nilai Final</button>
-   <p id="gudep-final-msg" class="text-xs text-slate-500" role="status"></p>
-  </div>
- </section>
- <p id="gudep-assessment-status" class="text-sm text-slate-500" role="status"></p>
-</section>
 <div id="status" class="text-sm text-slate-500"></div></section></main>
 <script>
 const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
@@ -438,153 +405,6 @@ window.addEventListener('ruangTegakFcmToken',event=>{
 
 async function callApi(payload){await ensureSb();const {data,error}=await sb.functions.invoke('pramuka-register',{body:payload});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Permintaan gagal');return data;}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-
-let gudepAssessmentCache={template:null,kategori:[],kriteria:[],periode:[]};
-function resetGudepCriteriaForm(){
- const f=$('gudep-criteria-form');f.reset();f.dataset.idKriteria='';$('gudep-criteria-evidence').checked=true;$('gudep-criteria-save').textContent='Simpan Indikator';
-}
-let gudepFeatureEnabled=false;
-async function loadGudepFeatureStatus(){
- const d=await callApi({action:'gudep_penilaian_admin_status'});
- gudepFeatureEnabled=!!d.enabled;
- $('gudep-feature-state').textContent=gudepFeatureEnabled?'Aktif — dapat digunakan oleh Pembina dan Admin Kwarran.':'Nonaktif — hanya terlihat oleh Admin Utama.';
- $('gudep-feature-toggle').textContent=gudepFeatureEnabled?'Nonaktifkan Modul':'Aktifkan Modul';
- $('gudep-feature-toggle').className='rounded-lg px-4 py-2 text-sm font-semibold '+(gudepFeatureEnabled?'bg-red-700 text-white':'bg-emerald-700 text-white');
- $('gudep-assessment-manager').classList.toggle('opacity-70',!gudepFeatureEnabled);
-}
-$('gudep-feature-toggle')?.addEventListener('click',async()=>{
- const btn=$('gudep-feature-toggle');btn.disabled=true;
- try{
-  const next=!gudepFeatureEnabled;
-  if(next&&!confirm('Aktifkan Penilaian Gudep Tergiat untuk Pembina dan Admin Kwarran?'))return;
-  if(!next&&!confirm('Nonaktifkan Penilaian Gudep Tergiat? Data dan hasil penilaian tidak akan dihapus.'))return;
-  await callApi({action:'gudep_penilaian_admin_toggle',enabled:next});
-  await loadGudepFeatureStatus();
-  if(next){await loadGudepPenilaianAdmin();await loadGudepFinalList();}
-  else{$('gudep-assessment-status').textContent='Modul dinonaktifkan. Seluruh data tetap tersimpan.';}
- }catch(err){$('gudep-feature-state').textContent=err.message||'Status modul gagal diperbarui.';}
- finally{btn.disabled=false;}
-});
-async function loadGudepPenilaianAdmin(){
- $('gudep-assessment-status').textContent='Memuat pengaturan penilaian...';
- const d=await callApi({action:'gudep_penilaian_admin_data'});
- gudepAssessmentCache=d;
- const tpl=d.template,cats=d.kategori||[],criteria=d.kriteria||[],periods=d.periode||[];
- const parentMap=new Map(cats.filter(x=>!x.parent_id).map(x=>[String(x.id_kategori),x]));
- const leaf=cats.filter(x=>x.parent_id);
- $('gudep-template-summary').innerHTML=tpl
-  ?'<b>'+esc(tpl.nama_template)+'</b><p class="text-xs text-slate-500">Kode: '+esc(tpl.kode_template)+' · Referensi '+esc(tpl.tahun_referensi||'-')+' · Status: <b>'+esc(tpl.status.toUpperCase())+'</b> · '+criteria.filter(x=>x.aktif).length+' indikator aktif</p><p class="text-xs text-slate-500">'+esc(tpl.catatan)+'</p>'
-  :'<p class="text-sm text-red-600">Template referensi belum tersedia.</p>';
- const allReady=leaf.length>0&&leaf.every(cat=>criteria.some(k=>Number(k.id_kategori)===Number(cat.id_kategori)&&k.aktif));
- $('gudep-template-activate').disabled=!tpl||tpl.status!=='draft'||!allReady;
- $('gudep-template-activate').textContent=tpl?.status==='aktif'?'Template Sudah Aktif':'Aktifkan Template';
- $('gudep-criteria-category').innerHTML='<option value="">Pilih komponen penilaian</option>'+leaf.map(x=>'<option value="'+x.id_kategori+'">'+esc(parentMap.get(String(x.parent_id))?.nama||'')+' — '+esc(x.nama)+'</option>').join('');
- $('gudep-criteria-list').innerHTML=leaf.map(cat=>{
-  const rows=criteria.filter(k=>Number(k.id_kategori)===Number(cat.id_kategori));
-  return '<div class="border rounded-lg p-3 space-y-2"><b>'+esc(parentMap.get(String(cat.parent_id))?.nama||'')+' / '+esc(cat.nama)+'</b>'+(
-   rows.length?rows.map(k=>'<div class="border-t pt-2 flex flex-wrap items-start justify-between gap-2"><div class="min-w-0 flex-1"><b>'+esc(k.kode)+' · '+esc(k.nama)+'</b><p class="text-xs text-slate-500">Maks. '+Number(k.poin_maks)+' poin · '+(k.bukti_wajib?'Bukti wajib':'Bukti opsional')+' · '+(k.aktif?'Aktif':'Nonaktif')+'</p><p class="text-xs text-slate-500">'+esc(k.panduan_penilaian||'Belum ada panduan skor.')+'</p></div><div class="flex gap-1">'+(tpl?.status==='draft'?'<button type="button" data-edit-gudep-criteria="'+k.id_kriteria+'" class="border rounded px-2 py-1 text-xs">Ubah</button>'+(k.aktif?'<button type="button" data-disable-gudep-criteria="'+k.id_kriteria+'" class="border rounded px-2 py-1 text-xs">Nonaktifkan</button>':''):'')+'</div></div>').join('')
-   :'<p class="text-xs text-slate-500">Belum ada indikator pada komponen ini.</p>'
-  )+'</div>';
- }).join('')||'<p class="text-sm text-slate-500">Belum ada komponen penilaian.</p>';
- $('gudep-criteria-list').querySelectorAll('[data-edit-gudep-criteria]').forEach(btn=>btn.onclick=()=>{
-  const k=criteria.find(x=>String(x.id_kriteria)===btn.dataset.editGudepCriteria);if(!k)return;
-  const f=$('gudep-criteria-form');f.dataset.idKriteria=k.id_kriteria;
-  $('gudep-criteria-category').value=k.id_kategori;$('gudep-criteria-code').value=k.kode;$('gudep-criteria-name').value=k.nama;
-  $('gudep-criteria-max').value=k.poin_maks;$('gudep-criteria-guide').value=k.panduan_penilaian||'';
-  $('gudep-criteria-evidence').checked=!!k.bukti_wajib;$('gudep-criteria-save').textContent='Simpan Perubahan';
-  f.scrollIntoView({behavior:'smooth',block:'center'});
- });
- $('gudep-criteria-list').querySelectorAll('[data-disable-gudep-criteria]').forEach(btn=>btn.onclick=async()=>{
-  if(!confirm('Nonaktifkan indikator ini?'))return;
-  try{await callApi({action:'gudep_penilaian_nonaktifkan_kriteria',id_kriteria:Number(btn.dataset.disableGudepCriteria)});await loadGudepPenilaianAdmin();}
-  catch(err){$('gudep-assessment-status').textContent=err.message||'Indikator gagal dinonaktifkan.';}
- });
- $('gudep-period-list').innerHTML=periods.map(p=>'<div class="border rounded-lg p-3 flex flex-wrap items-center justify-between gap-2"><div><b>'+esc(p.nama_periode)+'</b><p class="text-xs text-slate-500">Tahun '+Number(p.tahun)+' · '+esc(p.tanggal_mulai||'Belum ditentukan')+' s.d. '+esc(p.tanggal_akhir||'Belum ditentukan')+' · Status '+esc(p.status.toUpperCase())+'</p></div><div>'+(p.status==='draft'||p.status==='ditutup'?'<button type="button" data-open-gudep-period="'+p.id_periode+'" class="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold">Buka Periode</button>':p.status==='dibuka'?'<button type="button" data-close-gudep-period="'+p.id_periode+'" class="rounded-lg border px-3 py-2 text-xs">Tutup Periode</button>':'')+'</div></div>').join('')||'<p class="text-sm text-slate-500">Belum ada periode penilaian.</p>';
- $('gudep-period-list').querySelectorAll('[data-open-gudep-period]').forEach(btn=>btn.onclick=async()=>{
-  btn.disabled=true;try{await callApi({action:'gudep_penilaian_ubah_status_periode',id_periode:Number(btn.dataset.openGudepPeriod),status:'dibuka'});await loadGudepPenilaianAdmin();}
-  catch(err){$('gudep-assessment-status').textContent=err.message||'Periode gagal dibuka.';btn.disabled=false;}
- });
- $('gudep-period-list').querySelectorAll('[data-close-gudep-period]').forEach(btn=>btn.onclick=async()=>{
-  btn.disabled=true;try{await callApi({action:'gudep_penilaian_ubah_status_periode',id_periode:Number(btn.dataset.closeGudepPeriod),status:'ditutup'});await loadGudepPenilaianAdmin();}
-  catch(err){$('gudep-assessment-status').textContent=err.message||'Periode gagal ditutup.';btn.disabled=false;}
- });
- $('gudep-assessment-status').textContent='Pengaturan penilaian berhasil dimuat.';
-}
-
-let gudepFinalCurrent=null;
-async function loadGudepFinalList(){
- const body=$('gudep-final-list'),msg=$('gudep-final-list-msg');if(!body)return;
- body.innerHTML='<tr><td colspan="7" class="text-center py-3 text-slate-500">Memuat daftar...</td></tr>';
- try{
-  const d=await callApi({action:'gudep_penilaian_kwarcab_data'}),rows=d.penilaian||[];
-  const status={terverifikasi_kwarran:'Menunggu penetapan final',final:'Final'};
-  body.innerHTML=rows.map(p=>{
-   const pangkalan=p.pangkalan||{},kwarran=p.kwarran||{},periode=p.gudep_penilaian_periode||{};
-   return '<tr class="border-t"><td class="py-2">'+esc(pangkalan.nama_pangkalan||'-')+'<div class="text-xs text-slate-500">Gudep '+esc(pangkalan.no_gudep||'-')+'</div></td><td class="py-2">'+esc(kwarran.nama_kwarran||'-')+'</td><td class="py-2">'+esc(periode.nama_periode||'')+' '+Number(periode.tahun||0)+'</td><td class="py-2">'+(status[p.status]||esc(p.status))+'</td><td class="py-2 text-center">'+Number(p.poin_total_verifikasi||0)+'</td><td class="py-2 text-center">'+(p.poin_total_final===null?'—':Number(p.poin_total_final))+'</td><td class="py-2 text-center font-bold">'+(p.peringkat_final?'#'+p.peringkat_final:'—')+'</td><td class="py-2"><button type="button" data-gudep-final-review="'+p.id_penilaian+'" class="border rounded-lg px-3 py-1 text-xs">'+(p.status==='final'?'Lihat':'Periksa & finalkan')+'</button></td></tr>';
-  }).join('')||'<tr><td colspan="8" class="text-center py-3 text-slate-500">Belum ada penilaian yang diteruskan Kwarran.</td></tr>';
-  body.querySelectorAll('[data-gudep-final-review]').forEach(btn=>btn.onclick=()=>openGudepFinalReview(Number(btn.dataset.gudepFinalReview)));
-  msg.textContent=rows.length+' penilaian ditemukan.';
- }catch(err){body.innerHTML='<tr><td colspan="8" class="text-center py-3 text-red-700">'+esc(err.message||'Gagal memuat daftar.')+'</td></tr>';msg.textContent='';}
-}
-async function openGudepFinalReview(id){
- const box=$('gudep-final-detail'),criteriaBox=$('gudep-final-criteria'),msg=$('gudep-final-msg');
- box.classList.remove('hidden');criteriaBox.innerHTML='<p class="text-sm text-slate-500">Memuat rincian...</p>';msg.textContent='';
- try{
-  const d=await callApi({action:'gudep_penilaian_kwarcab_detail',id_penilaian:id});gudepFinalCurrent=d;
-  const p=d.penilaian,base=p.pangkalan||{},region=p.kwarran||{},period=p.gudep_penilaian_periode||{},editable=p.status==='terverifikasi_kwarran';
-  $('gudep-final-title').textContent=base.nama_pangkalan||'Penilaian Gudep';
-  $('gudep-final-meta').textContent='Gudep '+(base.no_gudep||'-')+' · '+(region.nama_kwarran||'-')+' · '+(period.nama_periode||'')+' '+(period.tahun||'')+' · Status '+p.status+' · Nilai Kwarran '+Number(p.poin_total_verifikasi||0);
-  $('gudep-final-note').value=p.catatan_kwarcab||'';
-  $('gudep-final-submit').hidden=!editable;
-  const cats=d.kategori||[],items=d.kriteria||[],parents=cats.filter(x=>!x.parent_id);
-  criteriaBox.innerHTML=parents.map(parent=>{
-   const children=cats.filter(x=>Number(x.parent_id)===Number(parent.id_kategori));
-   return '<section class="space-y-2"><h5 class="font-bold">'+esc(parent.kode)+'. '+esc(parent.nama)+'</h5>'+children.map(cat=>{
-    const ks=items.filter(k=>Number(k.id_kategori)===Number(cat.id_kategori));
-    return '<div class="border rounded-lg p-3 space-y-2"><b>'+esc(cat.kode)+'. '+esc(cat.nama)+'</b>'+ks.map(k=>{
-     const evidence=k.bukti||[];
-     return '<div class="border-t pt-2 space-y-2"><div class="flex flex-wrap justify-between gap-2"><b>'+esc(k.kode)+' · '+esc(k.nama)+'</b><span class="text-xs">Maks. '+Number(k.poin_maks)+'</span></div><p class="text-xs text-slate-500">'+esc(k.panduan_penilaian||'')+'</p><p class="text-xs">Usulan Pembina: <b>'+Number(k.nilai_usulan||0)+'</b> · Verifikasi Kwarran: <b>'+Number(k.nilai_verifikator||0)+'</b></p><label class="block text-xs font-semibold">Nilai final Admin Utama</label><input data-gudep-final-score="'+k.id_kriteria+'" type="number" min="0" max="'+Number(k.poin_maks)+'" step="0.01" value="'+(k.nilai_final===null?(k.nilai_verifikator??''):Number(k.nilai_final))+'" '+(!editable?'disabled':'')+' class="w-full border rounded-lg p-2 text-sm"><div class="space-y-1"><p class="text-xs font-semibold">Bukti pendukung</p>'+(evidence.map(b=>'<div class="text-xs border rounded p-2 flex flex-wrap justify-between gap-2"><a class="underline" target="_blank" rel="noopener" href="'+esc(b.url||'#')+'">'+esc(b.nama_file)+'</a><span>'+esc(b.status_verifikasi||'menunggu')+'</span></div>').join('')||'<p class="text-xs text-slate-500">Tidak ada bukti.</p>')+'</div></div>';
-    }).join('')+'</div>';
-   }).join('')+'</section>';
-  }).join('')||'<p class="text-sm text-slate-500">Tidak ada indikator aktif.</p>';
-  msg.textContent=editable?'Nilai awal mengikuti hasil verifikasi Kwarran. Admin Utama dapat menetapkan nilai final sesuai hasil pemeriksaan akhir.':'Penilaian ini sudah final dan terkunci.';
-  $('gudep-final-submit').onclick=async()=>{
-   if(!confirm('Tetapkan nilai final ini sebagai hasil resmi Gudep Tergiat? Setelah ditetapkan, penilaian akan terkunci.'))return;
-   const values=Array.from(criteriaBox.querySelectorAll('[data-gudep-final-score]')).map(input=>({id_kriteria:Number(input.dataset.gudepFinalScore),nilai_final:input.value===''?null:Number(input.value)}));
-   if(values.some(x=>x.nilai_final===null||!Number.isFinite(x.nilai_final))){msg.textContent='Isi seluruh nilai final.';return;}
-   const btn=$('gudep-final-submit');btn.disabled=true;msg.textContent='Menetapkan nilai final...';
-   try{const result=await callApi({action:'gudep_penilaian_kwarcab_finalkan',id_penilaian:id,nilai:values,catatan:$('gudep-final-note').value});msg.textContent=result.message||'Nilai final ditetapkan.';await openGudepFinalReview(id);await loadGudepFinalList();}
-   catch(err){msg.textContent=err.message||'Finalisasi gagal.';btn.disabled=false;}
-  };
- }catch(err){criteriaBox.innerHTML='<p class="text-sm text-red-700">'+esc(err.message||'Rincian gagal dimuat.')+'</p>';}
-}
-$('gudep-final-close')?.addEventListener('click',()=>$('gudep-final-detail').classList.add('hidden'));
-
-$('gudep-criteria-form').addEventListener('submit',async e=>{
- e.preventDefault();const f=e.currentTarget,btn=$('gudep-criteria-save');btn.disabled=true;
- try{
-  await callApi({action:'gudep_penilaian_simpan_kriteria',id_kriteria:f.dataset.idKriteria?Number(f.dataset.idKriteria):null,id_kategori:Number($('gudep-criteria-category').value),kode:$('gudep-criteria-code').value.trim(),nama:$('gudep-criteria-name').value.trim(),poin_maks:Number($('gudep-criteria-max').value),panduan_penilaian:$('gudep-criteria-guide').value.trim(),bukti_wajib:$('gudep-criteria-evidence').checked});
-  resetGudepCriteriaForm();await loadGudepPenilaianAdmin();
- }catch(err){$('gudep-assessment-status').textContent=err.message||'Indikator gagal disimpan.';}
- finally{btn.disabled=false;}
-});
-$('gudep-criteria-reset').onclick=resetGudepCriteriaForm;
-$('gudep-template-activate').onclick=async()=>{
- const tpl=gudepAssessmentCache.template;if(!tpl)return;
- if(!confirm('Aktifkan template ini? Setelah aktif, indikator dan bobot tidak dapat diubah.'))return;
- const btn=$('gudep-template-activate');btn.disabled=true;
- try{await callApi({action:'gudep_penilaian_aktifkan_template',id_template:tpl.id_template});await loadGudepPenilaianAdmin();}
- catch(err){$('gudep-assessment-status').textContent=err.message||'Template gagal diaktifkan.';btn.disabled=false;}
-};
-$('gudep-period-form').addEventListener('submit',async e=>{
- e.preventDefault();const btn=e.submitter;btn.disabled=true;
- try{
-  const tpl=gudepAssessmentCache.template;if(!tpl)throw new Error('Template belum tersedia.');
-  await callApi({action:'gudep_penilaian_simpan_periode',id_template:tpl.id_template,nama_periode:$('gudep-period-name').value.trim(),tahun:Number($('gudep-period-year').value),tanggal_mulai:$('gudep-period-start').value,tanggal_akhir:$('gudep-period-end').value});
-  $('gudep-period-form').reset();$('gudep-period-year').value=new Date().getFullYear();await loadGudepPenilaianAdmin();
- }catch(err){$('gudep-assessment-status').textContent=err.message||'Periode gagal dibuat.';}
- finally{btn.disabled=false;}
-});
 
 $('login-form').addEventListener('submit',async e=>{
   e.preventDefault();
@@ -659,7 +479,7 @@ ambalanRekapCache=d.rekap||[];pangkalanRankingCache=d.peringkat_pangkalan||[];kw
 $('pangkalan-list').innerHTML=d.pangkalan.map(x=>'<div class="border rounded-xl p-3 space-y-1"><b>'+esc(x.nama_pangkalan)+'</b><p class="text-xs text-slate-500">Gudep: '+esc(x.no_gudep||'-')+'</p><p class="text-xs">Kode gabung pangkalan: <b class="font-mono">'+esc(x.kode_gabung_peserta)+'</b></p><p class="text-xs text-slate-500">Ambalan: '+esc(x.nama_ambalan_putra)+' / '+esc(x.nama_ambalan_putri)+'</p><p class="text-xs">Ketua Gudep: '+esc(x.nama_ketua_gudep||'Belum diisi')+'</p><p class="text-xs">Ketua Mabigus: '+esc(x.nama_ketua_mabigus||'Belum diisi')+'</p><p class="text-xs text-slate-400">Data administrasi dikelola Pembina pangkalan.</p></div>').join('')||'<p class="text-sm text-slate-500">Belum ada pangkalan.</p>';
 pembinaAccessCache=d.pembina||[];renderPembinaAccess();
 
-renderPesertaDetail(d.peserta||[]);try{await loadGudepFeatureStatus();if(gudepFeatureEnabled){await loadGudepPenilaianAdmin();await loadGudepFinalList();}else{$('gudep-assessment-status').textContent='Modul nonaktif. Data penilaian tetap tersimpan dan hanya dapat diakses Admin Utama.';$('gudep-final-list-msg').textContent='Modul sedang dinonaktifkan.';}}catch(err){$('gudep-assessment-manager').classList.add('hidden');$('gudep-assessment-status').textContent='Modul Gudep Tergiat hanya tersedia bagi Admin Utama pemilik aplikasi.';}$('status').textContent='Data berhasil diperbarui.';}catch(err){$('status').textContent='Gagal memuat: '+err.message;}}
+renderPesertaDetail(d.peserta||[]);$('status').textContent='Data berhasil diperbarui.';}catch(err){$('status').textContent='Gagal memuat: '+err.message;}}
 
 async function loadKwarranManager(){
  const status=$('kwarran-manager-status');status.textContent='Memuat pengaturan Kwarran...';
