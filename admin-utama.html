@@ -387,7 +387,7 @@ async function ensureSb(){
   if(sb) return sb;
   const loaded = await window.__sbReady;
   if(!loaded || !window.supabase?.createClient) throw new Error('Komponen login belum termuat. Periksa koneksi internet lalu muat ulang halaman.');
-  sb = window.supabase.createClient(SUPABASE_URL,KEY);
+  sb = window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:'sb-bopxmtxfrlrnywwhywne-auth-token'}});
   return sb;
 }
 const $=id=>document.getElementById(id);
