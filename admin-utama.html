@@ -322,19 +322,28 @@ header nav button{
 
 
 <style id="admin-header-balanced-gold">
-/* Navigasi header seimbang, tombol kuning timbul, dan tombol keluar terpisah di kanan atas */
-header{position:relative!important;padding-top:18px!important}
+/* Navigasi ringkas: 4 kolom x 3 baris, layar HP 3 kolom x 4 baris */
+header{position:relative!important;padding-top:14px!important}
 header .max-w-6xl{width:100%;box-sizing:border-box;padding-right:0!important}
-header .rt-admin-brand{width:100%;padding-right:112px;min-height:68px}
-#admin-header-nav{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px!important;width:100%;align-items:stretch}
-#admin-header-nav a{display:flex!important;align-items:center;justify-content:center;text-align:center;white-space:normal;min-width:0;min-height:40px!important;padding:8px 7px!important;border:1px solid #bd8a00!important;border-radius:10px!important;background:linear-gradient(145deg,#fff2a6 0%,#ffd400 48%,#d9a900 100%)!important;color:#302313!important;font-size:12px!important;font-weight:800!important;line-height:1.2!important;text-shadow:0 1px rgba(255,255,255,.5);box-shadow:0 4px 0 #936d08,0 6px 10px rgba(25,15,4,.28),inset 0 1px 0 rgba(255,255,255,.9)!important;transform:translateY(0);transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
-#admin-header-nav a:hover{filter:brightness(1.06);transform:translateY(-1px);box-shadow:0 5px 0 #936d08,0 8px 13px rgba(25,15,4,.3),inset 0 1px 0 #fff!important}
-#admin-header-nav a:active{transform:translateY(2px);box-shadow:0 1px 0 #936d08,0 3px 6px rgba(25,15,4,.25),inset 0 2px 4px rgba(90,55,0,.2)!important}
-#admin-header-nav a.rt-nav-active{background:linear-gradient(145deg,#8d6845 0%,#68472e 55%,#49301f 100%)!important;color:#fff8e8!important;border-color:#392416!important;text-shadow:0 1px 2px #211309;box-shadow:0 4px 0 #2b1a10,0 6px 10px rgba(25,15,4,.3),inset 0 1px 0 rgba(255,255,255,.28)!important}
-#logout{position:absolute!important;top:12px;right:max(16px,calc((100vw - 1152px)/2));z-index:40;display:inline-flex!important;align-items:center;justify-content:center;min-height:36px!important;padding:7px 13px!important;border:1px solid #bd8a00!important;border-radius:10px!important;background:linear-gradient(145deg,#fff2a6,#ffd400 50%,#d9a900)!important;color:#302313!important;font-weight:900!important;box-shadow:0 4px 0 #936d08,0 6px 10px #0004,inset 0 1px 0 #fff!important}
+header .rt-admin-brand{width:100%;padding-right:112px;min-height:62px}
+#admin-header-nav{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px!important;width:100%;align-items:stretch}
+#admin-header-nav a{display:flex!important;align-items:center;justify-content:center;text-align:center;white-space:normal;min-width:0;min-height:34px!important;padding:5px 7px!important;border:1px solid #bd8a00!important;border-radius:8px!important;background:linear-gradient(145deg,#fff2a6 0%,#ffd400 48%,#d9a900 100%)!important;color:#302313!important;font-size:14px!important;font-weight:800!important;line-height:1.15!important;text-shadow:0 1px rgba(255,255,255,.5);box-shadow:0 3px 0 #936d08,0 4px 7px rgba(25,15,4,.24),inset 0 1px 0 rgba(255,255,255,.9)!important;transform:translateY(0);transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
+#admin-header-nav a:hover{filter:brightness(1.06);transform:translateY(-1px);box-shadow:0 4px 0 #936d08,0 6px 9px rgba(25,15,4,.27),inset 0 1px 0 #fff!important}
+#admin-header-nav a:active{transform:translateY(2px);box-shadow:0 1px 0 #936d08,0 2px 4px rgba(25,15,4,.22),inset 0 2px 4px rgba(90,55,0,.2)!important}
+#admin-header-nav a.rt-nav-active{background:linear-gradient(145deg,#8d6845 0%,#68472e 55%,#49301f 100%)!important;color:#fff8e8!important;border-color:#392416!important;text-shadow:0 1px 2px #211309;box-shadow:0 3px 0 #2b1a10,0 4px 7px rgba(25,15,4,.27),inset 0 1px 0 rgba(255,255,255,.28)!important}
+#logout{position:absolute!important;top:10px;right:max(16px,calc((100vw - 1152px)/2));z-index:40;display:inline-flex!important;align-items:center;justify-content:center;min-height:34px!important;padding:6px 11px!important;border:1px solid #bd8a00!important;border-radius:8px!important;background:linear-gradient(145deg,#fff2a6,#ffd400 50%,#d9a900)!important;color:#302313!important;font-size:13px!important;font-weight:900!important;box-shadow:0 3px 0 #936d08,0 4px 7px #0003,inset 0 1px 0 #fff!important}
 #logout.hidden{display:none!important}
 @media(max-width:900px){#admin-header-nav{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:600px){header .rt-admin-brand{padding-right:82px;min-height:58px;gap:9px}header .rt-admin-logo{width:52px;height:52px;flex-basis:52px}header .rt-admin-name{font-size:15px;letter-spacing:.08em}header h1{font-size:16px;line-height:1.2}header .rt-admin-brand p{font-size:11px;line-height:1.3}#admin-header-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important}#admin-header-nav a{min-height:38px!important;padding:7px 5px!important;font-size:11px!important}#logout{top:10px;right:12px;padding:6px 9px!important;font-size:11px!important}}
+@media(max-width:600px){
+ header .rt-admin-brand{padding-right:82px;min-height:54px;gap:9px}
+ header .rt-admin-logo{width:50px;height:50px;flex-basis:50px}
+ header .rt-admin-name{font-size:15px;letter-spacing:.08em}
+ header h1{font-size:16px;line-height:1.2}
+ header .rt-admin-brand p{font-size:11px;line-height:1.3}
+ #admin-header-nav{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px!important}
+ #admin-header-nav a{min-height:34px!important;padding:5px 4px!important;font-size:13px!important}
+ #logout{top:9px;right:12px;padding:5px 8px!important;font-size:12px!important}
+}
 </style>
 </head>
 <body class="min-h-screen bg-amber-50 text-slate-800">
