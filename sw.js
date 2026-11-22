@@ -1,4 +1,4 @@
-const CACHE_NAME='ruang-tegak-shell-v2';
+const CACHE_NAME='ruang-tegak-shell-v3';
 const APP_SHELL=['./','./index.html','./admin-utama.html','./belajar.html','./login-confirm.html','./dokumen.html','./uji.html','./admin-kwarran.html','./sekretaris-daftar.html','./sekretaris-kwarcab.html','./manifest.webmanifest','./assets/ruang-tegak-icon.svg','./assets/ruang-tegak-ui.css','./assets/ruang-tegak-ui.js'];
 // Mendukung tombol Perbarui pada pemberitahuan aplikasi.
 self.addEventListener('message',event=>{
