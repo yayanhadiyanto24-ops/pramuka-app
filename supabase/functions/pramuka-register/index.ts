@@ -279,7 +279,7 @@ Deno.serve(async(req:Request)=>{
     const patch={nta:teacherNta,foto_profil_data:photo||null,tahun_kmd:years.tahun_kmd?Number(years.tahun_kmd):null,tahun_kml:years.tahun_kml?Number(years.tahun_kml):null,tahun_kpd:years.tahun_kpd?Number(years.tahun_kpd):null,tahun_kpl:years.tahun_kpl?Number(years.tahun_kpl):null,tanda_tangan_data:typeof body.tanda_tangan_data==="string"&&body.tanda_tangan_data.startsWith("data:image/")&&body.tanda_tangan_data.length<300000?body.tanda_tangan_data:null,paraf_data:typeof body.paraf_data==="string"&&body.paraf_data.startsWith("data:image/")&&body.paraf_data.length<150000?body.paraf_data:null};
     if(ktaEvidence){
      const ocrNta=clean(body.kta_ocr_nta,80);
-     if(!teacherNta||!ocrNta||ocrNta.replace(/\\D/g,"")!==teacherNta.replace(/\\D/g,""))return reply({ok:false,message:"Hasil pembacaan NTA pada foto KTA tidak cocok dengan NTA profil."},400);
+     if(!teacherNta||!ocrNta||ocrNta.replace(/\D/g,"")!==teacherNta.replace(/\D/g,""))return reply({ok:false,message:"Hasil pembacaan NTA pada foto KTA tidak cocok dengan NTA profil."},400);
      patch.nta_bukti_kta=ktaEvidence;patch.nta_status_verifikasi="terverifikasi_otomatis";
     }else if(currentTeacher.nta!==teacherNta)patch.nta_status_verifikasi="belum_ada";
     const {error}=await admin.from("profil_pembina").update(patch).eq("id_user",authData.user.id);if(error)throw error;
