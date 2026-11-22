@@ -12,6 +12,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebSettings;
 import android.graphics.Color;
+import android.view.View;
 
 
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -33,6 +34,11 @@ public class MainActivity extends Activity {
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.WHITE);
+        // Izinkan layanan Autofill Android mengenali formulir login di WebView.
+        // Jangan mematikan penyimpanan/autofill kredensial pengguna.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webView.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_YES);
+        }
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
