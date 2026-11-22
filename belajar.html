@@ -4,7 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ruang Tegak · Belajar Pramuka Penegak</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
+<script>
+window.__sbReady = new Promise(resolve => {
+  const load = (src, fallback) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve(true);
+    s.onerror = () => {
+      s.remove();
+      if (fallback) load(fallback, null);
+      else resolve(false);
+    };
+    document.head.appendChild(s);
+  };
+  load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', 'https://unpkg.com/@supabase/supabase-js@2');
+});
+</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -558,8 +573,13 @@ function renderNtaParseInfo(){
 window.addEventListener('error',e=>{const m=$('loginMsg');if(m&&!currentUser)m.textContent='Aplikasi mengalami kendala saat dimuat: '+(e.message||'Kesalahan JavaScript. Muat ulang halaman.');});
 window.addEventListener('unhandledrejection',e=>{const m=$('loginMsg');if(m&&!currentUser)m.textContent='Koneksi aplikasi bermasalah: '+(e.reason?.message||'Silakan muat ulang halaman.');});
 const SUPABASE_KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
-const sb=window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:'sb-bopxmtxfrlrnywwhywne-auth-token'}}):null;
-if(!sb){$('loginMsg').textContent='Layanan login belum termuat. Periksa koneksi internet, lalu muat ulang halaman.';}
+let sb=null;
+const sbReady=(async()=>{
+ const loaded=await window.__sbReady;
+ if(!loaded||!window.supabase?.createClient)throw new Error('Layanan autentikasi belum termuat. Periksa koneksi internet, lalu muat ulang halaman.');
+ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:'sb-bopxmtxfrlrnywwhywne-auth-token'}});
+ return sb;
+})();
 let currentUser=null, account=null, participant=null, teacher=null, items=[], lessons=[], progress=[], general=[], examRecords=[], subpoints=[], subpointProgress=[], completionPlans=[], monitorReportHtml='', monitorStudents=[], monitorPangkalan=[], monitorProgressRows=[], monitorSubpointRows=[];
 let selectedItem=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -577,13 +597,13 @@ $('loginForm').addEventListener('submit',async e=>{
  if(!email||!password){$('loginMsg').textContent='Email dan password wajib diisi.';return;}
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){$('loginMsg').textContent='Format email belum benar.';return;}
  $('loginBtn').disabled=true;$('loginBtn').textContent='Memeriksa...';$('loginMsg').textContent='Menghubungkan ke server...';
- try{if(!sb)throw new Error('Layanan login belum termuat. Muat ulang halaman.');const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;await boot(data.user);}
+ try{const client=await sbReady;const {data,error}=await client.auth.signInWithPassword({email,password});if(error)throw error;await boot(data.user);}
  catch(err){$('loginMsg').textContent='Login belum berhasil: '+(err.message||'Periksa email dan password.');}
  finally{$('loginBtn').disabled=false;$('loginBtn').textContent='Masuk';}
 });
 
 
-$('logout').onclick=async()=>{const {error}=await sb.auth.signOut();if(error){setMsg('Keluar belum berhasil: '+error.message);return;}window.location.replace('./index.html');};
+$('logout').onclick=async()=>{const client=await sbReady;const {error}=await client.auth.signOut();if(error){setMsg('Keluar belum berhasil: '+error.message);return;}window.location.replace('./index.html');};
 async function boot(user){
  currentUser=user;
  const {data:u,error:ue}=await sb.from('users').select('role,status_akun,kode_unik,foto_profil_data').eq('id_user',user.id).maybeSingle();
@@ -1512,7 +1532,7 @@ async function review(id,status){
  if(error){setMsg('Penilaian gagal disimpan: '+error.message);return;}
  const {data}=await sb.from('sku_learning_progress').select('*');progress=data||[];await loadMonitor();setMsg('Hasil ujian tersimpan.');
 }
-sb.auth.getSession().then(async({data,error})=>{if(error){$('loginMsg').textContent='Sesi login tidak dapat dibaca: '+error.message;return;}if(data.session){$('login').classList.add('hidden');$('application').classList.remove('hidden');try{await boot(data.session.user);}catch(err){$('application').classList.remove('hidden');$('login').classList.add('hidden');$('accountNotice').classList.remove('hidden');$('accountNotice').textContent='Akun sudah masuk, tetapi data Ruang Belajar belum berhasil dimuat: '+(err.message||'Kesalahan pemuatan data')+'. Muat ulang halaman atau hubungi Admin Utama jika berulang.';console.error('Ruang Tegak boot error:',err);}}else{$('login').classList.remove('hidden');$('application').classList.add('hidden');}});
+sbReady.then(client=>client.auth.getSession()).then(async({data,error})=>{if(error)throw error;if(data.session){$('login').classList.add('hidden');$('application').classList.remove('hidden');try{await boot(data.session.user);}catch(err){$('application').classList.remove('hidden');$('login').classList.add('hidden');$('accountNotice').classList.remove('hidden');$('accountNotice').textContent='Akun sudah masuk, tetapi data Ruang Belajar belum berhasil dimuat: '+(err.message||'Kesalahan pemuatan data')+'. Muat ulang halaman atau hubungi Admin Utama jika berulang.';console.error('Ruang Tegak boot error:',err);}}else{$('login').classList.remove('hidden');$('application').classList.add('hidden');}}).catch(err=>{$('loginMsg').textContent='Sesi masuk belum dapat diperiksa: '+(err.message||'Layanan autentikasi bermasalah.');});
 
 // Pemeriksaan versi otomatis dan pemberitahuan jika pembaruan perlu tindakan pengguna.
 (()=>{
