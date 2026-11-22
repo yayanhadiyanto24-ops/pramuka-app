@@ -488,7 +488,7 @@ header #who{min-width:0!important;max-width:100%!important;white-space:normal!im
 header #whoName,header #whoRole{white-space:normal!important;overflow-wrap:anywhere!important}
 header #headerButtons{
  grid-area:actions!important;display:flex!important;flex-direction:column!important;
- align-items:flex-end!important;justify-content:flex-start!important;gap:4px!important;
+ align-items:flex-end!important;justify-content:flex-start!important;gap:4px!important;justify-self:end!important;
  width:132px!important;min-width:132px!important;max-width:132px!important;
  margin:0!important;align-self:start!important;justify-self:end!important;
 }
@@ -499,13 +499,15 @@ header #logout,header #refreshAppBtn,header #installAppBtn{
  white-space:nowrap!important;overflow:visible!important;text-align:center!important;
  line-height:1.1!important;padding:5px 7px!important;font-size:10px!important;
 }
-header #logout{width:66px!important;min-width:66px!important;max-width:66px!important}
+header #logout{align-self:flex-end!important;margin-left:auto!important;width:66px!important;min-width:66px!important;max-width:66px!important}
 header #refreshAppBtn{width:99px!important;min-width:99px!important;max-width:99px!important;font-size:11px!important}
 header #installAppBtn{width:132px!important;min-width:132px!important;max-width:132px!important;font-size:11px!important}
 header #roleSubtitle{
- display:block!important;white-space:normal!important;overflow-wrap:normal!important;
- max-width:100%!important;line-height:1.2!important;
+ display:block!important;width:max-content!important;max-width:none!important;
+ white-space:nowrap!important;overflow:visible!important;line-height:1.2!important;
+ font-size:8px!important;
 }
+header #roleSubtitle .role-subtitle-line{display:block!important;white-space:nowrap!important;overflow-wrap:normal!important;}
 header #appCreatorCredit{grid-area:credit!important}
 @media(max-width:360px){
  header .max-w-6xl{grid-template-columns:minmax(0,1fr) 120px!important}
@@ -513,14 +515,14 @@ header #appCreatorCredit{grid-area:credit!important}
  header #logout{width:60px!important;min-width:60px!important;max-width:60px!important}
  header #refreshAppBtn{width:90px!important;min-width:90px!important;max-width:90px!important}
  header #installAppBtn{width:120px!important;min-width:120px!important;max-width:120px!important}
- header #roleSubtitle{font-size:8px!important}
+ header #roleSubtitle{font-size:7.5px!important}
 }
 </style>
 </head>
 <body class="min-h-screen">
 <header class="brand text-white px-4 py-5">
  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 relative">
-  <div class="rt-header-brand"><img class="rt-header-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div><div class="rt-header-name text-xl">RUANG TEGAK</div><p class="rt-header-sub text-sm">Ruang Belajar Pramuka Penegak</p><p id="roleSubtitle" class="text-amber-200 text-xs">Materi umum · SKU Bantara · SKU Laksana<br>Progres kecakapan</p></div></div>
+  <div class="rt-header-brand"><img class="rt-header-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div><div class="rt-header-name text-xl">RUANG TEGAK</div><p class="rt-header-sub text-sm">Ruang Belajar Pramuka Penegak</p><p id="roleSubtitle" class="text-amber-200 text-xs"><span class="role-subtitle-line">Materi umum · SKU Bantara · SKU Laksana</span><span class="role-subtitle-line">Progres kecakapan</span></p></div></div>
   <div id="headerActions" class="rt-account-actions"><div id="profileIdentity"><img id="headerProfileAvatar" class="rt-profile-mark" alt="Foto profil"><span id="who" class="text-sm text-amber-100"><span id="whoName"></span><span id="whoRole"></span></span></div><div id="headerButtons"><button id="logout" type="button" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button><button id="refreshAppBtn" type="button" class="rounded-lg font-bold" aria-label="Perbarui halaman" onclick="window.location.reload()">↻ Perbarui</button><button id="installAppBtn" type="button" class="rounded-xl bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 border border-yellow-200 px-3 py-2 text-xs font-extrabold text-stone-950 shadow-md"><span aria-hidden="true">⬇</span> Unduh Aplikasi</button></div></div>
   <p id="appCreatorCredit">Pembuat &amp; Pengembang Aplikasi: Yayan Hadiyanto, S.Pd.-MT.</p>
  </div>
