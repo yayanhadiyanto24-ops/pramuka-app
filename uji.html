@@ -371,22 +371,20 @@ loadExam();
 <style>@media print{header,#exam,#loading,#errorBox,#printCert{display:none!important}body{background:#fff}.panel{box-shadow:none;border:0}#certificate{display:block!important}}</style>
 
 <style id="rt-active-navigation-style">
-/* Penanda konsisten untuk menu/tautan halaman yang sedang aktif */
-nav a.rt-nav-active, .rt-nav-active.quick-link {
- background:linear-gradient(115deg,#f3c623 0%,#ffe98a 55%,#f7c842 100%) !important;
- color:#3b2508 !important;
- border:1px solid #fff0a8 !important;
- box-shadow:0 2px 8px rgba(120,72,0,.22),inset 0 1px 0 rgba(255,255,255,.65) !important;
- font-weight:900 !important;
-}
-nav a.rt-nav-active::before{content:"●";font-size:.65em;margin-right:5px;vertical-align:1px}
+/* Navigasi premium RUANG TEGAK: cokelat hangat, teks putih, kilau lembut */
+nav a.rt-nav-active,.rt-nav-active.quick-link,
 button.tab.active,[role="tab"][aria-selected="true"]{
- background:linear-gradient(115deg,#f3c623 0%,#ffe98a 55%,#f7c842 100%) !important;
- color:#3b2508 !important;
- border:1px solid #fff0a8 !important;
- box-shadow:0 2px 8px rgba(120,72,0,.18),inset 0 1px 0 rgba(255,255,255,.65) !important;
+ background:linear-gradient(115deg,#3b2619 0%,#67472f 42%,#765638 58%,#392316 100%) !important;
+ color:#fff !important;
+ border:1px solid #b99668 !important;
+ text-shadow:0 1px 2px rgba(0,0,0,.42) !important;
+ box-shadow:0 3px 0 #24160e,0 5px 11px rgba(38,23,13,.28),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -1px 0 rgba(0,0,0,.2) !important;
  font-weight:900 !important;
 }
+nav a.rt-nav-active::before{content:"";display:inline-block;width:6px;height:6px;margin-right:7px;border-radius:50%;background:#f1d39a;box-shadow:0 0 6px rgba(255,226,170,.8);vertical-align:1px}
+button.tab.active,[role="tab"][aria-selected="true"]{border-bottom:2px solid #d8b77f!important}
+button,nav a,[role="button"]{transition:background .2s ease,box-shadow .2s ease,transform .16s ease,filter .2s ease}
+button:focus-visible,a:focus-visible{outline:3px solid #c9a875!important;outline-offset:2px}
 </style>
 <script id="rt-active-navigation">
 (()=>{
