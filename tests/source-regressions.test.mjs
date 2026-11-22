@@ -14,6 +14,11 @@ test('Form login Belajar mempertahankan autofill Android', () => {
   assert.match(html, /\$\('password'\)\.value=passwordValue/);
 });
 
+test('Subtitle progres pribadi berada pada baris kedua', () => {
+  const source = read('belajar.html');
+  assert.ok(source.includes('<span class="role-subtitle-line">Ruang Peserta Didik · Materi umum · Pembelajaran SKU</span><span class="role-subtitle-line">Progres pribadi</span>'));
+});
+
 test('Memilih halaman Peserta Didik/Pembina tidak mereset formulir', () => {
   const html = read('index.html');
   const start = html.indexOf('function switchTab(role)');
