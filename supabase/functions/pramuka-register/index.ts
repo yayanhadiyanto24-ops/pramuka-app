@@ -256,7 +256,7 @@ Deno.serve(async(req:Request)=>{
     if(body.tanggal_lahir&&!birthDate)return reply({ok:false,message:"Tanggal lahir tidak valid."},400);
     if(nta){
      const match=nta.match(/^(\d{2})\.(\d{2})\.(\d{2})\.(\d{6})\.(\d{4})$/);
-     if(!match)return reply({ok:false,message:"Format NTA harus seperti 09.03.00.200780.0001 (lima kelompok angka dipisahkan titik)."},400);
+     if(!match)return reply({ok:false,message:"Format NTA harus lima kelompok angka dipisahkan titik, misalnya 09.03.30.200780.0001 untuk Kwarran Leles, Cianjur."},400);
      if(!birthDate)return reply({ok:false,message:"Isi tanggal lahir sesuai KTA terlebih dahulu."},400);
      const d=new Date(birthDate+"T00:00:00Z");
      if(Number.isNaN(d.getTime())||d.toISOString().slice(0,10)!==birthDate)return reply({ok:false,message:"Tanggal lahir tidak valid."},400);
