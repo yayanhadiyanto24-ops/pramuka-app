@@ -490,7 +490,7 @@ a[class*="rounded"]{
     <button id="savePangkalan" class="rounded-lg bg-amber-800 text-white px-4 py-3 font-semibold">Simpan data pangkalan</button><p id="pangkalanMsg" class="text-sm muted"></p>
    </div>
    <div class="panel p-4 space-y-3"><div><h3 class="font-bold">Persetujuan Peserta Didik</h3><p class="text-xs muted">Daftar hanya menampilkan peserta dari satuan yang sesuai dengan jabatan Pembina ini.</p></div><div id="pendingStudentList" class="space-y-2 text-sm muted">Memuat daftar peserta...</div></div>
-    <div id="gudepPembinaPanel" class="hidden panel p-4 space-y-3"><div><h3 class="font-bold">Penilaian Gudep Tergiat</h3><p class="text-xs muted">Isi nilai usulan berdasarkan indikator dan lampirkan bukti pendukung. Nilai akhir akan ditetapkan setelah pemeriksaan Kwarran dan Kwarcab.</p></div><div id="gudepPembinaPeriod" class="rounded-lg border p-3 text-sm muted">Memeriksa periode penilaian...</div><div id="gudepPembinaCriteria" class="space-y-3 text-sm"></div><div id="gudepPembinaFormActions" class="space-y-2" hidden><label class="block text-xs font-semibold">Catatan umum Pembina</label><textarea id="gudepPembinaCatatan" rows="3" maxlength="3000" placeholder="Catatan tambahan untuk tim penilai" class="w-full border rounded-lg p-2 text-sm"></textarea><div class="flex flex-wrap gap-2"><button id="gudepPembinaSave" type="button" class="rounded-lg bg-amber-800 text-white px-4 py-2 text-sm font-semibold">Simpan Draft</button><button id="gudepPembinaSubmit" type="button" class="rounded-lg border px-4 py-2 text-sm font-semibold">Ajukan Penilaian</button></div></div><p id="gudepPembinaMsg" class="text-xs muted" role="status"></p></div><div class="panel p-4 space-y-3"><div><h3 class="font-bold">Pengelolaan Ambalan</h3><p class="text-xs muted">Ambalan Putera dan Puteri dikelola terpisah. Maksimal 32 anggota aktif per Ambalan. Ambalan Persiapan menjadi Aktif setelah mencapai 12 anggota.</p></div><div id="ambalanNameList" class="grid sm:grid-cols-2 gap-2 text-sm">Memuat daftar Ambalan...</div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="ambalanStudentList" class="space-y-2 text-sm muted">Memuat peserta...</div></div><p id="ambalanMsg" class="text-xs muted"></p></div><div class="panel p-4 space-y-3"><div><h3 class="font-bold">Penempatan Sangga</h3><p class="text-xs muted">Sangga baku Penegak: Perintis, Pencoba, Pendobrak, Penegas, dan Pelaksana. Peserta dapat dipindahkan ke Sangga lain sesuai kebutuhan.</p></div><div id="sanggaNameList" class="flex flex-wrap gap-2 text-xs"></div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="sanggaStudentList" class="space-y-2 text-sm muted">Memuat data peserta...</div></div><p id="sanggaMsg" class="text-xs muted"></p></div>
+<div class="panel p-4 space-y-3"><div><h3 class="font-bold">Pengelolaan Ambalan</h3><p class="text-xs muted">Ambalan Putera dan Puteri dikelola terpisah. Maksimal 32 anggota aktif per Ambalan. Ambalan Persiapan menjadi Aktif setelah mencapai 12 anggota.</p></div><div id="ambalanNameList" class="grid sm:grid-cols-2 gap-2 text-sm">Memuat daftar Ambalan...</div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="ambalanStudentList" class="space-y-2 text-sm muted">Memuat peserta...</div></div><p id="ambalanMsg" class="text-xs muted"></p></div><div class="panel p-4 space-y-3"><div><h3 class="font-bold">Penempatan Sangga</h3><p class="text-xs muted">Sangga baku Penegak: Perintis, Pencoba, Pendobrak, Penegas, dan Pelaksana. Peserta dapat dipindahkan ke Sangga lain sesuai kebutuhan.</p></div><div id="sanggaNameList" class="flex flex-wrap gap-2 text-xs"></div><div class="border-t pt-3"><h4 class="font-semibold text-sm mb-2">Penempatan Peserta Didik</h4><div id="sanggaStudentList" class="space-y-2 text-sm muted">Memuat data peserta...</div></div><p id="sanggaMsg" class="text-xs muted"></p></div>
   </section>
   <section id="view-peringkat" class="hidden space-y-4"><div><h2 class="text-xl font-bold">Peringkat Pangkalan se-Kwarran</h2><p class="text-sm muted">Bandingkan posisi pangkalan Anda dengan pangkalan lain dalam Kwarran yang sama. Peringkat dihitung dari total poin Ambalan yang memenuhi syarat.</p></div><div class="panel p-4 space-y-3"><div><h3 class="font-bold">Peringkat Pangkalan se-Kwarran</h3><p class="text-xs muted">Peringkat dihitung dari total poin Ambalan yang memenuhi syarat. Pangkalan Anda diberi penanda khusus.</p></div><div id="pangkalanRankingList" class="space-y-2 text-sm">Memuat peringkat...</div></div></section>
   <section id="view-pantau" class="hidden space-y-4">
@@ -842,95 +842,6 @@ async function loadPangkalanPending(){
       catch(err){$('sanggaMsg').textContent=err.message||'Pemindahan gagal.';b.disabled=false;b.textContent='Pindahkan';}
     });
    }catch(err){names.textContent='Gagal memuat sangga: '+(err.message||'Kesalahan');students.textContent='';ambalanNames.textContent='Gagal memuat Ambalan: '+(err.message||'Kesalahan');ambalanStudents.textContent='';}
-   // Modul Gudep Tergiat hanya ditampilkan jika Admin Utama mengaktifkannya.
-   try{
-    const {data:feature,error:featureError}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_feature_status'}});
-    if(featureError)throw featureError;
-    if(feature?.enabled){$('gudepPembinaPanel').classList.remove('hidden');await loadGudepAssessmentPembina();}
-   }catch(err){console.warn('Status modul Gudep Tergiat tidak dapat dimuat:',err?.message||err);}
-  }
-
-    let gudepPembinaCache=null;
-    async function loadGudepAssessmentPembina(){
-     const periodBox=$('gudepPembinaPeriod'),criteriaBox=$('gudepPembinaCriteria'),actions=$('gudepPembinaFormActions'),msg=$('gudepPembinaMsg');
-     if(!periodBox||!criteriaBox)return;
-     periodBox.textContent='Memuat periode penilaian...';criteriaBox.innerHTML='';actions.hidden=true;
-     const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_pembina_data'}});
-     if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Data penilaian tidak dapat dimuat.');
-     gudepPembinaCache=data;
-     if(!data.periode){
-      periodBox.innerHTML='<b>'+esc(data.message||'Belum ada periode penilaian yang dibuka.')+'</b><p class="text-xs muted">Perhatikan jadwal periode yang ditetapkan Admin Utama.</p>';msg.textContent='';return;
-     }
-     const p=data.periode,a=data.penilaian,editable=!a||['draft','perlu_perbaikan'].includes(a.status);
-     const statusLabel={draft:'Draft',perlu_perbaikan:'Perlu perbaikan',diajukan:'Menunggu pemeriksaan Kwarran',ditinjau_kwarran:'Sedang ditinjau Kwarran',terverifikasi_kwarran:'Terverifikasi Kwarran',final:'Final',ditolak:'Ditolak'};
-     periodBox.innerHTML='<b>'+esc(p.nama_periode)+'</b><p class="text-xs muted">Tahun '+Number(p.tahun)+' · '+esc(p.tanggal_mulai||'Mulai belum ditentukan')+' s.d. '+esc(p.tanggal_akhir||'Akhir belum ditentukan')+'</p><p class="text-xs muted">Status penilaian: '+(a?esc(statusLabel[a.status]||a.status):'Belum dibuat')+' · Total usulan: <b>'+Number(a?.poin_total_usulan||0)+'</b> poin</p>'+(a?.id_penilaian?'<p class="text-xs muted">Nomor penilaian: '+a.id_penilaian+'</p>':'<p class="text-xs muted">Simpan draft terlebih dahulu sebelum mengunggah bukti.</p>');
-     $('gudepPembinaCatatan').value=a?.catatan_pembina||'';
-     actions.hidden=!editable;
-     const categories=data.kategori||[],criteria=data.kriteria||[];
-     const parents=categories.filter(x=>!x.parent_id);
-     const grouped=parents.map(parent=>{
-      const children=categories.filter(x=>Number(x.parent_id)===Number(parent.id_kategori));
-      return '<section class="space-y-2"><h4 class="font-bold">'+esc(parent.kode)+'. '+esc(parent.nama)+'</h4>'+children.map(cat=>{
-       const items=criteria.filter(k=>Number(k.id_kategori)===Number(cat.id_kategori));
-       return '<div class="border rounded-lg p-3 space-y-3"><b>'+esc(cat.kode)+'. '+esc(cat.nama)+'</b>'+(items.length?items.map(k=>{
-        const evidence=(k.bukti||[]);
-        return '<div class="border-t pt-3 space-y-2"><div class="flex flex-wrap items-start justify-between gap-2"><div class="min-w-0 flex-1"><b>'+esc(k.kode)+' · '+esc(k.nama)+'</b><p class="text-xs muted">'+esc(k.panduan_penilaian||'Ikuti panduan penilaian yang ditetapkan.')+'</p></div><span class="text-xs rounded-full border px-2 py-1">Maks. '+Number(k.poin_maks)+' poin</span></div><label class="block text-xs font-semibold">Nilai usulan Pembina</label><input data-gudep-score="'+k.id_kriteria+'" type="number" min="0" max="'+Number(k.poin_maks)+'" step="0.01" value="'+Number(k.nilai_usulan||0)+'" '+(!editable?'disabled':'')+' class="w-full border rounded-lg p-2 text-sm"><textarea data-gudep-note="'+k.id_kriteria+'" rows="2" maxlength="2000" placeholder="Catatan atau alasan pemberian nilai" '+(!editable?'disabled':'')+' class="w-full border rounded-lg p-2 text-xs">'+esc(k.catatan_pembina||'')+'</textarea><div class="space-y-2"><p class="text-xs font-semibold">Bukti pendukung '+(k.bukti_wajib?'(wajib)':'(opsional)')+'</p>'+(evidence.map(b=>'<div class="flex flex-wrap items-center justify-between gap-2 rounded bg-stone-50 p-2"><a href="'+esc(b.url||'#')+'" target="_blank" rel="noopener" class="text-xs underline">'+esc(b.nama_file)+'</a><span class="text-xs muted">'+esc(b.status_verifikasi)+'</span>'+(editable?'<button type="button" data-gudep-delete-bukti="'+b.id_bukti+'" class="text-xs border rounded px-2 py-1">Hapus</button>':'')+'</div>').join('')||'<p class="text-xs muted">Belum ada bukti diunggah.</p>')+(editable?'<div class="flex flex-col sm:flex-row gap-2"><input data-gudep-file="'+k.id_kriteria+'" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" class="min-w-0 flex-1 text-xs"><button type="button" data-gudep-upload="'+k.id_kriteria+'" '+(!a?.id_penilaian?'disabled':'')+' class="rounded-lg border px-3 py-2 text-xs font-semibold">Unggah Bukti</button></div>':'')+'</div></div>';
-       }).join(''):'<p class="text-xs muted">Belum ada indikator aktif pada komponen ini.</p>')+'</div>';
-      }).join('')+'</section>';
-     }).join('');
-     criteriaBox.innerHTML=grouped||'<p class="text-sm muted">Belum ada indikator penilaian. Hubungi Admin Utama.</p>';
-     criteriaBox.querySelectorAll('[data-gudep-upload]').forEach(btn=>btn.onclick=async()=>{
-      const id=Number(btn.dataset.gudepUpload),input=criteriaBox.querySelector('[data-gudep-file="'+id+'"]'),file=input?.files?.[0];
-      if(!file){msg.textContent='Pilih berkas bukti terlebih dahulu.';return;}
-      if(file.size>10485760){msg.textContent='Ukuran bukti maksimal 10 MB.';return;}
-      btn.disabled=true;btn.textContent='Menyiapkan...';
-      let signed=null;
-      try{
-       const {data:up,error:upError}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_bukti_upload',id_penilaian:a.id_penilaian,id_kriteria:id,nama_file:file.name,mime_type:file.type,ukuran_byte:file.size}});
-       if(upError)throw upError;if(!up?.ok)throw new Error(up?.message||'Tautan unggah tidak tersedia.');signed=up;
-       btn.textContent='Mengunggah...';
-       const {error:storageError}=await sb.storage.from(up.bucket).uploadToSignedUrl(up.path,up.token,file,{contentType:file.type,upsert:false});
-       if(storageError)throw storageError;
-       msg.textContent='Bukti berhasil diunggah.';await loadGudepAssessmentPembina();
-      }catch(err){
-       if(signed?.id_bukti)await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_bukti_hapus',id_bukti:signed.id_bukti}});
-       msg.textContent=err.message||'Bukti gagal diunggah.';btn.disabled=false;btn.textContent='Unggah Bukti';
-      }
-     });
-     criteriaBox.querySelectorAll('[data-gudep-delete-bukti]').forEach(btn=>btn.onclick=async()=>{
-      if(!confirm('Hapus bukti pendukung ini?'))return;
-      btn.disabled=true;try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_bukti_hapus',id_bukti:Number(btn.dataset.gudepDeleteBukti)}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Bukti gagal dihapus.');await loadGudepAssessmentPembina();}
-      catch(err){msg.textContent=err.message||'Bukti gagal dihapus.';btn.disabled=false;}
-     });
-     $('gudepPembinaSave').disabled=!editable;
-     $('gudepPembinaSubmit').hidden=!editable||!a?.id_penilaian;
-     $('gudepPembinaSave').onclick=async()=>{
-      const values=Array.from(criteriaBox.querySelectorAll('[data-gudep-score]')).map(input=>{
-       const id=input.dataset.gudepScore,note=criteriaBox.querySelector('[data-gudep-note="'+id+'"]');
-       return {id_kriteria:Number(id),nilai_usulan:Number(input.value||0),catatan_pembina:note?.value||''};
-      });
-      const btn=$('gudepPembinaSave');btn.disabled=true;msg.textContent='Menyimpan draft...';
-      try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_pembina_simpan',id_periode:p.id_periode,nilai:values,catatan:$('gudepPembinaCatatan').value}});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Draft gagal disimpan.');msg.textContent=data.message||'Draft tersimpan.';await loadGudepAssessmentPembina();}
-      catch(err){msg.textContent=err.message||'Draft gagal disimpan.';btn.disabled=false;}
-     };
-     $('gudepPembinaSubmit').onclick=async()=>{
-      if(!confirm('Ajukan penilaian ini kepada Admin Kwarran? Setelah diajukan, nilai tidak dapat diubah kecuali dikembalikan untuk perbaikan.'))return;
-      const btn=$('gudepPembinaSubmit');btn.disabled=true;msg.textContent='Menyimpan perubahan terakhir...';
-      try{
-       const values=Array.from(criteriaBox.querySelectorAll('[data-gudep-score]')).map(input=>{
-        const id=input.dataset.gudepScore,note=criteriaBox.querySelector('[data-gudep-note="'+id+'"]');
-        return {id_kriteria:Number(id),nilai_usulan:Number(input.value||0),catatan_pembina:note?.value||''};
-       });
-       const {data:saveData,error:saveError}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_pembina_simpan',id_periode:p.id_periode,nilai:values,catatan:$('gudepPembinaCatatan').value}});
-       if(saveError)throw saveError;if(!saveData?.ok)throw new Error(saveData?.message||'Perubahan terakhir gagal disimpan.');
-       msg.textContent='Mengajukan penilaian...';
-       const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'gudep_penilaian_pembina_kirim',id_periode:p.id_periode,catatan:$('gudepPembinaCatatan').value}});
-       if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Penilaian gagal diajukan.');
-       msg.textContent=data.message||'Penilaian diajukan.';await loadGudepAssessmentPembina();
-      }catch(err){msg.textContent=err.message||'Penilaian gagal diajukan.';btn.disabled=false;}
-     };
-     msg.textContent=editable?'Isi nilai dan bukti, lalu simpan draft sebelum mengajukan.':'Penilaian sudah diajukan dan menunggu proses verifikasi.';
-    }
 const STRUKTUR_GUDEP_GROUPS=[
  {id:'mabigus',title:'Majelis Pembimbing Gudep (Mabigus)',note:'Sekurang-kurangnya Ketua, Sekretaris, dan beberapa anggota.',defaults:['Ketua','Sekretaris','Anggota']},
  {id:'pengurus_gudep',title:'Pengurus Gugus Depan',note:'Sekurang-kurangnya Ketua Gudep, Wakil Ketua Gudep, dan Pembina Satuan.',defaults:['Ketua Gudep','Wakil Ketua Gudep','Pembina Satuan Putra','Pembina Satuan Putri']},
