@@ -1538,7 +1538,7 @@ async function review(id,status){
  if(error){setMsg('Penilaian gagal disimpan: '+error.message);return;}
  const {data}=await sb.from('sku_learning_progress').select('*');progress=data||[];await loadMonitor();setMsg('Hasil ujian tersimpan.');
 }
-sb.auth.getSession().then(async({data})=>{if(data.session){try{await boot(data.session.user);}catch(err){$('loginMsg').textContent=err.message;$('login').classList.remove('hidden');$('application').classList.add('hidden');}}});
+sb.auth.getSession().then(async({data,error})=>{if(error){$('loginMsg').textContent='Sesi login tidak dapat dibaca: '+error.message;return;}if(data.session){$('login').classList.add('hidden');$('application').classList.remove('hidden');try{await boot(data.session.user);}catch(err){$('application').classList.remove('hidden');$('login').classList.add('hidden');$('accountNotice').classList.remove('hidden');$('accountNotice').textContent='Akun sudah masuk, tetapi data Ruang Belajar belum berhasil dimuat: '+(err.message||'Kesalahan pemuatan data')+'. Muat ulang halaman atau hubungi Admin Utama jika berulang.';console.error('Ruang Tegak boot error:',err);}}else{$('login').classList.remove('hidden');$('application').classList.add('hidden');}});
 
 // Pemeriksaan versi otomatis dan pemberitahuan jika pembaruan perlu tindakan pengguna.
 (()=>{
