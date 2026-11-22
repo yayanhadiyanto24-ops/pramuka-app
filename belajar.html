@@ -649,6 +649,8 @@ async function boot(user){
  const accountName=participant?.nama_lengkap||teacher?.nama_lengkap||user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_utama'?'Admin Utama':'Pengguna');
  $('whoName').textContent=accountName;
  $('whoRole').textContent=({pembina:'Pembina',peserta_didik:'Peserta Didik',admin_utama:'Admin Utama'}[u.role]||u.role.replaceAll('_',' '));
+ const avatarFallback='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"%3E%3Ccircle cx="40" cy="40" r="39" fill="%23f5c52b"/%3E%3Ccircle cx="40" cy="29" r="13" fill="%23704a1d"/%3E%3Cpath d="M15 70c2-17 12-25 25-25s23 8 25 25" fill="%23704a1d"/%3E%3C/svg%3E';
+ const headerAvatar=$('headerProfileAvatar');if(headerAvatar)headerAvatar.src=participant?.foto_profil_data||teacher?.foto_profil_data||u.foto_profil_data||user.user_metadata?.avatar_url||avatarFallback;
  if(u.role!=='admin_utama')renderProfile();
  await loadAll();
 }
@@ -662,7 +664,7 @@ function renderProfile(){
  $('ntaProfileField').classList.toggle('hidden',!isTeacher&&!isStudent);
  $('qrKtaProfileField').classList.toggle('hidden',!isTeacher&&!isStudent);
  if(isTeacher){const ambalan=Math.max(0,Number(teacher.jumlah_ambalan_berbayar||0));const hasNtaKta=!!teacher.nta&&!!teacher.nta_bukti_kta?.path;const kuota=!hasNtaKta?5:(ambalan>0?ambalan*32:10);$('teacherQuotaInfo').textContent='Kuota penerimaan saat ini: '+kuota+' peserta. '+(!hasNtaKta?'Kuota dibatasi 5 peserta sampai NTA diisi dan foto KTA diunggah. Lengkapi keduanya agar dapat menerima peserta ke-6.':ambalan>0?'Anda memiliki '+ambalan+' ambalan aktif. Setiap penambahan ambalan membuka 32 peserta didik.':'Kuota awal 10 peserta didik. Transfer seikhlasnya dan konfirmasi kepada Admin Utama untuk membuka ambalan pertama (32 peserta).');$('accessCodeInput').disabled=!hasNtaKta;$('activateAccessCode').disabled=!hasNtaKta;}
- profilePhotoData=p?.foto_profil_data||'';
+ profilePhotoData=p?.foto_profil_data||account?.foto_profil_data||currentUser?.user_metadata?.avatar_url||'';
  const headerAvatar=$('headerProfileAvatar');if(headerAvatar){headerAvatar.src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"%3E%3Ccircle cx="40" cy="40" r="39" fill="%23f5c52b"/%3E%3Ccircle cx="40" cy="29" r="13" fill="%23704a1d"/%3E%3Cpath d="M15 70c2-17 12-25 25-25s23 8 25 25" fill="%23704a1d"/%3E%3C/svg%3E';}
  $('profilePhotoPreview').src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect width="100%25" height="100%25" fill="%23f1f5f9"/%3E%3Ctext x="50%25" y="54%25" text-anchor="middle" fill="%2364758b" font-size="12"%3EFoto%3C/text%3E%3C/svg%3E';
  $('profileNta').value=formatNtaInput(p?.nta||'');
