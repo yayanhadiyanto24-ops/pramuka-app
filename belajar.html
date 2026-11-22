@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <style>
 body{background:#fffbeb;color:#1f2937}.brand{background:#451a03}.gold{color:#b45309}.panel{background:#fff;border:1px solid #f3e8c8;border-radius:16px;box-shadow:0 4px 18px #78350f0c}.tab.active{background:#78350f;color:#fff}.muted{color:#64748b}.sku-card{border:1px solid #e7e5e4;border-radius:12px;background:#fff}.sku-card.selected{border-color:#b45309;box-shadow:0 0 0 2px #fef3c7}.pill{font-size:11px;padding:3px 8px;border-radius:999px;background:#fef3c7;color:#92400e}.lesson-text{white-space:pre-wrap;line-height:1.7}.status-lulus{background:#dcfce7;color:#166534}.status-menunggu{background:#dbeafe;color:#1d4ed8}.status-revisi{background:#ffedd5;color:#9a3412}
@@ -616,7 +617,7 @@ function renderProfile(){
  $('profileBirthDate').value=p?.tanggal_lahir||'';
   renderNtaParseInfo();
  const ktaStatus=p?.nta_status_verifikasi||'belum_ada';
- const ktaLabels={belum_ada:'Belum ada bukti KTA yang diunggah atau NTA berubah.',menunggu:isTeacher?'Bukti KTA Pembina menunggu validasi Admin Utama.':'Bukti KTA sudah diunggah dan menunggu pemeriksaan Pembina.',disetujui_admin:'KTA Pembina telah disetujui Admin Utama. Anda berwenang melakukan validasi akhir NTA peserta.',disetujui_pembina:'Bukti KTA telah diperiksa Pembina.',terverifikasi_resmi:'KTA terverifikasi melalui kanal resmi.',ditolak:'Bukti KTA perlu diperbaiki atau diunggah ulang.'};
+ const ktaLabels={belum_ada:'Belum ada bukti KTA yang diunggah atau NTA berubah.',menunggu:isTeacher?'Pemeriksaan KTA sedang berlangsung.':'Bukti KTA sudah diunggah dan menunggu pemeriksaan Pembina.',terverifikasi_otomatis:'NTA pada foto KTA cocok dengan NTA profil. Verifikasi otomatis berhasil; Anda berwenang melakukan validasi akhir NTA peserta.',disetujui_admin:'Verifikasi lama: KTA Pembina telah disetujui Admin Utama.',disetujui_pembina:'Bukti KTA telah diperiksa Pembina.',terverifikasi_resmi:'KTA terverifikasi melalui kanal resmi.',ditolak:'NTA pada foto KTA tidak cocok atau bukti perlu diunggah ulang.'};
  if($('ktaEvidenceStatus'))$('ktaEvidenceStatus').textContent=ktaLabels[ktaStatus]||ktaLabels.belum_ada;
  if($('ktaEvidenceLink')){const meta=p?.nta_bukti_kta;$('ktaEvidenceLink').classList.toggle('hidden',!meta?.path);$('ktaEvidenceLink').removeAttribute('href');if(meta?.path){sb.storage.from('sku-bukti').createSignedUrl(meta.path,300).then(({data,error})=>{if(!error&&data?.signedUrl){$('ktaEvidenceLink').href=data.signedUrl;$('ktaEvidenceLink').classList.remove('hidden');}});}}
  if($('ktaEvidenceInput'))$('ktaEvidenceInput').value='';
@@ -662,8 +663,20 @@ async function saveProfile(extra={}){
  }
  const ktaFile=$('ktaEvidenceInput')?.files?.[0];
  if(ktaFile){
-  const allowed=['image/jpeg','image/png','image/webp','application/pdf'];
-  if(!allowed.includes(ktaFile.type)||ktaFile.size>10*1024*1024){$('profileMsg').textContent='Bukti KTA harus PDF/JPG/PNG/WEBP maksimal 10 MB.';return false;}
+  const allowed=isTeacher?['image/jpeg','image/png','image/webp']:['image/jpeg','image/png','image/webp','application/pdf'];
+  if(!allowed.includes(ktaFile.type)||ktaFile.size>10*1024*1024){$('profileMsg').textContent=isTeacher?'Foto KTA Pembina harus JPG/PNG/WEBP maksimal 10 MB agar dapat dibaca otomatis.':'Bukti KTA harus PDF/JPG/PNG/WEBP maksimal 10 MB.';return false;}
+  if(isTeacher){
+   if(!payload.nta){$('profileMsg').textContent='Isi NTA Pembina terlebih dahulu sebelum mengunggah foto KTA.';return false;}
+   if(!window.Tesseract?.recognize){$('profileMsg').textContent='Mesin pembaca NTA belum termuat. Periksa koneksi internet lalu muat ulang halaman.';return false;}
+   $('profileMsg').textContent='Membaca NTA pada foto KTA secara otomatis...';
+   try{
+    const ocr=await Tesseract.recognize(ktaFile,'eng');
+    const target=payload.nta.replace(/\D/g,'');
+    const candidates=String(ocr?.data?.text||'').split(/\r?\n/).map(line=>line.toUpperCase().replace(/[OQ]/g,'0').replace(/[IL|]/g,'1').replace(/[^0-9]/g,'')).flatMap(line=>line.match(/\d{16}/g)||[]);
+    if(!candidates.includes(target)){$('profileMsg').textContent='NTA pada foto KTA belum terbaca cocok dengan NTA yang diinput. Pastikan foto jelas, utuh, tidak miring, lalu unggah ulang.';return false;}
+    payload.kta_ocr_nta=payload.nta;
+   }catch(ocrError){$('profileMsg').textContent='Foto KTA gagal dibaca otomatis. Coba foto ulang dengan pencahayaan yang baik.';return false;}
+  }
   $('profileMsg').textContent='Mengunggah bukti KTA...';
   const ext=ktaFile.type==='application/pdf'?'pdf':ktaFile.type==='image/png'?'png':ktaFile.type==='image/webp'?'webp':'jpg';
   const path=currentUser.id+'/nta-kta/'+Date.now()+'-'+crypto.randomUUID()+'.'+ext;
@@ -675,7 +688,7 @@ async function saveProfile(extra={}){
  if(isStudent){const ambalanChoice=$('studentJabatanAmbalan').value,ambalanOther=$('studentJabatanAmbalanOther').value.trim();if(ambalanChoice==='Lainnya'&&!ambalanOther){$('profileMsg').textContent='Tuliskan jabatan lainnya di ambalan.';return false;}Object.assign(payload,{jabatan_ambalan:ambalanChoice==='Lainnya'?ambalanOther:ambalanChoice,jabatan_sangga:$('studentJabatanSangga').value,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows});}
  $('profileMsg').textContent='Menyimpan profil...';$('saveProfile').disabled=true;
  try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:payload});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Profil gagal disimpan.');
-  if(isTeacher)teacher={...teacher,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:(teacher.nta!==payload.nta?{nta_status_verifikasi:'belum_ada'}:{}))};
+  if(isTeacher)teacher={...teacher,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'terverifikasi_otomatis'}:(teacher.nta!==payload.nta?{nta_status_verifikasi:'belum_ada'}:{}))};
   if(isStudent){const nextLevel=participant.tingkatan;participant={...participant,nta:payload.nta,tanggal_lahir:payload.tanggal_lahir,tingkatan:nextLevel,foto_profil_data:profilePhotoData,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows,jabatan_ambalan:payload.jabatan_ambalan,jabatan_sangga:payload.jabatan_sangga,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:((participant.nta!==payload.nta||participant.tanggal_lahir!==payload.tanggal_lahir)?{nta_status_verifikasi:'belum_ada'}:{}))};}if($('studentTierLabel'))$('studentTierLabel').textContent='Tingkatan: '+participant.tingkatan;
   if(!isTeacher&&!isStudent)account={...account,foto_profil_data:profilePhotoData};
   renderProfile();
@@ -991,7 +1004,7 @@ async function loadAll(){
 }
 function renderNtaReviewPanel(){
  const box=$('ntaReviewList');if(!box)return;
- if(teacher?.nta_status_verifikasi!=='disetujui_admin'){box.innerHTML='<p class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm">Validasi akhir NTA peserta hanya tersedia setelah NTA dan foto KTA Pembina diperiksa serta disetujui Admin Utama.</p>';return;}
+ if(!['terverifikasi_otomatis','disetujui_admin'].includes(teacher?.nta_status_verifikasi)){box.innerHTML='<p class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm">Lengkapi NTA dan unggah foto KTA Pembina. Sistem akan membaca NTA pada foto dan mencocokkannya secara otomatis sebelum fitur validasi akhir dibuka.</p>';return;}
  const pending=(monitorStudents||[]).filter(s=>s.nta_status_verifikasi==='menunggu'&&s.nta&&s.nta_bukti_kta?.path);
  if(!pending.length){box.innerHTML='<p class="muted">Tidak ada pengajuan NTA/KTA yang menunggu pemeriksaan.</p>';return;}
  box.innerHTML=pending.map(s=>'<article class="border rounded-xl p-3 space-y-2"><div class="flex flex-wrap justify-between gap-2"><b>'+esc(s.nama_lengkap)+'</b><span class="pill">Menunggu verifikasi</span></div><p class="text-xs muted">NTA: <b>'+esc(s.nta)+'</b> · Tingkatan: '+esc(s.tingkatan)+' · Pangkalan ID: '+esc(s.id_pangkalan)+'</p><p class="text-xs">Pastikan nama dan nomor pada KTA sama dengan data peserta.</p><div class="flex flex-wrap gap-2"><button type="button" data-kta-open="'+esc(s.id_user)+'" class="rounded-lg border px-3 py-2 text-xs font-semibold">Buka bukti KTA</button><button type="button" data-kta-approve="'+esc(s.id_user)+'" class="rounded-lg bg-emerald-700 text-white px-3 py-2 text-xs font-semibold">Sesuai — setujui</button><button type="button" data-kta-reject="'+esc(s.id_user)+'" class="rounded-lg bg-red-700 text-white px-3 py-2 text-xs font-semibold">Tidak sesuai</button></div><p id="kta-review-msg-'+esc(s.id_user)+'" class="text-xs muted"></p></article>').join('');
