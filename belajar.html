@@ -1730,7 +1730,10 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
   try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
  }
  $('sessionLoading')?.classList.add('hidden');
- if(allowAdminHandoff&&data.session){
+ if(data.session){
+  // Pulihkan sesi Supabase yang masih aktif untuk seluruh peran.
+  // admin_handoff hanya diperlukan saat token lintas halaman perlu dipulihkan;
+  // sesi persisten normal juga harus langsung membuka aplikasi, bukan formulir login.
   $('login').classList.add('hidden');$('application').classList.remove('hidden');
   try{await boot(data.session.user);}
   catch(err){
