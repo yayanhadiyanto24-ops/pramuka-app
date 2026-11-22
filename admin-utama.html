@@ -440,8 +440,10 @@ $('open-belajar-sku')?.addEventListener('click',async event=>{
       refresh_token:session.refresh_token,
       created_at:Date.now()
     });
-    sessionStorage.setItem('ruang-tegak-auth-bridge',authBridge);
-    localStorage.setItem('ruang-tegak-auth-bridge',authBridge);
+    try{sessionStorage.setItem('ruang-tegak-auth-bridge',authBridge);}catch(_){}
+    try{localStorage.setItem('ruang-tegak-auth-bridge',authBridge);}catch(_){}
+    const savedBridge=sessionStorage.getItem('ruang-tegak-auth-bridge')||localStorage.getItem('ruang-tegak-auth-bridge');
+    if(!savedBridge)throw new Error('Sesi tidak dapat diteruskan oleh penyimpanan browser.');
     const targetUrl=new URL(link.href,window.location.href);
     targetUrl.searchParams.set('admin_handoff','1');
     window.location.assign(targetUrl.toString());
