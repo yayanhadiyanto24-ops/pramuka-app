@@ -408,13 +408,13 @@ Deno.serve(async(req:Request)=>{
    if(rawStructure.some((item:any)=>!allowedStructureGroups.includes(clean(item?.kelompok,50))))return reply({ok:false,message:"Kelompok struktur Gudep tidak dikenal."},400);
    const patch={nama_pangkalan:clean(body.nama_pangkalan),no_gudep:clean(body.no_gudep,40)||null,nama_ambalan_putra:clean(body.nama_ambalan_putra,120),nama_ambalan_putri:clean(body.nama_ambalan_putri,120),nama_ketua_gudep:clean(body.nama_ketua_gudep,150)||null,nama_ketua_mabigus:clean(body.nama_ketua_mabigus,150)||null,struktur_gudep:struktur};
    if(!patch.nama_pangkalan||!patch.nama_ambalan_putra||!patch.nama_ambalan_putri)return reply({ok:false,message:"Nama pangkalan dan kedua nama ambalan wajib diisi."},400);
-   const {data:before,error:beforeError}=await admin.from("pangkalan").select("nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,struktur_gudep").eq("id_pangkalan",pb.id_pangkalan).single();
-   if(beforeError)throw beforeError;
-   const {error:updateError}=await admin.from("pangkalan").update(patch).eq("id_pangkalan",pb.id_pangkalan);
-   if(updateError)throw updateError;
-   const {error:auditError}=await admin.from("pangkalan_change_audit").insert({id_pangkalan:pb.id_pangkalan,changed_by:authData.user.id,before_data:before,after_data:patch});
-   if(auditError)throw auditError;
-   return reply({ok:true,message:"Data Pangkalan berhasil disimpan."});
+   const {error:saveError}=await admin.rpc("pembina_update_pangkalan_with_audit",{
+    p_id_pangkalan:pb.id_pangkalan,
+    p_actor_user_id:authData.user.id,
+    p_patch:patch
+   });
+   if(saveError)throw saveError;
+   return reply({ok:true,message:"Data Pangkalan berhasil disimpan dan riwayat perubahannya tercatat."});
   }
   const {data:config}=await admin.from("app_admin_config").select("admin_email").eq("singleton",true).single();
   const configuredEmail=clean(config?.admin_email,254).toLowerCase();
