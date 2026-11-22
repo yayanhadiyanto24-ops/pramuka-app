@@ -415,7 +415,7 @@ a[class*="rounded"]{
        <p id="ktaEvidenceStatus" class="text-sm text-slate-600">Belum ada bukti KTA yang diunggah.</p>
        <a id="ktaEvidenceLink" class="hidden text-sm font-semibold text-blue-700 underline" target="_blank" rel="noopener">Lihat bukti KTA tersimpan</a>
       </div>
-      <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 space-y-2"><b class="text-sm">Pemindaian QR KTA</b><p class="text-xs muted">Pindai QR pada KTA dengan kamera belakang. Pembacaan QR tidak otomatis membuktikan status aktif; pemeriksaan status resmi memerlukan layanan AyoPramuka yang terverifikasi.</p><div class="flex flex-wrap gap-2"><button id="ktaQrStart" type="button" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-sm font-semibold">Pindai QR dengan kamera</button><button id="ktaQrStop" type="button" class="hidden rounded-lg border px-3 py-2 text-sm font-semibold">Tutup pemindai</button></div><div id="ktaQrReader" class="hidden w-full max-w-sm overflow-hidden rounded-lg bg-black"></div><p id="ktaQrResult" class="text-xs muted" role="status">QR belum dipindai.</p></div>
+      <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 space-y-2"><b class="text-sm">Pemindaian QR KTA</b><p class="text-xs muted">Pindai QR KTA. Sistem akan membaca NTA dari data QR dan otomatis mencocokkannya dengan NTA pada profil. Jika kolom NTA kosong, nomor dari QR akan diisikan otomatis.</p><div class="flex flex-wrap gap-2"><button id="ktaQrStart" type="button" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-sm font-semibold">Pindai QR dengan kamera</button><button id="ktaQrStop" type="button" class="hidden rounded-lg border px-3 py-2 text-sm font-semibold">Tutup pemindai</button></div><div id="ktaQrReader" class="hidden w-full max-w-sm overflow-hidden rounded-lg bg-black"></div><p id="ktaQrResult" class="text-xs muted" role="status">QR belum dipindai.</p></div>
       <div id="ntaParseInfo" class="rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700">Rincian wilayah dan tanggal lahir dari NTA akan muncul setelah nomor diisi.</div>
       <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"><b>Belum memiliki KTA Pramuka Nasional?</b><p class="mt-1">Kamu tetap dapat belajar di aplikasi. Hubungi Pembina pangkalanmu dan sampaikan bahwa kamu belum memiliki KTA. Pembina akan membantu meneruskan permohonan kepada Sekretaris Kwarran untuk proses penerbitan KTA Nasional. Setelah KTA terbit, lengkapi nomor NTA dan bukti pendukung pada profil.</p></div></div>
     </div>
@@ -717,6 +717,36 @@ async function saveProfile(extra={}){
 $('saveProfile').onclick=()=>saveProfile();
 $('profileNta')?.addEventListener('input',renderNtaParseInfo);
 let ktaQrScanner=null;
+function extractNtaFromQr(raw){
+ const textValue=String(raw||'').trim();
+ const decodedValues=[textValue];
+ try{decodedValues.push(decodeURIComponent(textValue));}catch(_){}
+ const addValue=v=>{if(typeof v==='string'||typeof v==='number')decodedValues.push(String(v));};
+ const inspect=(value,key='')=>{
+  if(value==null)return;
+  if(typeof value==='object'){
+   for(const [k,v] of Object.entries(value))inspect(v,k);
+  }else if(/nta|nomor.?tanda.?anggota|member.?number/i.test(key))addValue(value);
+ };
+ for(const value of [...decodedValues]){
+  try{inspect(JSON.parse(value));}catch(_){}
+  try{
+   const u=new URL(value);
+   for(const [k,v] of u.searchParams.entries())if(/nta|nomor.?tanda.?anggota|member.?number/i.test(k))addValue(v);
+   const pathMatch=u.pathname.match(/\d{2}[.\-/]?\d{2}[.\-/]?\d{2}[.\-/]?\d{6}[.\-/]?\d{4}/);
+   if(pathMatch)addValue(pathMatch[0]);
+  }catch(_){}
+ }
+ const results=[];
+ for(const value of decodedValues){
+  const formatted=value.match(/\d{2}[.\s-]?\d{2}[.\s-]?\d{2}[.\s-]?\d{6}[.\s-]?\d{4}/g)||[];
+  for(const item of formatted){const digits=item.replace(/\D/g,'');if(digits.length===16)results.push(digits);}
+  const compact=value.replace(/\D/g,'');
+  if(compact.length===16)results.push(compact);
+ }
+ const unique=[...new Set(results)];
+ return unique.length===1?unique[0]:null;
+}
 $('ktaQrStart')?.addEventListener('click',async()=>{
  const result=$('ktaQrResult'),reader=$('ktaQrReader');
  if(!window.Html5Qrcode){result.textContent='Modul pemindai QR belum berhasil dimuat. Periksa koneksi internet lalu muat ulang halaman.';return;}
@@ -726,17 +756,15 @@ $('ktaQrStart')?.addEventListener('click',async()=>{
   await ktaQrScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:230,height:230},aspectRatio:1.0},async(decoded)=>{
    try{await ktaQrScanner.stop();}catch(_){}
    try{await ktaQrScanner.clear();}catch(_){}
-   reader.classList.add('hidden');$('ktaQrStart').disabled=false;$('ktaQrStop').classList.add('hidden');
-   const decodedText=String(decoded||'').trim();
-   let candidate=decodedText;try{candidate=decodeURIComponent(decodedText);}catch(_){}
-   const match=candidate.match(/\d{2}\.\d{2}\.\d{2}\.\d{6}\.\d{4}/);
-   if(match){
-    $('profileNta').value=match[0];renderNtaParseInfo();
-    result.textContent='QR berhasil dibaca. NTA '+match[0]+' ditemukan dan dimasukkan ke kolom NTA. Cocokkan nama dan nomor dengan KTA.';
+   ktaQrScanner=null;reader.classList.add('hidden');$('ktaQrStart').disabled=false;$('ktaQrStop').classList.add('hidden');
+   const qrNta=extractNtaFromQr(decoded),field=$('profileNta'),existing=String(field?.value||'').replace(/\D/g,'');
+   if(qrNta){
+    const formatted=qrNta.replace(/^(\d{2})(\d{2})(\d{2})(\d{6})(\d{4})$/,'$1.$2.$3.$4.$5');
+    if(!existing){field.value=formatted;renderNtaParseInfo();result.textContent='QR terbaca otomatis. NTA '+formatted+' berhasil diisikan ke profil. Data QR dan NTA profil sekarang cocok.';}
+    else if(existing===qrNta){result.textContent='QR KTA cocok dengan NTA pada profil ('+formatted+'). Pemeriksaan data berhasil.';}
+    else{result.textContent='NTA pada QR ('+formatted+') TIDAK cocok dengan NTA profil. Kolom profil tidak diubah. Periksa KTA dan NTA yang dimasukkan.';}
    }else{
-    let safe='QR berhasil dibaca dan berisi data verifikasi.';
-    try{const u=new URL(decodedText);safe='QR mengarah ke '+u.hostname+u.pathname+' (parameter/token disembunyikan).';}catch(_){}
-    result.textContent=safe+' Status aktif belum dapat dipastikan karena endpoint verifikasi resmi AyoPramuka belum dikonfirmasi.';
+    result.textContent='QR berhasil dipindai, tetapi nomor NTA tidak ditemukan secara jelas di dalam data QR. Sistem tidak akan menebak atau mengubah NTA profil.';
    }
   },()=>{});
  }catch(err){
