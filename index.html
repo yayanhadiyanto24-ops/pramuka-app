@@ -364,7 +364,7 @@ a[class*="rounded"]{
 .rt-role-entry:active{transform:translateY(1px)}
 @media(max-width:380px){.rt-role-entry-grid{gap:5px}.rt-role-entry{min-height:60px;padding:7px 3px;font-size:12px;border-radius:11px}}
 </style>
-<div class="px-4 py-4 bg-amber-50 border-b border-amber-100"><p class="text-center text-xs font-bold uppercase tracking-wide text-amber-900 mb-3">Pilih halaman masuk</p><div class="rt-role-entry-grid"><a href="admin-utama.html" class="rt-role-entry rt-role-admin">Admin<br>Utama</a><a href="admin-kwarran.html" class="rt-role-entry rt-role-kwarran">Admin<br>Kwarran</a><a href="belajar.html?build=40" class="rt-role-entry rt-role-pembina">Pembina</a><a href="belajar.html?build=40" class="rt-role-entry rt-role-peserta">Peserta<br>Didik</a></div><p class="text-center text-xs font-bold text-black mt-3">Belum memiliki akun?<br>Gunakan formulir pendaftaran di bawah</p></div>
+<div class="px-4 py-4 bg-amber-50 border-b border-amber-100"><p class="text-center text-xs font-bold uppercase tracking-wide text-amber-900 mb-3">Pilih halaman masuk</p><div class="rt-role-entry-grid"><a href="admin-utama.html" class="rt-role-entry rt-role-admin">Admin<br>Utama</a><a href="admin-kwarran.html" class="rt-role-entry rt-role-kwarran">Admin<br>Kwarran</a><a href="belajar.html?build=41" class="rt-role-entry rt-role-pembina">Pembina</a><a href="belajar.html?build=41" class="rt-role-entry rt-role-peserta">Peserta<br>Didik</a></div><p class="text-center text-xs font-bold text-black mt-3">Belum memiliki akun?<br>Gunakan formulir pendaftaran di bawah</p></div>
         <style id="rt-registration-tab-style">
 button.rt-registration-tab{
  display:flex!important;align-items:center!important;justify-content:center!important;gap:5px;
@@ -741,6 +741,17 @@ nav a.rt-nav-active::before{content:"";display:inline-block;width:6px;height:6px
 button.tab.active,[role="tab"][aria-selected="true"]{border-bottom:2px solid #d8b77f!important}
 button,nav a,[role="button"]{transition:background .2s ease,box-shadow .2s ease,transform .16s ease,filter .2s ease}
 button:focus-visible,a:focus-visible{outline:3px solid #c9a875!important;outline-offset:2px}
+</style>
+<style id="rt-home-active-tab-fix">
+/* Tab yang sedang dipilih di halaman awal selalu cokelat premium. */
+button.rt-registration-tab.is-active,
+button.rt-registration-tab.rt-button-active{
+ background:linear-gradient(120deg,#765638 0%,#60432d 46%,#392719 100%)!important;
+ color:#fff!important;border:1px solid #c7a574!important;border-bottom:4px solid #d8b77f!important;
+ text-shadow:0 1px 2px #21130999!important;
+ box-shadow:0 3px 0 #2b1a10,0 5px 10px #21130940,inset 0 1px 0 #ffffff45!important;
+ font-weight:850!important
+}
 </style>
 <script id="rt-active-navigation">
 (()=>{
