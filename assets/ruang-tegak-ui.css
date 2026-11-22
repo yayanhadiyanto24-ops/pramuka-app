@@ -26,3 +26,41 @@ button:not(.signature-control):not(#clearSignature):active:not(:disabled),[role=
 button:disabled,[role="button"][aria-disabled="true"]{opacity:.55;cursor:not-allowed}
 button:focus-visible,a:focus-visible,[role="button"]:focus-visible{outline:3px solid #b58a36!important;outline-offset:2px}
 @media(max-width:640px){button:not(.signature-control):not(#clearSignature){padding:.4rem .62rem;font-size:.84rem;line-height:1.2}nav a{padding:.42rem .62rem!important;font-size:.82rem!important}}
+
+
+/* RUANG TEGAK — aksen hasduk merah-putih yang halus dan konsisten */
+:root{
+ --rt-hasduk-red:#b3262d;
+ --rt-hasduk-white:#fff;
+ --rt-hasduk-red-soft:rgba(179,38,45,.16);
+ --rt-hasduk-shadow:rgba(65,38,25,.09);
+}
+/* Garis merah dengan pemisah putih: identitas hasduk, tanpa mendominasi header. */
+header{
+ border-bottom:4px solid var(--rt-hasduk-red)!important;
+ box-shadow:0 2px 0 rgba(255,255,255,.96),0 7px 18px var(--rt-hasduk-shadow);
+}
+/* Panel dan kartu diberi detail merah yang sangat tipis; warna isi asli tetap dipertahankan. */
+.panel,.card,.doc-card,.sku-card{
+ border-color:#eadbc9;
+}
+.panel,.card,.doc-card{
+ box-shadow:0 5px 18px rgba(65,38,25,.055);
+}
+.sku-card.selected{
+ border-color:var(--rt-hasduk-red)!important;
+ box-shadow:0 0 0 2px rgba(179,38,45,.10),0 5px 16px rgba(65,38,25,.06)!important;
+}
+/* Fokus formulir jelas dan seragam, termasuk saat digunakan dari ponsel. */
+input:focus-visible,select:focus-visible,textarea:focus-visible{
+ outline:2px solid rgba(179,38,45,.48)!important;
+ outline-offset:1px;
+ border-color:var(--rt-hasduk-red)!important;
+}
+/* Aksen kecil untuk status/penanda penting tanpa mengubah warna tombol emas. */
+.badge-red,.status-revisi{
+ border:1px solid rgba(179,38,45,.16);
+}
+@media(prefers-reduced-motion:no-preference){
+ .panel,.card,.doc-card,.sku-card{transition:border-color .18s ease,box-shadow .18s ease}
+}
