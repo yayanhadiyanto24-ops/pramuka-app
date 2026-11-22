@@ -697,7 +697,7 @@ async function saveProfile(extra={}){
   if(extra.tanda_tangan_data){$('teacherSignaturePreview').src=extra.tanda_tangan_data;$('teacherSignatureEditor').classList.add('hidden');}
   if(extra.paraf_data){$('teacherParafPreview').src=extra.paraf_data;$('teacherParafEditor').classList.add('hidden');}
   return true;
- }catch(err){$('profileMsg').textContent='Gagal menyimpan: '+(err.message||'Kesalahan');return false;}
+ }catch(err){let detail=err?.message||'Kesalahan tidak diketahui';try{const response=err?.context;if(response){const copy=typeof response.clone==='function'?response.clone():response;const body=await copy.json();if(body?.message)detail=body.message;else if(body?.error)detail=body.error;}}catch(parseError){}$('profileMsg').textContent='Gagal menyimpan: '+detail;return false;}
  finally{$('saveProfile').disabled=false;}
 }
 $('saveProfile').onclick=()=>saveProfile();
