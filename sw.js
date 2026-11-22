@@ -1,5 +1,5 @@
-const CACHE_NAME='ruang-tegak-shell-v13';
-const APP_SHELL=['./','./index.html','./belajar.html','./dokumen.html','./uji.html','./admin-kwarran.html','./manifest.webmanifest','./assets/ruang-tegak-icon.svg'];
+const CACHE_NAME='ruang-tegak-shell-v14';
+const APP_SHELL=['./','./index.html','./belajar.html','./login-confirm.html','./dokumen.html','./uji.html','./admin-kwarran.html','./manifest.webmanifest','./assets/ruang-tegak-icon.svg'];
 self.addEventListener('install',event=>{
  event.waitUntil((async()=>{
   const cache=await caches.open(CACHE_NAME);
