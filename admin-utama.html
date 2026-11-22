@@ -433,17 +433,8 @@ $('open-belajar-sku')?.addEventListener('click',async event=>{
     if(error)throw error;
     const session=data?.session;
     if(!session?.access_token||!session?.refresh_token)throw new Error('Sesi Admin Utama tidak ditemukan. Silakan masuk kembali.');
-    const authBridge=JSON.stringify({
-      access_token:session.access_token,
-      refresh_token:session.refresh_token,
-      created_at:Date.now()
-    });
-    // Simpan ke penyimpanan bersama dan penyimpanan tab sebagai jalur cadangan.
-    // Halaman Belajar akan mengambil salah satu yang tersedia.
-    try{localStorage.setItem('ruang-tegak-auth-bridge',authBridge);}catch(_){}
-    try{sessionStorage.setItem('ruang-tegak-auth-bridge',authBridge);}catch(_){}
-    const savedBridge=localStorage.getItem('ruang-tegak-auth-bridge')||sessionStorage.getItem('ruang-tegak-auth-bridge');
-    if(!savedBridge)throw new Error('Sesi login tidak dapat diteruskan oleh penyimpanan browser.');
+    // Kedua halaman memakai proyek dan storageKey Supabase yang sama.
+    // Sesi persisten dibaca langsung oleh halaman Belajar; tidak perlu menyalin token.
     const targetUrl=new URL(link.href,window.location.href);
     targetUrl.searchParams.set('admin_handoff','1');
     window.location.assign(targetUrl.toString());
