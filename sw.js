@@ -1,5 +1,5 @@
-const CACHE_NAME='ruang-tegak-shell-v51';
-const APP_SHELL=['./','./index.html','./admin-utama.html','./belajar.html?build=45','./login-confirm.html','./dokumen.html','./uji.html','./admin-kwarran.html','./sekretaris-daftar.html','./sekretaris-kwarcab.html','./manifest.webmanifest','./assets/ruang-tegak-icon.svg','./assets/ruang-tegak-ui.css','./assets/ruang-tegak-ui.js'];
+const CACHE_NAME='ruang-tegak-shell-v52';
+const APP_SHELL=['./','./index.html','./admin-utama.html','./belajar.html?build=46','./login-confirm.html','./dokumen.html','./uji.html','./admin-kwarran.html','./sekretaris-daftar.html','./sekretaris-kwarcab.html','./manifest.webmanifest','./assets/ruang-tegak-icon.svg','./assets/ruang-tegak-ui.css','./assets/ruang-tegak-ui.js'];
 // Mendukung tombol Perbarui pada pemberitahuan aplikasi.
 self.addEventListener('message',event=>{
  if(event.data&&event.data.type==='SKIP_WAITING')self.skipWaiting();
