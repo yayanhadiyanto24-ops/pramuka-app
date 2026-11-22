@@ -397,7 +397,7 @@ a[class*="rounded"]{
  </div>
 </header>
 <main class="max-w-6xl mx-auto p-4 md:p-6">
- <section id="login" class="panel max-w-md mx-auto p-6 mt-8">
+ <section id="login" class="panel max-w-md mx-auto p-6 mt-8 hidden">
   <h1 class="text-xl font-bold mb-1">Masuk ke Ruang Belajar</h1><p class="text-sm muted mb-4">Masuk menggunakan email dan sandi akun yang sudah terdaftar dan aktif.</p>
    <form id="loginForm" class="space-y-3" novalidate>
    <input id="email" type="email" required autocomplete="username" placeholder="Email" class="w-full border rounded-lg p-3">
@@ -407,7 +407,8 @@ a[class*="rounded"]{
 <p id="loginMsg" class="text-sm mt-3" role="status"></p>
 
  </section>
- <section id="application" class="hidden space-y-5">
+ <p id="sessionLoading" class="panel max-w-md mx-auto p-4 mt-8 text-sm text-center">Memeriksa sesi akun...</p>
+  <section id="application" class="hidden space-y-5">
   <div id="accountNotice" class="hidden panel p-4 text-sm"></div>
   <nav class="flex flex-wrap gap-2">
    <button class="tab active rounded-lg px-4 py-2 text-sm font-semibold" data-tab="umum">Materi Umum</button>
@@ -1536,23 +1537,37 @@ sbReady.then(async client=>{
  let {data,error}=await client.auth.getSession();
  if(error)throw error;
  if(!data.session){
-  let bridge=null;
+  const candidates=[];
   for(const store of [sessionStorage,localStorage]){
-   try{const candidate=JSON.parse(store.getItem('ruang-tegak-auth-bridge')||'null');if(candidate?.access_token&&candidate?.refresh_token&&Date.now()-Number(candidate.created_at||0)<120000){bridge=candidate;break;}}catch(_){}
-   try{store.removeItem('ruang-tegak-auth-bridge');}catch(_){}
+   try{
+    const candidate=JSON.parse(store.getItem('ruang-tegak-auth-bridge')||'null');
+    if(candidate?.access_token&&candidate?.refresh_token&&Date.now()-Number(candidate.created_at||0)<600000)candidates.push(candidate);
+   }catch(_){}
   }
-  if(bridge?.access_token&&bridge?.refresh_token&&Date.now()-Number(bridge.created_at||0)<120000){
+  candidates.sort((a,b)=>Number(b.created_at||0)-Number(a.created_at||0));
+  const bridge=candidates[0];
+  if(bridge){
    const restored=await client.auth.setSession({access_token:bridge.access_token,refresh_token:bridge.refresh_token});
    if(restored.error)throw restored.error;
-   data={session:restored.data.session};
+   const check=await client.auth.getSession();
+   if(check.error)throw check.error;
+   data=check.data;
+   if(!data.session)throw new Error('Sesi Admin Utama belum berhasil dipulihkan. Silakan masuk kembali dari halaman Admin Utama.');
+   try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
   }
  }
+ $('sessionLoading')?.classList.add('hidden');
  if(data.session){
   $('login').classList.add('hidden');$('application').classList.remove('hidden');
   try{await boot(data.session.user);}
   catch(err){$('application').classList.remove('hidden');$('login').classList.add('hidden');$('accountNotice').classList.remove('hidden');$('accountNotice').textContent='Akun sudah masuk, tetapi data Ruang Belajar belum berhasil dimuat: '+(err.message||'Kesalahan pemuatan data')+'. Muat ulang halaman atau hubungi Admin Utama jika berulang.';console.error('Ruang Tegak boot error:',err);}
  }else{$('login').classList.remove('hidden');$('application').classList.add('hidden');}
-}).catch(err=>{$('loginMsg').textContent='Sesi masuk belum dapat diperiksa: '+(err.message||'Layanan autentikasi bermasalah.');});
+}).catch(err=>{
+ $('sessionLoading')?.classList.add('hidden');
+ $('login').classList.remove('hidden');
+ $('application').classList.add('hidden');
+ $('loginMsg').textContent='Sesi masuk belum dapat diperiksa: '+(err.message||'Layanan autentikasi bermasalah.');
+});
 
 // Pemeriksaan versi otomatis dan pemberitahuan jika pembaruan perlu tindakan pengguna.
 (()=>{
