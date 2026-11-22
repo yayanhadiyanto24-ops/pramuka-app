@@ -28,26 +28,59 @@ jobs:
         with:
           gradle-version: '8.9'
 
+      - name: Siapkan keystore rilis stabil
+        id: signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        shell: bash
+        run: |
+          if [[ -n "$ANDROID_KEYSTORE_BASE64" && -n "$ANDROID_KEYSTORE_PASSWORD" && -n "$ANDROID_KEY_ALIAS" && -n "$ANDROID_KEY_PASSWORD" ]]; then
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/ruangtegak-release.jks"
+            keytool -list -keystore "$RUNNER_TEMP/ruangtegak-release.jks" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" >/dev/null
+            {
+              echo "RT_KEYSTORE_PATH=$RUNNER_TEMP/ruangtegak-release.jks"
+              echo "RT_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
+              echo "RT_KEY_ALIAS=$ANDROID_KEY_ALIAS"
+              echo "RT_KEY_PASSWORD=$ANDROID_KEY_PASSWORD"
+              echo "ANDROID_SIGNING_READY=true"
+            } >> "$GITHUB_ENV"
+            echo "Keystore rilis stabil siap digunakan."
+          else
+            echo "ANDROID_SIGNING_READY=false" >> "$GITHUB_ENV"
+            echo "::warning::Keystore rilis belum disetel. Build debug hanya untuk pengujian dan tidak dijamin dapat menimpa instalasi APK sebelumnya."
+          fi
+
       - name: Build APK
         working-directory: android
-        run: gradle :app:assembleDebug --no-daemon
+        shell: bash
+        run: |
+          if [[ "$ANDROID_SIGNING_READY" == "true" ]]; then
+            gradle :app:assembleRelease --no-daemon
+            cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/ruang-tegak.apk
+          else
+            gradle :app:assembleDebug --no-daemon
+            cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/ruang-tegak.apk
+          fi
 
       - name: Simpan APK sebagai artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ruang-Tegak-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Ruang-Tegak-APK-v1.0.1
+          path: android/app/build/outputs/apk/ruang-tegak.apk
           if-no-files-found: error
           retention-days: 30
 
-      - name: Terbitkan APK untuk diunduh
+      - name: Terbitkan APK rilis bertanda tangan stabil
+        if: env.ANDROID_SIGNING_READY == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: Ruang Tegak Android v1.0.0
+          tag_name: v1.0.1
+          name: Ruang Tegak Android v1.0.1
           body: |
-            APK Android Ruang Tegak.
-            Aplikasi Android ini membuka layanan web Ruang Tegak versi terbaru.
-            Unduh file app-debug.apk, lalu pasang di perangkat Android.
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+            APK rilis Ruang Tegak versi 1.0.1.
+            APK ditandatangani dengan keystore rilis stabil agar pembaruan dapat dipasang di atas versi sebelumnya.
+          files: android/app/build/outputs/apk/ruang-tegak.apk
           fail_on_unmatched_files: true
