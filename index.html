@@ -353,7 +353,17 @@ a[class*="rounded"]{
             <h1 class="text-lg font-bold tracking-wide mt-1">Pendaftaran Gugus Depan</h1>
             <p class="text-amber-200 text-sm mt-1">Pilih jalur pendaftaran sesuai peran Anda</p>
         </div>
-        <div class="px-4 py-4 bg-amber-50 border-b border-amber-100"><p class="text-center text-xs font-bold uppercase tracking-wide text-amber-900 mb-3">Pilih halaman masuk</p><div class="grid grid-cols-3 gap-2"><a href="admin-utama.html" class="rounded-lg bg-amber-950 hover:bg-amber-900 text-white text-center font-bold text-xs sm:text-sm px-2 py-3">Admin Utama</a><a href="belajar.html" class="rounded-lg bg-amber-800 hover:bg-amber-900 text-white text-center font-bold text-xs sm:text-sm px-2 py-3">Pembina</a><a href="belajar.html" class="rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-center font-bold text-xs sm:text-sm px-2 py-3">Peserta Didik</a></div><a href="admin-kwarran.html" class="flex items-center justify-center mx-4 mt-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-center font-bold text-xs sm:text-sm px-3 py-2">Admin Kwarran</a><p class="text-center text-xs font-bold text-black mt-2">Belum memiliki akun?<br>Gunakan formulir pendaftaran di bawah</p></div>
+        <style id="rt-role-entry-buttons">
+.rt-role-entry-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.rt-role-entry{display:flex;align-items:center;justify-content:center;min-width:0;min-height:66px;padding:8px 5px;border:1px solid #d6b66a;border-radius:15px;color:#fff!important;text-align:center;font-size:clamp(10px,2.5vw,14px);font-weight:800;line-height:1.15;box-shadow:inset 0 1px 0 #ffffff55,0 3px 8px #39200b30;overflow-wrap:anywhere}
+.rt-role-admin{background:linear-gradient(145deg,#451a03 0%,#78350f 100%)}
+.rt-role-kwarran{background:linear-gradient(145deg,#78350f 0%,#a16232 100%)}
+.rt-role-pembina{background:linear-gradient(145deg,#92400e 0%,#b45309 100%)}
+.rt-role-peserta{background:#b45309}
+.rt-role-entry:active{transform:translateY(1px)}
+@media(max-width:380px){.rt-role-entry-grid{gap:5px}.rt-role-entry{min-height:60px;padding:7px 3px;font-size:10px;border-radius:11px}}
+</style>
+<div class="px-4 py-4 bg-amber-50 border-b border-amber-100"><p class="text-center text-xs font-bold uppercase tracking-wide text-amber-900 mb-3">Pilih halaman masuk</p><div class="rt-role-entry-grid"><a href="admin-utama.html" class="rt-role-entry rt-role-admin">Admin<br>Utama</a><a href="admin-kwarran.html" class="rt-role-entry rt-role-kwarran">Admin<br>Kwarran</a><a href="belajar.html" class="rt-role-entry rt-role-pembina">Pembina</a><a href="belajar.html" class="rt-role-entry rt-role-peserta">Peserta<br>Didik</a></div><p class="text-center text-xs font-bold text-black mt-3">Belum memiliki akun?<br>Gunakan formulir pendaftaran di bawah</p></div>
         <div class="grid grid-cols-3 border-b border-gray-200 bg-gray-50">
             <button id="tab-peserta" type="button" onclick="switchTab('peserta')" class="py-3.5 text-sm font-bold text-amber-900 border-b-2 border-amber-800 bg-white transition">⚜️ Peserta Didik</button>
             <button id="tab-pembina" type="button" onclick="switchTab('pembina')" class="py-3.5 text-sm font-semibold text-gray-500 hover:text-amber-900 transition">🎖️ Pembina</button>
