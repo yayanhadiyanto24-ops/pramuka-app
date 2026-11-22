@@ -631,7 +631,7 @@ async function saveProfile(extra={}){
  const isTeacher=account.role==='pembina',isStudent=account.role==='peserta_didik';
  const payload={action:'save_profile',nta:$('profileNta').value.trim(),tanggal_lahir:$('profileBirthDate')?.value||null,foto_profil_data:profilePhotoData,...extra};
  if(isStudent&&payload.nta){
-  const m=payload.nta.match(/^(\\d{2})\\.(\\d{2})\\.(\\d{2})\\.(\\d{6})\\.(\\d{4})$/);
+  const m=payload.nta.match(/^(\d{2})\.(\d{2})\.(\d{2})\.(\d{6})\.(\d{4})$/);
   if(!m){$('profileMsg').textContent='Format NTA harus seperti 09.03.00.200780.0001.';return false;}
   if(!payload.tanggal_lahir){$('profileMsg').textContent='Isi tanggal lahir sesuai KTA terlebih dahulu.';return false;}
   const encoded=payload.tanggal_lahir.slice(8,10)+payload.tanggal_lahir.slice(5,7)+payload.tanggal_lahir.slice(2,4);
