@@ -1720,21 +1720,28 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
  // Sesi otomatis hanya berlaku untuk perpindahan langsung dari Admin Utama.
  // Kunjungan biasa dari tombol Pembina/Peserta Didik harus menunggu ketukan tombol Masuk.
  if(bridge){
-  if(!data.session){
-   const restored=await withAuthTimeout(client.auth.setSession({access_token:bridge.access_token,refresh_token:bridge.refresh_token}),'Pemulihan sesi');
-   if(restored.error)throw restored.error;
-   const check=await withAuthTimeout(client.auth.getSession(),'Verifikasi sesi');
-   if(check.error)throw check.error;
-   data=check.data;
-   if(!data.session)throw new Error('Sesi Admin Utama belum berhasil dipulihkan. Silakan masuk kembali dari halaman Admin Utama.');
-  }
+  // Token dari klik Admin Utama menjadi sumber sesi yang otoritatif.
+  // Jangan memakai sesi lokal lama yang mungkin milik akun berbeda.
+  const restored=await withAuthTimeout(client.auth.setSession({access_token:bridge.access_token,refresh_token:bridge.refresh_token}),'Pemulihan sesi Admin Utama');
+  if(restored.error)throw restored.error;
+  const check=await withAuthTimeout(client.auth.getSession(),'Verifikasi sesi Admin Utama');
+  if(check.error)throw check.error;
+  data=check.data;
+  if(!data.session)throw new Error('Sesi Admin Utama belum berhasil dipulihkan. Silakan masuk kembali dari halaman Admin Utama.');
   try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
  }
  $('sessionLoading')?.classList.add('hidden');
  if(bridge&&data.session){
   $('login').classList.add('hidden');$('application').classList.remove('hidden');
   try{await boot(data.session.user);}
-  catch(err){$('application').classList.remove('hidden');$('login').classList.add('hidden');$('accountNotice').classList.remove('hidden');$('accountNotice').textContent='Akun sudah masuk, tetapi data Ruang Belajar belum berhasil dimuat: '+(err.message||'Kesalahan pemuatan data')+'. Muat ulang halaman atau hubungi Admin Utama jika berulang.';console.error('Ruang Tegak boot error:',err);}
+  catch(err){
+   // Jika handoff gagal, jangan pernah meninggalkan pengguna di layar kosong.
+   $('application').classList.add('hidden');
+   $('login').classList.remove('hidden');
+   $('accountNotice').classList.add('hidden');
+   $('loginMsg').textContent='Sesi Admin Utama belum dapat diteruskan: '+(err.message||'Kesalahan pemuatan data')+'. Silakan kembali ke Admin Utama lalu ketuk Belajar & SKU sekali lagi.';
+   console.error('Ruang Tegak boot error:',err);
+  }
  }else{$('login').classList.remove('hidden');$('application').classList.add('hidden');}
 }).catch(err=>{
  $('sessionLoading')?.classList.add('hidden');
