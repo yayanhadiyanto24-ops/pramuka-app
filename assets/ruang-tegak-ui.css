@@ -65,14 +65,60 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  .panel,.card,.doc-card,.sku-card{transition:border-color .18s ease,box-shadow .18s ease}
 }
 
-/* Ikon kalender/jam pada input tanggal dan waktu mengikuti aksen hasduk. */
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="datetime-local"]::-webkit-calendar-picker-indicator,
-input[type="time"]::-webkit-calendar-picker-indicator{
- filter: invert(19%) sepia(69%) saturate(2354%) hue-rotate(337deg) brightness(83%) contrast(93%);
- opacity:.95;
- cursor:pointer;
+
+/* IDENTITAS MERAH-PUTIH — aksen hasduk terlihat jelas di seluruh halaman */
+:root{
+  --rt-flag-red:#c62832;
+  --rt-flag-white:#fff;
+  --rt-flag-ink:#54242a;
 }
-input[type="date"],input[type="datetime-local"],input[type="time"]{
- accent-color:var(--rt-hasduk-red,#b3262d);
+/* Pita hasduk dua warna di bawah setiap kepala halaman. */
+header{
+  position:relative;
+  border-bottom:0!important;
+  box-shadow:0 5px 16px rgba(65,38,25,.12)!important;
+}
+header::after{
+  content:"";
+  display:block;
+  width:100%;
+  height:9px;
+  margin-top:14px;
+  background:linear-gradient(to bottom,var(--rt-flag-red) 0 50%,var(--rt-flag-white) 50% 100%);
+  box-shadow:0 1px 2px rgba(40,20,15,.18);
+}
+/* Judul bagian mendapat penanda merah yang tegas, dengan garis putih pemisah. */
+main h2{
+  border-left:4px solid var(--rt-flag-red);
+  padding-left:.62rem;
+  box-shadow:inset 2px 0 0 var(--rt-flag-white);
+}
+/* Kartu tetap memakai warna dasar aslinya; tepi merah-putih menjadi aksen. */
+.panel,.card,.doc-card,.sku-card{
+  border-top:2px solid rgba(198,40,50,.52);
+}
+.sku-card.selected{
+  border:2px solid var(--rt-flag-red)!important;
+  box-shadow:0 0 0 3px rgba(198,40,50,.12),0 5px 16px rgba(65,38,25,.07)!important;
+}
+/* Tombol tindakan utama memakai merah; tombol emas navigasi tetap dipertahankan. */
+button.primary,button[type="submit"].primary,.rt-primary,
+a.rt-primary{
+  background:linear-gradient(135deg,#d7353e,#a91825)!important;
+  color:#fff!important;
+  border:1px solid #941722!important;
+  box-shadow:0 2px 0 #78121c,0 3px 8px rgba(80,12,20,.2),inset 0 1px 0 rgba(255,255,255,.24)!important;
+}
+input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid rgba(198,40,50,.62)!important;
+  outline-offset:2px;
+  border-color:var(--rt-flag-red)!important;
+}
+/* Pita kecil merah-putih pada tabel dan area informasi. */
+main table thead{
+  border-top:2px solid var(--rt-flag-red);
+  border-bottom:2px solid #fff;
+}
+@media(max-width:640px){
+  header::after{height:8px;margin-top:11px}
 }
