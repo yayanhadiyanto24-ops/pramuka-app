@@ -47,6 +47,15 @@ Pemeriksaan dilakukan dengan membaca berkas dari branch utama, penelusuran alur 
 6. **Supabase Auth belum mengaktifkan perlindungan kata sandi bocor.** Advisor mengingatkan fitur pemeriksaan kata sandi kompromi masih nonaktif. Ini pengaturan Auth tingkat proyek yang perlu ditinjau Admin Utama sebelum diaktifkan.
 7. **Advisor masih menandai fungsi `pembina_review_nta` karena role `authenticated` dapat menjalankan SECURITY DEFINER.** Ini diperlukan oleh tombol verifikasi di halaman Belajar; isi fungsi memeriksa `auth.uid()`, status akun, kecocokan satuan, dan verifikasi KTA Pembina sebelum mengubah data. Grant untuk `anon` sudah dicabut. Temuan authenticated dicatat sebagai akses terproteksi yang memang dibutuhkan, bukan dihapus dengan memutus fitur.
 
+## Verifikasi lanjutan setelah perbaikan
+
+- Pemeriksaan statis ulang pada 10 kondisi kode berhasil: atribut login, tidak adanya reset form login, tab peran tidak memanggil reset, pemulihan sesi admin, fallback submitter, fallback Service Worker, pemulihan WebView, dan penggunaan RPC audit atomik.
+- Database live: tidak ada lagi foreign key tanpa indeks pada schema `public`; indeks unik utama Sangga tetap dipertahankan; indeks duplikat telah hilang.
+- Advisor performa: peringatan `auth_rls_initplan` telah hilang; multiple-permissive-policy turun dari 5 menjadi 2. Dua sisanya dipertahankan karena memang menggabungkan hak peserta/Pembina dan akses publik/Pembina.
+- Advisor keamanan: grant anonim untuk RPC verifikasi NTA sudah hilang. Masih ada peringatan untuk fungsi verifikasi NTA yang memang dipanggil akun terautentikasi dan memiliki pemeriksaan kewenangan di dalam fungsi; 15 tabel tanpa policy tetap tertutup bagi `anon/authenticated` dan digunakan melalui Edge Function service-role.
+- Perlindungan kata sandi bocor masih nonaktif pada konfigurasi Auth proyek; ini belum diubah karena merupakan pengaturan keamanan tingkat proyek yang dapat memengaruhi proses pendaftaran.
+- **Gejala kolom email/kata sandi yang kosong belum dapat dinyatakan selesai.** Pemeriksaan kode memastikan tidak ada reset langsung pada form login Belajar, tab peran halaman awal hanya menyembunyikan/menampilkan form tanpa reset, dan reload otomatis Service Worker hanya terjadi setelah pengguna menekan tombol Perbarui. Pengujian langsung pada WebView HP masih diperlukan untuk memastikan apakah nilai hilang akibat perilaku autofill, pemulihan Activity, atau navigasi aktual.
+
 ## Catatan pemeriksaan
 
 - Referensi lokal yang dipindai pada halaman utama tidak menunjukkan tautan aset/halaman lokal yang hilang.
