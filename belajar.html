@@ -750,7 +750,12 @@ const loginForm=$('loginForm'),loginButton=$('loginBtn');
   await boot(data.user);
  }catch(err){
   console.error('Ruang Tegak login error:',err);
-  $('loginMsg').textContent='Login gagal: '+(err?.message||'Terjadi kendala yang belum dikenali.');
+  // Jangan biarkan halaman kosong jika boot gagal setelah login berhasil.
+  $('application').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('accountNotice').classList.add('hidden');
+  $('logout').classList.add('hidden');
+  $('loginMsg').textContent='Login belum dapat diselesaikan: '+(err?.message||'Terjadi kendala yang belum dikenali. Periksa koneksi dan coba kembali.');
  }finally{
   if(!$('login').classList.contains('hidden')){
    $('email').value=emailValue;
