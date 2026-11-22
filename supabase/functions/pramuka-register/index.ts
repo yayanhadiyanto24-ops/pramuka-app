@@ -273,7 +273,7 @@ Deno.serve(async(req:Request)=>{
    }else if(me.role==="pembina"){
     const {data:currentTeacher,error:currentTeacherError}=await admin.from("profil_pembina").select("nta,nta_status_verifikasi").eq("id_user",authData.user.id).single();if(currentTeacherError)throw currentTeacherError;
     const teacherNta=clean(body.nta,80)||null;
-    if(teacherNta&&!/^\\d{2}\\.\\d{2}\\.\\d{2}\\.\\d{6}\\.\\d{4}$/.test(teacherNta))return reply({ok:false,message:"Format NTA Pembina harus AA.BB.CC.DDMMYY.XXXX."},400);
+    if(teacherNta&&!/^\d{2}\.\d{2}\.\d{2}\.\d{6}\.\d{4}$/.test(teacherNta))return reply({ok:false,message:"Format NTA Pembina harus AA.BB.CC.DDMMYY.XXXX."},400);
     const years={tahun_kmd:body.tahun_kmd,tahun_kml:body.tahun_kml,tahun_kpd:body.tahun_kpd,tahun_kpl:body.tahun_kpl};
     for(const [k,v] of Object.entries(years))if(v!==null&&v!==undefined&&v!==""&&(!Number.isInteger(Number(v))||Number(v)<1950||Number(v)>new Date().getFullYear()+1))return reply({ok:false,message:"Tahun pendidikan Pembina tidak valid."},400);
     const patch={nta:teacherNta,foto_profil_data:photo||null,tahun_kmd:years.tahun_kmd?Number(years.tahun_kmd):null,tahun_kml:years.tahun_kml?Number(years.tahun_kml):null,tahun_kpd:years.tahun_kpd?Number(years.tahun_kpd):null,tahun_kpl:years.tahun_kpl?Number(years.tahun_kpl):null,tanda_tangan_data:typeof body.tanda_tangan_data==="string"&&body.tanda_tangan_data.startsWith("data:image/")&&body.tanda_tangan_data.length<300000?body.tanda_tangan_data:null,paraf_data:typeof body.paraf_data==="string"&&body.paraf_data.startsWith("data:image/")&&body.paraf_data.length<150000?body.paraf_data:null};
@@ -654,7 +654,7 @@ Deno.serve(async(req:Request)=>{
    if(!targetId||!["disetujui_admin","ditolak"].includes(status))return reply({ok:false,message:"Data validasi KTA Pembina tidak valid."},400);
    const {data:target,error:targetError}=await admin.from("profil_pembina").select("id_user,nta,nta_bukti_kta").eq("id_user",targetId).maybeSingle();if(targetError)throw targetError;
    if(!target||!clean(target.nta,80)||!target.nta_bukti_kta?.path)return reply({ok:false,message:"Pembina harus melengkapi NTA dan mengunggah bukti KTA terlebih dahulu."},400);
-   if(status==="disetujui_admin"&&!/^\\d{2}\\.\\d{2}\\.\\d{2}\\.\\d{6}\\.\\d{4}$/.test(target.nta))return reply({ok:false,message:"Format NTA Pembina tidak valid."},400);
+   if(status==="disetujui_admin"&&!/^\d{2}\.\d{2}\.\d{2}\.\d{6}\.\d{4}$/.test(target.nta))return reply({ok:false,message:"Format NTA Pembina tidak valid."},400);
    const {error:updateError}=await admin.from("profil_pembina").update({nta_status_verifikasi:status}).eq("id_user",targetId);if(updateError)throw updateError;
    return reply({ok:true,message:status==="disetujui_admin"?"KTA Pembina disetujui. Pembina kini berwenang melakukan validasi akhir NTA peserta.":"KTA Pembina ditolak. Pembina belum berwenang melakukan validasi akhir."});
   }
