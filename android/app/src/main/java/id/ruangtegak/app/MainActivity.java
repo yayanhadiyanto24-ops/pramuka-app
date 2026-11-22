@@ -57,9 +57,14 @@ public class MainActivity extends Activity {
             }
         });
 
+        boolean restored = false;
         if (savedInstanceState != null) {
-            webView.restoreState(savedInstanceState);
-        } else {
+            android.webkit.WebBackForwardList history = webView.restoreState(savedInstanceState);
+            restored = history != null && history.getSize() > 0;
+        }
+        // Pemulihan WebView dapat gagal atau tidak memiliki riwayat.
+        // Dalam kondisi itu tetap buka halaman Admin Utama, bukan WebView kosong.
+        if (!restored) {
             webView.loadUrl(APP_URL);
         }
     }
