@@ -602,9 +602,32 @@ $('loginModeEmail').onclick=()=>setLoginMode('email');$('loginModeQr').onclick=(
 let loginQrScanner=null,loginQrId='';
 async function stopLoginQrScanner(){if(loginQrScanner){try{await loginQrScanner.stop();}catch(_){}try{await loginQrScanner.clear();}catch(_){}loginQrScanner=null;}$('loginQrReader').classList.add('hidden');$('loginQrStart').disabled=false;}
 async function requestQrLogin(id){
- $('loginQrStatus').textContent='Memeriksa ID QR dan profil anggota...';$('loginQrStart').disabled=true;
- try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'qr_login',id_qr_kta:id}});if(error)throw error;if(!data?.ok||!data.session)throw new Error(data?.message||'Login QR belum berhasil.');const {data:sessionData,error:setError}=await sb.auth.setSession(data.session);if(setError)throw setError;await boot(sessionData.user||data.user);}
- catch(err){$('loginQrStatus').textContent=err.message||'QR tidak cocok atau akun belum aktif.';$('loginQrStart').disabled=false;}
+ $('loginQrStatus').textContent='Memeriksa QR dan mengirim email konfirmasi...';$('loginQrStart').disabled=true;
+ let pollTimer=null;
+ try{
+  const {data,error}=await sb.functions.invoke('pramuka-register',{body:{action:'qr_login',id_qr_kta:id}});
+  if(error)throw error;if(!data?.ok||!data.approval_token)throw new Error(data?.message||'Permintaan login belum berhasil.');
+  const approvalToken=data.approval_token;
+  $('loginQrStatus').textContent='Email konfirmasi telah dikirim. Buka email di perangkat Anda, lalu pilih YA. Menunggu persetujuan (maksimal 5 menit)...';
+  const deadline=Date.now()+5*60*1000;
+  while(Date.now()<deadline){
+   await new Promise(resolve=>setTimeout(resolve,2500));
+   const {data:statusData,error:statusError}=await sb.functions.invoke('pramuka-register',{body:{action:'qr_login_status',token:approvalToken}});
+   if(statusError)throw statusError;
+   if(statusData?.status==='approved'){
+    $('loginQrStatus').textContent='Login disetujui. Menyiapkan sesi...';
+    const {data:exchange,error:exchangeError}=await sb.functions.invoke('pramuka-register',{body:{action:'qr_login_exchange',token:approvalToken}});
+    if(exchangeError)throw exchangeError;if(!exchange?.ok||!exchange.session)throw new Error(exchange?.message||'Sesi login tidak berhasil dibuat.');
+    const {data:sessionData,error:setError}=await sb.auth.setSession(exchange.session);if(setError)throw setError;
+    $('loginQrStatus').textContent='Login berhasil.';
+    await boot(sessionData.user||exchange.user);return;
+   }
+   if(statusData?.status==='denied')throw new Error('Permintaan login ditolak melalui email. Pindai ulang jika itu memang Anda.');
+   if(statusData?.status==='expired')throw new Error('Waktu konfirmasi berakhir. Silakan pindai QR lagi.');
+   if(statusData?.status==='consumed')throw new Error('Permintaan login sudah digunakan. Silakan pindai QR lagi.');
+  }
+  throw new Error('Belum ada konfirmasi dalam 5 menit. Silakan pindai QR lagi.');
+ }catch(err){$('loginQrStatus').textContent=err.message||'Login QR belum berhasil.';$('loginQrStart').disabled=false;}
 }
 $('loginQrStart').onclick=async()=>{
  if(!window.Html5Qrcode){$('loginQrStatus').textContent='Modul pemindai QR belum termuat. Muat ulang halaman.';return;}
