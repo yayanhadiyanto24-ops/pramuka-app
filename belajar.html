@@ -535,7 +535,7 @@ header #appCreatorCredit{grid-area:credit!important}
    <div><span class="rt-login-kicker">RUANG TEGAK</span><h1 class="text-xl sm:text-2xl font-extrabold">Masuk ke Ruang Belajar</h1><p class="text-sm muted mt-1">Gunakan akun Pembina atau Peserta Didik yang telah terdaftar.</p></div>
   </div>
   <div class="rt-login-divider"></div>
-  <form id="loginForm" class="rt-login-form" novalidate>
+  <form id="loginForm" class="rt-login-form" autocomplete="on" novalidate>
    <label class="rt-login-field" for="email"><span>Email akun</span><input id="email" type="email" required autocomplete="username" placeholder="nama@email.com" class="w-full border rounded-lg p-3"></label>
    <label class="rt-login-field" for="password"><span>Kata sandi</span><input id="password" type="password" required autocomplete="current-password" placeholder="Masukkan kata sandi" class="w-full border rounded-lg p-3"></label>
    <button id="loginBtn" type="submit" class="rt-login-submit w-full rounded-lg font-bold p-3">Masuk</button>
@@ -728,7 +728,14 @@ function showTab(name){
  ['umum','profile','sku','pantau','administrasi','peringkat'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==name));
  if((name==='administrasi'||name==='peringkat')&&account?.role==='pembina')loadPangkalanAdmin();}
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
-$('loginForm').addEventListener('submit',async e=>{
+const loginForm=$('loginForm'),loginButton=$('loginBtn');
+ let loginButtonExplicitlyPressed=false;
+ loginButton.addEventListener('click',e=>{loginButtonExplicitlyPressed=e.isTrusted===true;});
+ loginForm.addEventListener('submit',e=>{
+  if(!loginButtonExplicitlyPressed){e.preventDefault();e.stopImmediatePropagation();return;}
+  loginButtonExplicitlyPressed=false;
+ },true);
+ $('loginForm').addEventListener('submit',async e=>{
  e.preventDefault();
  const emailValue=$('email').value.trim(),passwordValue=$('password').value;
  if(!emailValue||!passwordValue){$('loginMsg').textContent='Email dan kata sandi wajib diisi.';return;}
