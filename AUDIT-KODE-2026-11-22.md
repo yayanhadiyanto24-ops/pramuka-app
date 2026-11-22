@@ -111,3 +111,7 @@ Pemeriksaan dilakukan dengan membaca berkas dari branch utama, penelusuran alur 
 - Uji regresi terbaru pada commit `af9ae7178cd712d1b305a16ee507e326e6a61704` lulus seluruhnya: 11 tes, 0 gagal. Tes tambahan memeriksa batas role pendaftaran publik, undangan sekali pakai, validasi Admin Utama, dan pembatasan dashboard Sekretaris/Admin Kwarran.
 - Halaman Admin Kwarran memang menampilkan perbandingan lintas Kwarran. Pemeriksaan menunjukkan respons tersebut hanya berisi agregat wilayah (jumlah pangkalan, ambalan, peserta, tingkatan, poin, dan peringkat), tanpa nama, email, profil, atau bukti individu peserta. Halaman juga memberi keterangan bahwa wilayah lain hanya tampil sebagai ringkasan. Data rinci pangkalan dan peringkat yang dikirim untuk pengelolaan tetap difilter ke `id_kwarran` milik Admin Kwarran. Karena itu, perbandingan agregat dipertahankan sebagai fungsi pembanding, bukan dianggap kebocoran data pribadi.
 - GitHub Pages untuk commit kode dan tes terbaru telah selesai dengan status sukses. Pembaruan dokumentasi audit ini menyusul pada deploy berikutnya.
+
+
+### Fitur akun yang belum tersedia
+- Audit halaman login menemukan belum ada alur “Lupa kata sandi”/pemulihan kata sandi pada halaman Peserta Didik, Pembina, Admin Utama, Admin Kwarran, maupun Sekretaris Kwarcab. Ini dicatat sebagai pekerjaan lanjutan. Implementasi aman memerlukan pemeriksaan dan pengaturan URL redirect Supabase Auth agar tautan reset kembali ke halaman pemulihan yang benar; pengaturan tersebut belum dapat dibaca atau diubah melalui koneksi administrasi yang tersedia.
