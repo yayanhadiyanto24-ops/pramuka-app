@@ -104,3 +104,10 @@ Pemeriksaan dilakukan dengan membaca berkas dari branch utama, penelusuran alur 
 ### Batas pemeriksaan
 - Audit ini tidak membuat akun uji, tidak mengubah data anggota, dan tidak mengubah penempatan Kwarran.
 - Pengaturan perlindungan kata sandi bocor pada Supabase Auth belum dapat diverifikasi melalui koneksi administrasi yang tersedia. Ini tetap menjadi pemeriksaan konfigurasi tersendiri, bukan dianggap sudah aktif.
+
+
+## Verifikasi akhir tahap ini — 22 November 2026
+
+- Uji regresi terbaru pada commit `af9ae7178cd712d1b305a16ee507e326e6a61704` lulus seluruhnya: 11 tes, 0 gagal. Tes tambahan memeriksa batas role pendaftaran publik, undangan sekali pakai, validasi Admin Utama, dan pembatasan dashboard Sekretaris/Admin Kwarran.
+- Halaman Admin Kwarran memang menampilkan perbandingan lintas Kwarran. Pemeriksaan menunjukkan respons tersebut hanya berisi agregat wilayah (jumlah pangkalan, ambalan, peserta, tingkatan, poin, dan peringkat), tanpa nama, email, profil, atau bukti individu peserta. Halaman juga memberi keterangan bahwa wilayah lain hanya tampil sebagai ringkasan. Data rinci pangkalan dan peringkat yang dikirim untuk pengelolaan tetap difilter ke `id_kwarran` milik Admin Kwarran. Karena itu, perbandingan agregat dipertahankan sebagai fungsi pembanding, bukan dianggap kebocoran data pribadi.
+- GitHub Pages untuk commit kode dan tes terbaru telah selesai dengan status sukses. Pembaruan dokumentasi audit ini menyusul pada deploy berikutnya.
