@@ -807,7 +807,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #c9a875!important;outline
 (()=>{
  const mark=()=>{
   const here=new URL(location.href);
-  document.querySelectorAll('nav a[href], .rt-account-actions a[href]').forEach(a=>{
+  document.querySelectorAll('nav:not(#admin-header-nav) a[href], .rt-account-actions a[href]').forEach(a=>{
    let target;try{target=new URL(a.getAttribute('href'),here.href)}catch(_){return}
    if(target.origin!==here.origin)return;
    const targetPath=target.pathname.endsWith('/')?target.pathname.slice(0,-1):target.pathname;
