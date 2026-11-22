@@ -1730,10 +1730,9 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
   try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
  }
  $('sessionLoading')?.classList.add('hidden');
- if(data.session){
-  // Pulihkan sesi Supabase yang masih aktif untuk seluruh peran.
-  // admin_handoff hanya diperlukan saat token lintas halaman perlu dipulihkan;
-  // sesi persisten normal juga harus langsung membuka aplikasi, bukan formulir login.
+ if(allowAdminHandoff&&data.session){
+  // Hanya perpindahan langsung dari Admin Utama yang boleh melewati formulir.
+  // Pembina dan Peserta Didik selalu mendapat formulir masuk yang siap digunakan.
   $('login').classList.add('hidden');$('application').classList.remove('hidden');
   try{await boot(data.session.user);}
   catch(err){
