@@ -1027,20 +1027,46 @@ function openSubpoint(id){
  if($('subEvidenceList'))renderEvidenceAttachments('subEvidenceList',p?.bukti_lampiran||[]);
  if(canEdit){$('subSave').onclick=()=>saveSubpointProgress(id,'dipelajari');$('subSubmit').onclick=()=>saveSubpointProgress(id,'siap_diuji');}
 }
+let savingCompletionPlan=false;
 async function saveCompletionPlan(status){
+ if(savingCompletionPlan)return;
+ if(!currentUser?.id||!selectedItem?.id_sku_item){setMsg('Sesi peserta atau butir SKU belum siap. Muat ulang halaman, lalu coba kembali.');return;}
+ const itemId=selectedItem.id_sku_item;
  const textPlan=$('skuPlanText')?.value.trim()||'';
  const targetDate=$('skuPlanDate')?.value||'';
  if(status==='diajukan'&&textPlan.length<20){setMsg('Tuliskan rencana kegiatan sekurang-kurangnya 20 karakter sebelum diserahkan kepada Pembina.');return;}
  if(status==='diajukan'&&!targetDate){setMsg('Tentukan tanggal target penyelesaian sebelum menyerahkan rencana kepada Pembina.');return;}
- const payload={id_user:currentUser.id,id_sku_item:selectedItem.id_sku_item,rencana_kegiatan:textPlan,target_tanggal:$('skuPlanDate')?.value||null,status,diajukan_at:status==='diajukan'?new Date().toISOString():null,diperbarui_at:new Date().toISOString()};
- setMsg(status==='diajukan'?'Menyerahkan rencana kepada Pembina...':'Menyimpan rancangan...');
- const {error}=await sb.from('sku_completion_plans').upsert(payload,{onConflict:'id_user,id_sku_item'});
- if(error){setMsg('Rencana belum tersimpan: '+error.message);return;}
- const {data,error:loadError}=await sb.from('sku_completion_plans').select('*').eq('id_user',currentUser.id);
- if(loadError){setMsg('Rencana tersimpan, tetapi tampilan belum diperbarui: '+loadError.message);return;}
- completionPlans=(completionPlans.filter(p=>p.id_user!==currentUser.id)).concat(data||[]);
- openSku(selectedItem.id_sku_item);
- setMsg(status==='diajukan'?'Rencana penyelesaian SKU berhasil diserahkan kepada Pembina.':'Rancangan penyelesaian SKU berhasil disimpan.');
+ const saveBtn=$('saveSkuPlan'),submitBtn=$('submitSkuPlan');
+ const buttons=[saveBtn,submitBtn].filter(Boolean);
+ const oldLabels=buttons.map(b=>b.textContent);
+ savingCompletionPlan=true;
+ buttons.forEach(b=>b.disabled=true);
+ const activeBtn=status==='diajukan'?submitBtn:saveBtn;
+ if(activeBtn)activeBtn.textContent=status==='diajukan'?'Sedang mengirim...':'Sedang menyimpan...';
+ setMsg(status==='diajukan'?'Sedang mengirim rancangan kepada Pembina. Mohon tunggu...':'Sedang menyimpan rancangan. Mohon tunggu...');
+ try{
+  const payload={id_user:currentUser.id,id_sku_item:itemId,rencana_kegiatan:textPlan,target_tanggal:targetDate||null,status,diajukan_at:status==='diajukan'?new Date().toISOString():null,diperbarui_at:new Date().toISOString()};
+  const {data:written,error}=await sb.from('sku_completion_plans').upsert(payload,{onConflict:'id_user,id_sku_item'}).select('id_user,id_sku_item,status,rencana_kegiatan,target_tanggal,diajukan_at,diperbarui_at').single();
+  if(error)throw new Error(error.message||'Database menolak penyimpanan rancangan.');
+  if(!written)throw new Error('Server belum mengonfirmasi data rancangan yang tersimpan.');
+  const {data,error:loadError}=await sb.from('sku_completion_plans').select('*').eq('id_user',currentUser.id);
+  if(loadError){
+   const existing=completionPlans.filter(p=>!(p.id_user===currentUser.id&&p.id_sku_item===itemId));
+   completionPlans=existing.concat([written]);
+   openSku(itemId);
+   setMsg(status==='diajukan'?'Rancangan berhasil dikirim dan tersimpan di server, tetapi daftar belum dapat diperbarui. Muat ulang halaman untuk melihat statusnya.':'Rancangan berhasil disimpan di server, tetapi daftar belum dapat diperbarui. Muat ulang halaman untuk melihat statusnya.');
+   return;
+  }
+  completionPlans=completionPlans.filter(p=>p.id_user!==currentUser.id).concat(data||[]);
+  openSku(itemId);
+  setMsg(status==='diajukan'?'Berhasil! Rencana penyelesaian SKU sudah terkirim kepada Pembina.':'Berhasil! Rancangan penyelesaian SKU sudah tersimpan.');
+ }catch(err){
+  const reason=err?.message||String(err)||'Kesalahan tidak diketahui.';
+  setMsg((status==='diajukan'?'Pengiriman gagal.':'Penyimpanan gagal.')+' Rancangan belum dapat dikonfirmasi: '+reason);
+ }finally{
+  savingCompletionPlan=false;
+  buttons.forEach((b,i)=>{b.disabled=false;b.textContent=oldLabels[i];});
+ }
 }
 async function saveSubpointProgress(subId,status){
  const notes=$('subNotes')?.value||'',evidence=$('subEvidence')?.value||'';
