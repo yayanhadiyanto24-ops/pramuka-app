@@ -67,3 +67,14 @@ Pemeriksaan dilakukan dengan membaca berkas dari branch utama, penelusuran alur 
 - JSON `manifest.webmanifest`, `google-services.json`, dan data SKU berhasil diparse.
 - CSS utama yang diperiksa memiliki jumlah kurung buka/tutup seimbang.
 - Belum ada klaim bahwa aplikasi telah lulus uji di perangkat; akses GitHub tidak memberi bukti hasil runtime pada HP.
+
+
+## Pemeriksaan keamanan database live — 22 November 2026
+
+- Seluruh tabel pada schema `public` yang memiliki hak akses SELECT/INSERT untuk role `anon` atau `authenticated` terverifikasi mengaktifkan RLS. Query katalog tidak menemukan tabel publik yang sekaligus dapat diakses kedua role tersebut tanpa RLS.
+- Tabel `users`, `pangkalan`, `profil_pembina`, `admin_kwarran`, `sekretaris_kwarcab`, `pangkalan_change_audit`, dan `kwarran_admin_invites` terverifikasi mengaktifkan RLS. Pembacaan data pengguna dan pangkalan dibatasi oleh policy sesuai identitas/keanggotaan; tabel pengelolaan internal yang tidak memiliki policy tetap tertutup untuk akses langsung.
+- `app_admin_config` mengaktifkan RLS dan tidak memiliki policy baca. Walaupun grant SELECT tercatat pada role `anon` dan `authenticated`, RLS tanpa policy membuat kedua role tidak dapat membaca baris konfigurasi. Edge Function membacanya melalui klien service-role; tidak ditemukan referensi tabel ini pada halaman HTML utama.
+- RPC `pembina_update_pangkalan_with_audit(bigint,uuid,jsonb)` terpasang di database live, dimiliki `postgres`, dan hanya memberikan EXECUTE kepada `service_role` (selain owner). Fungsi memeriksa Pembina aktif dan kecocokan pangkalan, membatasi nama kolom yang boleh diubah, mengunci baris, serta menyimpan perubahan dan audit dalam satu transaksi.
+- Fungsi `pembina_review_nta(uuid,text)` memang dapat dijalankan oleh `authenticated`, tetapi isi fungsi memerlukan `auth.uid()` dan memanggil `private.can_review_student`. Pemeriksaan tersebut mencocokkan Pembina aktif, status KTA/validasi Pembina, satuan yang sama, serta jenis kelamin peserta sebelum status NTA diubah. Grant `anon` sudah dicabut pada migrasi sebelumnya.
+- Pemeriksaan data live menemukan 5 pangkalan dengan penempatan pada 2 Kwarran: 4 pada Leles dan 1 pada Sindangbarang. Tidak terlihat seluruh data saat ini terseragamkan ke satu Kwarran.
+- Pemeriksaan ini bersifat audit baca-saja; tidak ada perubahan data anggota atau penempatan Kwarran pada tahap ini.
