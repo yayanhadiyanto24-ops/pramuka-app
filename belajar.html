@@ -6,14 +6,20 @@
 <title>Ruang Tegak · Belajar Pramuka Penegak</title>
 <script>
 window.__sbReady = new Promise(resolve => {
+  let finished = false;
   const load = (src, fallback) => {
     const s = document.createElement('script');
-    s.src = src;
-    s.onload = () => resolve(true);
-    s.onerror = () => {
+    const timer = setTimeout(() => {
       s.remove();
       if (fallback) load(fallback, null);
-      else resolve(false);
+      else if (!finished) { finished = true; resolve(false); }
+    }, 8000);
+    s.src = src;
+    s.onload = () => { clearTimeout(timer); if (!finished) { finished = true; resolve(true); } };
+    s.onerror = () => {
+      clearTimeout(timer); s.remove();
+      if (fallback) load(fallback, null);
+      else if (!finished) { finished = true; resolve(false); }
     };
     document.head.appendChild(s);
   };
@@ -1533,8 +1539,12 @@ async function review(id,status){
  if(error){setMsg('Penilaian gagal disimpan: '+error.message);return;}
  const {data}=await sb.from('sku_learning_progress').select('*');progress=data||[];await loadMonitor();setMsg('Hasil ujian tersimpan.');
 }
-sbReady.then(async client=>{
- let {data,error}=await client.auth.getSession();
+const withAuthTimeout=(promise,label,ms=12000)=>Promise.race([
+ promise,
+ new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' tidak merespons dalam '+Math.round(ms/1000)+' detik. Periksa koneksi, lalu muat ulang halaman.')),ms))
+]);
+withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
+ let {data,error}=await withAuthTimeout(client.auth.getSession(),'Pemeriksaan sesi');
  if(error)throw error;
  const candidates=[];
  for(const store of [sessionStorage,localStorage]){
@@ -1546,9 +1556,9 @@ sbReady.then(async client=>{
  candidates.sort((a,b)=>Number(b.created_at||0)-Number(a.created_at||0));
  const bridge=candidates[0];
  if(bridge){
-  const restored=await client.auth.setSession({access_token:bridge.access_token,refresh_token:bridge.refresh_token});
+  const restored=await withAuthTimeout(client.auth.setSession({access_token:bridge.access_token,refresh_token:bridge.refresh_token}),'Pemulihan sesi');
   if(restored.error)throw restored.error;
-  const check=await client.auth.getSession();
+  const check=await withAuthTimeout(client.auth.getSession(),'Verifikasi sesi');
   if(check.error)throw check.error;
   data=check.data;
   if(!data.session)throw new Error('Sesi Admin Utama belum berhasil dipulihkan. Silakan masuk kembali dari halaman Admin Utama.');
