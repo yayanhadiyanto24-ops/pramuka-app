@@ -21,6 +21,12 @@ test('Memilih halaman Peserta Didik/Pembina tidak mereset formulir', () => {
   const handler = html.slice(start, end);
   assert.doesNotMatch(handler, /\.reset\s*\(/);
   assert.doesNotMatch(handler, /\.value\s*=\s*['"]['"]/);
+  assert.match(handler, /activeRegistrationRole === 'peserta' && role === 'pembina'/);
+  assert.match(handler, /activeRegistrationRole === 'pembina' && role === 'peserta'/);
+  assert.match(handler, /if \(fromEmail && toEmail && !toEmail\.value\) toEmail\.value = fromEmail\.value/);
+  assert.match(handler, /if \(fromPassword && toPassword && !toPassword\.value\) toPassword\.value = fromPassword\.value/);
+  assert.match(handler, /activeRegistrationRole = role/);
+  assert.doesNotMatch(handler, /localStorage|sessionStorage/);
 });
 
 test('Semua dataset dashboard memakai paginasi bertahap', () => {
