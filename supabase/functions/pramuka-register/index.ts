@@ -252,16 +252,16 @@ Deno.serve(async(req:Request)=>{
    if(assignmentError)throw assignmentError;
    if(!assignment)return reply({ok:false,message:"Akun Admin Kwarran belum ditetapkan wilayahnya. Hubungi Admin Utama."},403);
    const [comparison,pangkalan]=await Promise.all([
-    admin.from("v_kwarran_comparison").select("*").order("nama_kwarran"),
-    admin.from("pangkalan").select("id_pangkalan,nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri").eq("id_kwarran",assignment.id_kwarran).order("nama_pangkalan")
+    fetchAllRows(()=>admin.from("v_kwarran_comparison").select("*").order("nama_kwarran")),
+    fetchAllRows(()=>admin.from("pangkalan").select("id_pangkalan,nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri").eq("id_kwarran",assignment.id_kwarran).order("nama_pangkalan").order("id_pangkalan"))
    ]);
    if(comparison.error)throw comparison.error;if(pangkalan.error)throw pangkalan.error;
    const ids=(pangkalan.data||[]).map(x=>x.id_pangkalan);
    let rekap=[],rankingPangkalan:any[]=[];
    if(ids.length){
     const [{data:rows,error:rowsError},{data:ranking,error:rankingError}]=await Promise.all([
-     admin.from("v_admin_ambalan_rekap").select("*").in("id_pangkalan",ids).order("nama_pangkalan").order("jenis_kelamin"),
-     admin.from("v_pangkalan_peringkat").select("*").eq("id_kwarran",assignment.id_kwarran).order("peringkat_kwarran",{ascending:true,nullsFirst:false}).order("nama_pangkalan")
+     fetchAllRows(()=>admin.from("v_admin_ambalan_rekap").select("*").in("id_pangkalan",ids).order("nama_pangkalan").order("jenis_kelamin")),
+     fetchAllRows(()=>admin.from("v_pangkalan_peringkat").select("*").eq("id_kwarran",assignment.id_kwarran).order("peringkat_kwarran",{ascending:true,nullsFirst:false}).order("nama_pangkalan"))
     ]);
     if(rowsError)throw rowsError;if(rankingError)throw rankingError;rekap=rows||[];rankingPangkalan=ranking||[];
    }
