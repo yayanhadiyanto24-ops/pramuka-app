@@ -404,7 +404,7 @@ a[class*="rounded"]{
     <div><h2 class="text-xl font-bold">Lengkapi Profil</h2><p class="text-sm muted">Data profil digunakan untuk identitas kepramukaan dan administrasi SKU. Isi NTA sesuai KTA Nasional.</p></div>
     <div class="grid md:grid-cols-[150px_1fr] gap-4 items-start">
      <div class="space-y-2"><img id="profilePhotoPreview" class="w-32 h-32 rounded-full object-cover border bg-slate-50" alt="Foto profil"><label class="block text-sm font-semibold">Foto profil<input id="profilePhotoInput" type="file" accept="image/*" class="block w-full text-xs mt-1"></label><p class="text-xs muted">Foto akan diperkecil otomatis.</p></div>
-     <div class="space-y-2"><label id="ntaProfileField" class="block text-sm font-semibold">NTA/KTA Pramuka Nasional<input id="profileNta" maxlength="80" class="w-full border rounded-lg p-2 mt-1" placeholder="Masukkan nomor NTA/KTA"></label><p class="text-xs muted">NTA diperlukan untuk persyaratan ujian SKU dan kenaikan tingkatan setelah validasi.</p>
+     <div class="space-y-2"><label id="ntaProfileField" class="block text-sm font-semibold">Nomor NTA Pramuka Nasional<input id="profileNta" maxlength="18" class="w-full border rounded-lg p-2 mt-1" placeholder="XX.XX.XX.XXXXXX.XXXX"></label><label id="qrKtaProfileField" class="block text-sm font-semibold mt-2">ID QR KTA Nasional (9 digit)<input id="profileQrKtaId" inputmode="numeric" maxlength="9" readonly class="w-full border rounded-lg p-2 mt-1 bg-slate-50" placeholder="Pindai QR KTA untuk mengisi ID"></label><p class="text-xs muted">NTA diperlukan untuk persyaratan ujian SKU dan kenaikan tingkatan setelah validasi.</p>
       <label class="block text-sm font-semibold">Tanggal lahir<input id="profileBirthDate" type="date" class="w-full border rounded-lg p-2 mt-1"></label>
       <p class="text-xs muted">Tanggal lahir harus sama dengan bagian tanggal lahir pada NTA dan KTA. Data ini akan dicocokkan saat verifikasi Pembina.</p>
       <p class="text-xs muted">Format NTA: AA (Kwarda).BB (Kwarcab).CC (Kwarran).DDMMYY (tanggal lahir).XXXX (nomor urut). Contoh penerbitan langsung Kwarcab: 09.03.00.200780.0001. Untuk Kwarran Leles, Cianjur: 09.03.30.DDMMYY.XXXX. Kode 09 = Kwarda Jawa Barat, 03 = Kwarcab Cianjur, 30 = Kwarran Leles.</p>
@@ -415,7 +415,7 @@ a[class*="rounded"]{
        <p id="ktaEvidenceStatus" class="text-sm text-slate-600">Belum ada bukti KTA yang diunggah.</p>
        <a id="ktaEvidenceLink" class="hidden text-sm font-semibold text-blue-700 underline" target="_blank" rel="noopener">Lihat bukti KTA tersimpan</a>
       </div>
-      <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 space-y-2"><b class="text-sm">Pemindaian QR KTA</b><p class="text-xs muted">Pindai QR KTA. Sistem akan membaca NTA dari data QR dan otomatis mencocokkannya dengan NTA pada profil. Jika kolom NTA kosong, nomor dari QR akan diisikan otomatis.</p><div class="flex flex-wrap gap-2"><button id="ktaQrStart" type="button" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-sm font-semibold">Pindai QR dengan kamera</button><button id="ktaQrStop" type="button" class="hidden rounded-lg border px-3 py-2 text-sm font-semibold">Tutup pemindai</button></div><div id="ktaQrReader" class="hidden w-full max-w-sm overflow-hidden rounded-lg bg-black"></div><p id="ktaQrResult" class="text-xs muted" role="status">QR belum dipindai.</p></div>
+      <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 space-y-2"><b class="text-sm">Pemindaian QR KTA</b><p class="text-xs muted">Pindai QR KTA Nasional. QR berisi ID registrasi pusat berupa tepat 9 digit. ID QR disimpan terpisah dari NTA yang diisi manual atau dibaca dari foto KTA.</p><div class="flex flex-wrap gap-2"><button id="ktaQrStart" type="button" class="rounded-lg bg-amber-800 text-white px-3 py-2 text-sm font-semibold">Pindai QR dengan kamera</button><button id="ktaQrStop" type="button" class="hidden rounded-lg border px-3 py-2 text-sm font-semibold">Tutup pemindai</button></div><div id="ktaQrReader" class="hidden w-full max-w-sm overflow-hidden rounded-lg bg-black"></div><p id="ktaQrResult" class="text-xs muted" role="status">QR belum dipindai.</p></div>
       <div id="ntaParseInfo" class="rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700">Rincian wilayah dan tanggal lahir dari NTA akan muncul setelah nomor diisi.</div>
       <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"><b>Belum memiliki KTA Pramuka Nasional?</b><p class="mt-1">Kamu tetap dapat belajar di aplikasi. Hubungi Pembina pangkalanmu dan sampaikan bahwa kamu belum memiliki KTA. Pembina akan membantu meneruskan permohonan kepada Sekretaris Kwarran untuk proses penerbitan KTA Nasional. Setelah KTA terbit, lengkapi nomor NTA dan bukti pendukung pada profil.</p></div></div>
     </div>
@@ -613,7 +613,7 @@ function renderProfile(){
  profilePhotoData=p?.foto_profil_data||'';
  const headerAvatar=$('headerProfileAvatar');if(headerAvatar){headerAvatar.src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"%3E%3Ccircle cx="40" cy="40" r="39" fill="%23f5c52b"/%3E%3Ccircle cx="40" cy="29" r="13" fill="%23704a1d"/%3E%3Cpath d="M15 70c2-17 12-25 25-25s23 8 25 25" fill="%23704a1d"/%3E%3C/svg%3E';}
  $('profilePhotoPreview').src=profilePhotoData||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect width="100%25" height="100%25" fill="%23f1f5f9"/%3E%3Ctext x="50%25" y="54%25" text-anchor="middle" fill="%2364758b" font-size="12"%3EFoto%3C/text%3E%3C/svg%3E';
- $('profileNta').value=p?.nta||'';
+ $('profileNta').value=p?.nta||'';\n $('profileQrKtaId').value=p?.id_qr_kta||'';
  $('profileBirthDate').value=p?.tanggal_lahir||'';
   renderNtaParseInfo();
  const ktaStatus=p?.nta_status_verifikasi||'belum_ada';
@@ -654,8 +654,8 @@ $('profilePhotoInput').addEventListener('change',async e=>{
 });
 async function saveProfile(extra={}){
  const isTeacher=account.role==='pembina',isStudent=account.role==='peserta_didik';
- const payload={action:'save_profile',nta:$('profileNta').value.trim(),tanggal_lahir:$('profileBirthDate')?.value||null,foto_profil_data:profilePhotoData,...extra};
- if(isStudent&&payload.nta){
+ const payload={action:'save_profile',nta:$('profileNta').value.trim(),id_qr_kta:$('profileQrKtaId')?.value.trim()||'',tanggal_lahir:$('profileBirthDate')?.value||null,foto_profil_data:profilePhotoData,...extra};
+ if((isStudent||isTeacher)&&!/^\d{9}$/.test(payload.id_qr_kta)){$('profileMsg').textContent='Pindai QR KTA Nasional terlebih dahulu. ID QR harus tepat 9 digit.';return false;}\n if((isStudent||isTeacher)&&!payload.nta){$('profileMsg').textContent='Nomor NTA wajib diisi terpisah dari ID QR KTA.';return false;}\n if(isStudent&&payload.nta){
   const m=payload.nta.match(/^(\d{2})\.(\d{2})\.(\d{2})\.(\d{6})\.(\d{4})$/);
   if(!m){$('profileMsg').textContent='Format NTA harus lima kelompok angka, misalnya 09.03.30.200780.0001 untuk Kwarran Leles, Cianjur.';return false;}
   if(!payload.tanggal_lahir){$('profileMsg').textContent='Isi tanggal lahir sesuai KTA terlebih dahulu.';return false;}
@@ -717,62 +717,7 @@ async function saveProfile(extra={}){
 $('saveProfile').onclick=()=>saveProfile();
 $('profileNta')?.addEventListener('input',renderNtaParseInfo);
 let ktaQrScanner=null;
-function getQrInspection(raw){
- const rawText=String(raw||'').trim(),keys=[],parts=[rawText];
- const walk=(v,path='')=>{
-  if(v==null)return;
-  if(Array.isArray(v)){v.forEach((x,i)=>walk(x,path+'['+i+']'));return;}
-  if(typeof v==='object'){for(const [k,x] of Object.entries(v)){keys.push(k);walk(x,path?path+'.'+k:k);}return;}
-  if(typeof v==='string'||typeof v==='number')parts.push(path+' : '+String(v));
- };
- const candidates=[rawText];
- try{candidates.push(decodeURIComponent(rawText));}catch(_){}
- for(const v of candidates){
-  try{walk(JSON.parse(v));}catch(_){}
-  try{const u=new URL(v);for(const [k,x] of u.searchParams.entries()){keys.push(k);parts.push(k+' : '+x);} }catch(_){}
- }
- const source=parts.join(' | ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
- const relevant=parts.filter(x=>/(nta|kwarda|kwartir|kwarcab|kwarran|ranting|lahir|birth|serial|urut|sequence|jawa|barat|cianjur|langsung|\b\d{1,2}[.\-/ ]\d{1,2}[.\-/ ]\d{4}\b)/i.test(x));
- return {source,format:rawText.startsWith('{')?'JSON':/^https?:/i.test(rawText)?'URL':'teks/terenkripsi',length:rawText.length,keys:[...new Set(keys)].slice(0,20),relevant:relevant.slice(0,10).map(x=>x.slice(0,100))};
-}
-function extractNtaFromQr(raw){
- const info=getQrInspection(raw),source=info.source;
- const compactMatches=[...source.matchAll(/(?:^|\D)(\d{2})[.\s-]?(\d{2})[.\s-]?(\d{2})[.\s-]?(\d{6})[.\s-]?(\d{4})(?:\D|$)/g)].map(m=>m.slice(1).join(''));
- const unique=[...new Set(compactMatches)];
- if(unique.length===1)return unique[0];
- const field=(names)=>{
-  for(const name of names){
-   const re=new RegExp('(?:^|[|,;\\s])'+name+'\\s*[:=\\-]\\s*([^,;|\\n]+)','i');
-   const m=source.match(re);if(m)return m[1].trim();
-  }
-  return '';
- };
- const aText=field(['kode[_ ]?kwarda','kwarda','kwartir daerah']);
- const bText=field(['kode[_ ]?kwarcab','kwarcab','kwartir cabang']);
- const cText=field(['kode[_ ]?kwarran','kwarran','kwartir ranting','ranting']);
- const code=(v,type)=>{
-  const t=v.toLowerCase();
-  if(type==='a'&&/jawa\\s+barat/.test(t))return '09';
-  if(type==='b'&&/cianjur/.test(t))return '03';
-  if(type==='c'&&/(penerbitan\\s+langsung|tingkat\\s+kwartir|langsung)/.test(t))return '00';
-  const m=t.match(/(?:^|\\D)(\\d{2})(?:\\D|$)/);return m?m[1]:'';
- };
- const a=code(aText,'a')||(/jawa\\s+barat/.test(source)?'09':'');
- const b=code(bText,'b')||(/cianjur/.test(source)?'03':'');
- const c=code(cText,'c')||(/penerbitan\\s+langsung|tingkat\\s+kwartir/.test(source)?'00':'');
- let d='';
- const dob=source.match(/(?:tanggal\\s+lahir|tgl\\.?\\s*lahir|birth[_ ]?date|dob)\\s*[:=\\-]\\s*(\\d{1,2}[.\\-/ ]\\d{1,2}[.\\-/ ]\\d{4})/i);
- if(dob){const p=dob[1].match(/(\\d{1,2})[.\\-/ ](\\d{1,2})[.\\-/ ](\\d{4})/);if(p)d=p[1].padStart(2,'0')+p[2].padStart(2,'0')+p[3].slice(-2);}
- const seqMatch=source.match(/(?:nomor[_ ]?urut|no\\.?[_ ]?urut|nomor[_ ]?seri|serial(?:[_ ]?number|[_ ]?no)?|sequence)\\s*[:=\\-]\\s*(\\d{1,4})/i);
- const seq=seqMatch?seqMatch[1].padStart(4,'0'):'';
- if(a&&b&&c&&d.length===6&&seq.length===4)return a+b+c+d+seq;
- return null;
-}
-function formatQrInspection(raw){
- const x=getQrInspection(raw);
- const fields=x.relevant.length?x.relevant.join(' ; '):'Tidak ada label NTA/wilayah/tanggal/nomor urut yang dikenali.';
- return 'Hasil pemeriksaan QR untuk dikirim: Format='+x.format+'; panjang data='+x.length+' karakter; nama kolom='+ (x.keys.join(', ')||'tidak terdeteksi')+'; potongan data relevan='+fields+'.';
-}
+function extractQrKtaId(raw){const value=String(raw??'').trim();return /^\d{9}$/.test(value)?value:null;}
 $('ktaQrStart')?.addEventListener('click',async()=>{
  const result=$('ktaQrResult'),reader=$('ktaQrReader');
  if(!window.Html5Qrcode){result.textContent='Modul pemindai QR belum berhasil dimuat. Periksa koneksi internet lalu muat ulang halaman.';return;}
@@ -783,15 +728,9 @@ $('ktaQrStart')?.addEventListener('click',async()=>{
    try{await ktaQrScanner.stop();}catch(_){}
    try{await ktaQrScanner.clear();}catch(_){}
    ktaQrScanner=null;reader.classList.add('hidden');$('ktaQrStart').disabled=false;$('ktaQrStop').classList.add('hidden');
-   const qrNta=extractNtaFromQr(decoded),field=$('profileNta'),existing=String(field?.value||'').replace(/\D/g,'');
-   if(qrNta){
-    const formatted=qrNta.replace(/^(\d{2})(\d{2})(\d{2})(\d{6})(\d{4})$/,'$1.$2.$3.$4.$5');
-    if(!existing){field.value=formatted;renderNtaParseInfo();result.textContent='QR terbaca otomatis. NTA '+formatted+' berhasil diisikan ke profil. Data QR dan NTA profil sekarang cocok.';}
-    else if(existing===qrNta){result.textContent='QR KTA cocok dengan NTA pada profil ('+formatted+'). Pemeriksaan data berhasil.';}
-    else{result.textContent='NTA pada QR ('+formatted+') TIDAK cocok dengan NTA profil. Kolom profil tidak diubah. Periksa KTA dan NTA yang dimasukkan.';}
-   }else{
-    result.textContent='QR berhasil dipindai, tetapi NTA belum dapat disusun dari data QR. Sistem tidak mengubah NTA profil. '+formatQrInspection(decoded);
-   }
+   const qrId=extractQrKtaId(decoded),field=$('profileQrKtaId');
+   if(qrId){field.value=qrId;result.textContent='ID QR KTA Nasional berhasil dibaca: '+qrId+'. ID QR disimpan terpisah dan tidak digunakan untuk menebak atau mengganti NTA.';}
+   else{result.textContent='QR terbaca, tetapi formatnya bukan ID QR KTA Nasional 9 digit. Data harus tepat 9 angka. NTA profil tidak diubah.';}
   },()=>{});
  }catch(err){
   reader.classList.add('hidden');$('ktaQrStart').disabled=false;$('ktaQrStop').classList.add('hidden');
