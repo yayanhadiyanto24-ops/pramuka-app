@@ -1,27 +1,47 @@
-# Sistem Informasi Pramuka Penegak
+# RUANG TEGAK — Sistem Informasi Pramuka Penegak
 
-Aplikasi pendaftaran dan pemantauan perkembangan Pramuka Penegak.
+Aplikasi pendaftaran, pembelajaran SKU, dan pemantauan perkembangan Pramuka Penegak.
 
-## Fitur
-- Pendaftaran Peserta Didik memakai kode gabung pangkalan.
-- Pendaftaran Pembina untuk pangkalan baru atau pangkalan terdaftar.
-- Satu Admin Utama pemilik aplikasi; tidak ada admin pangkalan.
-- Persetujuan dan penonaktifan akun.
-- Rekap tiap ambalan Putra/Putri: jumlah peserta, aktif, menunggu, tingkatan Calon Penegak/Bantara/Laksana/Garuda, dan jumlah sangga.
-- Daftar pangkalan dan kode gabung.
+## Halaman aplikasi
+
+- `index.html` — beranda dan pendaftaran Peserta Didik, Pembina, serta Admin Kwarran.
+- `admin-utama.html` — pengelolaan oleh Admin Utama.
+- `admin-kwarran.html` — pemantauan wilayah oleh Admin Kwarran.
+- `belajar.html` — materi umum, pembelajaran SKU, profil, dan pemantauan sesuai peran.
+- `sekretaris-daftar.html` — pendaftaran Sekretaris Kwarcab melalui undangan sekali pakai.
+- `sekretaris-kwarcab.html` — pemantauan baca-saja tingkat Kwarcab.
+- `dokumen.html` — pusat dokumen dan poster.
+- `uji.html` — halaman pengujian SKU.
+- `login-confirm.html` — konfirmasi login QR KTA.
+
+`admin.html` adalah halaman administrasi lama dan bukan tautan utama untuk alur Admin Utama saat ini.
+
+## Struktur kewenangan
+
+- **Admin Utama** — kewenangan tertinggi untuk pengelolaan aplikasi.
+- **Admin Kwarran** — pengelolaan/pemantauan dalam cakupan Kwarran yang ditetapkan.
+- **Sekretaris Kwarcab** — akses pemantauan baca-saja tingkat Kwarcab.
+- **Pembina** — pengelolaan pembinaan pada pangkalan dan satuan yang menjadi kewenangannya.
+- **Peserta Didik** — pembelajaran dan pencatatan perkembangan SKU.
+
+Status akun ditetapkan oleh alur pendaftaran dan kebijakan server. Jangan mengasumsikan semua pendaftar selalu berstatus pending; migrasi pendaftaran terbaru mengaktifkan beberapa jenis pendaftaran secara langsung.
 
 ## Supabase
+
 - Project ref: `bopxmtxfrlrnywwhywne`
-- Edge Function: `pramuka-register` (ACTIVE, version 2)
-- RPC: `public.pramuka_register_profile`
+- Edge Function utama: `pramuka-register`
+- RPC pendaftaran profil: `public.pramuka_register_profile`
 - View rekap: `public.v_admin_ambalan_rekap`
 
-## Halaman
-- Pendaftaran: `index.html`
-- Admin Utama: `admin.html`
+Frontend menggunakan publishable key. Service-role key hanya boleh berada di lingkungan Edge Function.
 
-## Satu konfigurasi yang masih diperlukan
-Email Admin Utama belum ditetapkan pada `public.app_admin_config.admin_email`. Login admin akan ditolak sampai email pemilik aplikasi dikonfigurasi.
+## Android
 
-## Keamanan
-Frontend hanya menggunakan publishable key. Service-role key berada di Edge Function. Pendaftaran profil diproses server-side. Tabel inti tetap RLS aktif tanpa akses publik langsung. Akun pendaftar berstatus `pending` sampai disetujui Admin Utama.
+Proyek Android berada di folder `android/`. Build APK debug dijalankan melalui GitHub Actions workflow `.github/workflows/build-android.yml`.
+
+## Catatan pengembangan
+
+- Jalankan migrasi Supabase secara berurutan sesuai nama file.
+- Periksa perubahan kebijakan RLS dan fungsi `SECURITY DEFINER` sebelum deploy.
+- Uji alur masuk setiap peran, perpindahan halaman, dan pemulihan sesi setelah perubahan autentikasi.
+- Jangan menaruh service-role key, kata sandi, atau token rahasia di frontend maupun repositori.
