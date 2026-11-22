@@ -610,13 +610,19 @@ async function boot(user){
   $('adminPangkalanTab').classList.remove('hidden');
    $('pangkalanRankingTab').classList.remove('hidden');
   $('roleSubtitle').textContent='Ruang Pembina · Pantau peserta\nData Pangkalan';
- }else if(u.role==='admin_kwarcab'){$('monitorTab').classList.remove('hidden');}
+ }else if(u.role==='admin_kwarcab'){
+  // Admin Utama hanya membaca materi dan pemantauan SKU; tidak memerlukan profil peserta/Pembina.
+  $('monitorTab').classList.remove('hidden');
+  document.querySelector('[data-tab="profile"]')?.classList.add('hidden');
+  $('view-profile')?.classList.add('hidden');
+  $('roleSubtitle').textContent='Admin Utama · Akses baca materi umum, SKU Bantara/Laksana, dan progres pembinaan';
+ }
  else throw new Error('Peran akun tidak dikenali.');
  const accountName=participant?.nama_lengkap||teacher?.nama_lengkap||user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_kwarcab'?'Admin Utama':'Pengguna');
  $('whoName').textContent=accountName;
  $('whoRole').textContent=({pembina:'Pembina',peserta_didik:'Peserta Didik',admin_kwarcab:'Admin Utama'}[u.role]||u.role.replaceAll('_',' '));
- renderProfile();
-  await loadAll();
+ if(u.role!=='admin_kwarcab')renderProfile();
+ await loadAll();
 }
 
 let profilePhotoData='',experienceRows=[],organizationRows=[];
