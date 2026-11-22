@@ -617,7 +617,7 @@ $('loginQrStart').onclick=async()=>{
  try{$('loginQrReader').classList.remove('hidden');$('loginQrStart').disabled=true;loginQrScanner=new Html5Qrcode('loginQrReader');
  await loginQrScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:230,height:230},aspectRatio:1.0},async decoded=>{
   await stopLoginQrScanner();const id=String(decoded||'').trim();
-  if(!/^\\d{9}$/.test(id)){$('loginQrStatus').textContent='QR tidak sesuai. KTA harus berisi ID registrasi tepat 9 digit.';return;}
+  if(!/^\d{9}$/.test(id)){$('loginQrStatus').textContent='QR tidak sesuai. KTA harus berisi ID registrasi tepat 9 digit.';return;}
   loginQrId=id;$('loginOtpArea').classList.add('hidden');$('loginOtp').value='';await requestLoginOtp(id);
  },()=>{});
  }catch(err){await stopLoginQrScanner();$('loginQrStatus').textContent='Kamera tidak dapat dibuka: '+(err.message||'Periksa izin kamera.');}
