@@ -322,6 +322,19 @@ Deno.serve(async(req:Request)=>{
    }else return reply({ok:false,message:"Peran akun tidak diizinkan."},403);
    return reply({ok:true,message:"Profil berhasil disimpan."});
   }
+  if(action==="peserta_pangkalan_ranking"){
+    const {data:authData,error:authErr}=await admin.auth.getUser(token);
+    if(authErr||!authData.user)return reply({ok:false,message:"Sesi login tidak valid."},401);
+    const {data:pd,error:pdErr}=await admin.from("profil_peserta_didik").select("id_user,id_pangkalan,users!inner(status_akun,role)").eq("id_user",authData.user.id).maybeSingle();
+    if(pdErr)throw pdErr;
+    if(!pd||pd.users?.status_akun!=="aktif"||pd.users?.role!=="peserta_didik")return reply({ok:false,message:"Akses hanya untuk Peserta Didik aktif."},403);
+    const {data:pangkalan,error:pangkalanError}=await admin.from("pangkalan").select("id_kwarran").eq("id_pangkalan",pd.id_pangkalan).maybeSingle();
+    if(pangkalanError)throw pangkalanError;
+    if(!pangkalan?.id_kwarran)return reply({ok:true,id_pangkalan:pd.id_pangkalan,ranking_pangkalan:[]});
+    const {data:ranking,error:rankingError}=await admin.from("v_pangkalan_peringkat").select("id_pangkalan,nama_pangkalan,no_gudep,jumlah_ambalan,jumlah_ambalan_layak,peserta_aktif,peserta_tamu,total_poin,layak_peringkat,peringkat_kwarran").eq("id_kwarran",pangkalan.id_kwarran).order("peringkat_kwarran",{ascending:true,nullsFirst:false}).order("nama_pangkalan");
+    if(rankingError)throw rankingError;
+    return reply({ok:true,id_pangkalan:pd.id_pangkalan,ranking_pangkalan:ranking||[]});
+   }
   if(action==="pembina_pangkalan"||action==="simpan_pangkalan_pembina"||action==="simpan_tanda_tangan_pangkalan"||action==="pembina_peserta_pending"||action==="setujui_peserta_pembina"||action==="pembina_sangga_data"||action==="pindah_sangga_peserta"||action==="pindah_ambalan_peserta"||action==="activate_access_code"){
    const {data:authData,error:authErr}=await admin.auth.getUser(token);
    if(authErr||!authData.user)return reply({ok:false,message:"Sesi login tidak valid."},401);
