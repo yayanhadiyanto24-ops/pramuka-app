@@ -1,0 +1,31 @@
+name: Uji Regresi RUANG TEGAK
+
+on:
+  push:
+    paths:
+      - '*.html'
+      - 'sw.js'
+      - 'android/**'
+      - 'supabase/functions/**'
+      - 'supabase/migrations/**'
+      - 'tests/**'
+      - '.github/workflows/test-application.yml'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v4
+
+      - name: Siapkan Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Jalankan tes regresi
+        run: node --test tests/*.test.mjs
