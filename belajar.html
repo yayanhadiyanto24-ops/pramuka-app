@@ -469,45 +469,61 @@ header #appCreatorCredit{grid-area:credit!important;position:static!important;le
 }
 </style>
 <style id="rt-header-profile-left-correction">
-/* Urutan header dikunci: identitas akun kiri, tombol aksi kanan */
+/* Jarak tombol seragam dan teks header tidak dipotong */
+header .max-w-6xl{row-gap:4px!important}
+header #logout{
+ align-self:end!important;
+ justify-self:end!important;
+ width:132px!important;min-width:132px!important;max-width:132px!important;
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ box-sizing:border-box!important;margin:0!important;padding:6px 8px!important;
+ white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important;
+ line-height:1.15!important;min-height:32px!important;
+}
 header #headerActions{
- display:flex!important;
- flex-direction:row!important;
- flex-wrap:nowrap!important;
- justify-content:space-between!important;
- align-items:center!important;
- direction:ltr!important;
- width:100%!important;
- min-width:0!important;
- gap:8px!important;
+ display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+ justify-content:space-between!important;align-items:center!important;
+ direction:ltr!important;width:100%!important;min-width:0!important;gap:8px!important;
 }
 header #profileIdentity{
- order:0!important;
- flex:1 1 auto!important;
- display:flex!important;
- flex-direction:row!important;
- justify-content:flex-start!important;
- align-items:center!important;
- direction:ltr!important;
- min-width:0!important;
- width:auto!important;
- margin:0 auto 0 0!important;
+ order:0!important;flex:1 1 auto!important;display:flex!important;
+ flex-direction:row!important;justify-content:flex-start!important;align-items:center!important;
+ direction:ltr!important;min-width:0!important;width:auto!important;margin:0 auto 0 0!important;
 }
 header #headerProfileAvatar{order:0!important;flex:0 0 34px!important;margin:0!important}
-header #who{order:1!important;flex:0 1 auto!important;text-align:left!important;margin:0!important}
+header #who{
+ order:1!important;flex:0 1 auto!important;text-align:left!important;margin:0!important;
+ min-width:0!important;max-width:100%!important;height:auto!important;overflow:visible!important;
+ white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.2!important;
+}
+header #whoName,header #whoRole{
+ display:block!important;max-width:100%!important;height:auto!important;
+ white-space:normal!important;overflow:visible!important;overflow-wrap:anywhere!important;
+ text-overflow:clip!important;line-height:1.2!important;
+}
 header #headerButtons{
- order:1!important;
- flex:0 0 132px!important;
- display:flex!important;
- flex-direction:column!important;
- align-items:stretch!important;
- justify-content:center!important;
- width:132px!important;
- min-width:132px!important;
- margin:0 0 0 auto!important;
+ order:1!important;flex:0 0 132px!important;display:flex!important;
+ flex-direction:column!important;align-items:stretch!important;justify-content:center!important;
+ width:132px!important;min-width:132px!important;margin:0 0 0 auto!important;gap:4px!important;
+}
+header #refreshAppBtn,header #installAppBtn{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ box-sizing:border-box!important;width:132px!important;min-width:132px!important;
+ max-width:132px!important;height:auto!important;min-height:32px!important;
+ margin:0!important;padding:6px 8px!important;transform:none!important;
+ white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important;
+ line-height:1.15!important;font-size:11px!important;
 }
 @media(min-width:768px){
- header #headerButtons{flex-direction:row!important;flex:0 0 auto!important;width:auto!important;min-width:0!important}
+ header .max-w-6xl{row-gap:6px!important}
+ header #logout{width:auto!important;min-width:116px!important;max-width:none!important}
+ header #headerButtons{flex-direction:row!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;gap:6px!important}
+ header #refreshAppBtn,header #installAppBtn{width:auto!important;min-width:116px!important;max-width:none!important;padding:8px 12px!important;font-size:12px!important}
+}
+@media(max-width:360px){
+ header #logout,header #headerButtons,header #refreshAppBtn,header #installAppBtn{
+  width:116px!important;min-width:116px!important;max-width:116px!important;
+ }
 }
 </style>
 </head>
