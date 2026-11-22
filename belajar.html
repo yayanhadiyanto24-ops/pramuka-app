@@ -1537,8 +1537,10 @@ sbReady.then(async client=>{
  if(error)throw error;
  if(!data.session){
   let bridge=null;
-  try{bridge=JSON.parse(sessionStorage.getItem('ruang-tegak-auth-bridge')||'null');}catch(_){}
-  sessionStorage.removeItem('ruang-tegak-auth-bridge');
+  for(const store of [sessionStorage,localStorage]){
+   try{const candidate=JSON.parse(store.getItem('ruang-tegak-auth-bridge')||'null');if(candidate?.access_token&&candidate?.refresh_token&&Date.now()-Number(candidate.created_at||0)<120000){bridge=candidate;break;}}catch(_){}
+   try{store.removeItem('ruang-tegak-auth-bridge');}catch(_){}
+  }
   if(bridge?.access_token&&bridge?.refresh_token&&Date.now()-Number(bridge.created_at||0)<120000){
    const restored=await client.auth.setSession({access_token:bridge.access_token,refresh_token:bridge.refresh_token});
    if(restored.error)throw restored.error;
