@@ -1,0 +1,28 @@
+/* RUANG TEGAK — sistem tombol konsisten dan ringkas */
+:root{--rt-gold-1:#fff3ad;--rt-gold-2:#ffdc35;--rt-gold-3:#d6a400;--rt-brown-1:#765638;--rt-brown-2:#4a3020;--rt-brown-3:#2c1b11}
+button:not(.signature-control):not(#clearSignature):not(.danger):not(.btn-danger):not(.delete):not(.remove):not([data-variant="danger"]),
+[role="button"]:not(.danger):not(.btn-danger):not(.delete):not(.remove):not([data-variant="danger"]),
+a.quick-link,a.btn,a.button,a[class~="tab"],[role="tab"]{
+ background:linear-gradient(120deg,var(--rt-gold-1) 0%,var(--rt-gold-2) 50%,var(--rt-gold-3) 100%)!important;
+ color:#382817!important;border:1px solid #bd941d!important;
+ text-shadow:0 1px 0 rgba(255,255,255,.38)!important;
+ box-shadow:0 2px 0 #9a740c,0 3px 7px rgba(45,30,8,.15),inset 0 1px 0 rgba(255,255,255,.72)!important;
+ font-weight:750!important;transition:background .18s ease,box-shadow .18s ease,transform .15s ease,filter .18s ease!important
+}
+nav a:not(.rt-nav-active),.rt-account-actions a:not(.rt-nav-active){background:linear-gradient(120deg,var(--rt-gold-1),var(--rt-gold-2) 50%,var(--rt-gold-3))!important;color:#382817!important;border:1px solid #bd941d!important;box-shadow:0 2px 0 #9a740c,0 3px 7px #2d1e0826,inset 0 1px 0 #ffffffb8!important}
+button.rt-button-active,[role="button"].rt-button-active,button.active,button.tab.active,[role="tab"][aria-selected="true"],
+nav a.rt-nav-active,.rt-account-actions a.rt-nav-active{
+ background:linear-gradient(120deg,#765638 0%,#60432d 46%,#392719 100%)!important;color:#fff!important;
+ border:1px solid #c7a574!important;text-shadow:0 1px 2px #21130999!important;
+ box-shadow:0 3px 0 #2b1a10,0 5px 10px #21130940,inset 0 1px 0 #ffffff45,inset 0 -1px 0 #0003!important;
+ font-weight:850!important
+}
+button:not(.signature-control):not(#clearSignature):not(:disabled),
+[role="button"]:not(:disabled),a.quick-link,a.btn,a.button{border-radius:.65rem}
+button:not(.signature-control):not(#clearSignature){padding:.45rem .78rem}
+nav a,.rt-account-actions a{border-radius:.6rem}
+button:not(.signature-control):not(#clearSignature):hover:not(:disabled),[role="button"]:hover:not(:disabled),a.quick-link:hover,a.btn:hover{filter:brightness(1.045)}
+button:not(.signature-control):not(#clearSignature):active:not(:disabled),[role="button"]:active{transform:translateY(1px)}
+button:disabled,[role="button"][aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+button:focus-visible,a:focus-visible,[role="button"]:focus-visible{outline:3px solid #b58a36!important;outline-offset:2px}
+@media(max-width:640px){button:not(.signature-control):not(#clearSignature){padding:.4rem .62rem;font-size:.84rem;line-height:1.2}nav a{padding:.42rem .62rem!important;font-size:.82rem!important}}
