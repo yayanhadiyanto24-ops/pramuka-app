@@ -64,6 +64,30 @@ test('Perpindahan tab benar-benar memindahkan email dan kata sandi dua arah', ()
   assert.equal(api.getRole(), 'pembina');
 });
 
+test('Pendaftaran publik tidak dapat membuat Admin Utama dan undangan dibatasi sekali pakai', () => {
+  const source = read('supabase/functions/pramuka-register/index.ts');
+  assert.match(source, /!\["peserta_didik","pembina","admin_kwarran"\]\.includes\(role\)/);
+  assert.doesNotMatch(source, /!\["peserta_didik","pembina","admin_kwarran","admin_utama"\]\.includes\(role\)/);
+  assert.match(source, /sekretaris_kwarcab_invites/);
+  assert.match(source, /\.is\("used_at",null\)\.is\("revoked_at",null\)/);
+  assert.match(source, /\.eq\("status","pending"\)/);
+  assert.match(source, /admin\.auth\.getUser\(token\)/);
+  assert.match(source, /authData\.user\.email\.toLowerCase\(\)!==configuredEmail/);
+});
+
+test('Dashboard admin membatasi role, status, dan wilayah dari relasi akun', () => {
+  const source = read('supabase/functions/pramuka-register/index.ts');
+  const secretary = source.slice(source.indexOf('if(action==="sekretaris_dashboard")'), source.indexOf('if(action==="kwarran_options")'));
+  const kwarran = source.slice(source.indexOf('if(action==="admin_kwarran_dashboard")'), source.indexOf('if(action==="save_profile")'));
+  assert.match(secretary, /me\.role!=="sekretaris_kwarcab"/);
+  assert.match(secretary, /me\.status_akun!=="aktif"/);
+  assert.match(secretary, /\.eq\("singleton",true\)/);
+  assert.match(kwarran, /me\.role!=="admin_kwarran"/);
+  assert.match(kwarran, /me\.status_akun!=="aktif"/);
+  assert.match(kwarran, /admin_kwarran/);
+  assert.match(kwarran, /\.eq\("id_user",authData\.user\.id\)/);
+});
+
 test('Semua dataset dashboard memakai paginasi bertahap', () => {
   const source = read('supabase/functions/pramuka-register/index.ts');
   assert.match(source, /async function fetchAllRows\(buildQuery:\(\)=>any,pageSize=500\)/);
