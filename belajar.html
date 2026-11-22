@@ -610,9 +610,9 @@ async function boot(user){
  if(ue)throw ue;if(!u)throw new Error('Profil akun belum tersedia. Hubungi Admin Utama.');
  account=u;
  $('login').classList.add('hidden');$('application').classList.remove('hidden');$('logout').classList.remove('hidden');
- const displayName=user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_kwarcab'?'Admin Utama':'Pengguna');
+ const displayName=user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_utama'?'Admin Utama':'Pengguna');
  $('whoName').textContent=displayName;
- $('whoRole').textContent=({pembina:'Pembina',peserta_didik:'Peserta Didik',admin_kwarcab:'Admin Utama'}[u.role]||u.role.replaceAll('_',' '));
+ $('whoRole').textContent=({pembina:'Pembina',peserta_didik:'Peserta Didik',admin_utama:'Admin Utama'}[u.role]||u.role.replaceAll('_',' '));
  if(u.status_akun!=='aktif'){
   $('accountNotice').classList.remove('hidden');$('accountNotice').textContent=u.role==='peserta_didik'?'Pendaftaran diterima. Akses belajar akan terbuka setelah disetujui Pembina sesuai satuan putera atau puteri.':'Akun masih '+u.status_akun+'. Akses belajar akan terbuka setelah disetujui Admin Utama.';return;
  }
@@ -631,7 +631,7 @@ async function boot(user){
   $('adminPangkalanTab').classList.remove('hidden');
    $('pangkalanRankingTab').classList.remove('hidden');
   $('roleSubtitle').textContent='Ruang Pembina · Pantau peserta\nData Pangkalan';
- }else if(u.role==='admin_kwarcab'){
+ }else if(u.role==='admin_utama'){
   // Admin Utama hanya membaca materi dan pemantauan SKU; tidak memerlukan profil peserta/Pembina.
   $('monitorTab').classList.remove('hidden');
   document.querySelector('[data-tab="profile"]')?.classList.add('hidden');
@@ -639,10 +639,10 @@ async function boot(user){
   $('roleSubtitle').textContent='Admin Utama · Akses baca materi umum, SKU Bantara/Laksana, dan progres pembinaan';
  }
  else throw new Error('Peran akun tidak dikenali.');
- const accountName=participant?.nama_lengkap||teacher?.nama_lengkap||user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_kwarcab'?'Admin Utama':'Pengguna');
+ const accountName=participant?.nama_lengkap||teacher?.nama_lengkap||user.user_metadata?.full_name||user.user_metadata?.nama_lengkap||(u.role==='admin_utama'?'Admin Utama':'Pengguna');
  $('whoName').textContent=accountName;
- $('whoRole').textContent=({pembina:'Pembina',peserta_didik:'Peserta Didik',admin_kwarcab:'Admin Utama'}[u.role]||u.role.replaceAll('_',' '));
- if(u.role!=='admin_kwarcab')renderProfile();
+ $('whoRole').textContent=({pembina:'Pembina',peserta_didik:'Peserta Didik',admin_utama:'Admin Utama'}[u.role]||u.role.replaceAll('_',' '));
+ if(u.role!=='admin_utama')renderProfile();
  await loadAll();
 }
 
