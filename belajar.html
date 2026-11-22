@@ -469,70 +469,59 @@ header #appCreatorCredit{grid-area:credit!important;position:static!important;le
 }
 </style>
 <style id="rt-header-profile-left-correction">
-/* Satu kolom tombol di kanan: lebar bertingkat dan seluruh tepi kanan sejajar */
-header .max-w-6xl{row-gap:4px!important}
-header #logout{
- align-self:end!important;justify-self:end!important;
- display:inline-flex!important;align-items:center!important;justify-content:center!important;
- box-sizing:border-box!important;width:66px!important;min-width:66px!important;max-width:66px!important;
- margin:0!important;padding:5px 3px!important;white-space:nowrap!important;
- overflow:visible!important;text-align:center!important;line-height:1.1!important;
- font-size:10px!important;min-height:30px!important;
+/* Ketiga tombol disatukan di pojok kanan atas; identitas tetap di kiri. */
+header .max-w-6xl{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr) 132px!important;
+ grid-template-areas:"brand actions" "identity actions" "credit credit"!important;
+ align-items:center!important;column-gap:8px!important;row-gap:5px!important;
 }
-header #headerActions{
- display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
- justify-content:space-between!important;align-items:center!important;direction:ltr!important;
- width:100%!important;min-width:0!important;gap:8px!important;
-}
+header .rt-header-brand{grid-area:brand!important;min-width:0!important;align-self:start!important}
+header #headerActions{display:contents!important}
 header #profileIdentity{
- order:0!important;flex:1 1 auto!important;display:flex!important;flex-direction:row!important;
- justify-content:flex-start!important;align-items:center!important;direction:ltr!important;
- min-width:0!important;width:auto!important;margin:0 auto 0 0!important;
+ grid-area:identity!important;display:flex!important;flex-direction:row!important;
+ justify-content:flex-start!important;align-items:center!important;min-width:0!important;
+ width:auto!important;margin:0!important;gap:7px!important;
 }
-header #headerProfileAvatar{order:0!important;flex:0 0 34px!important;margin:0!important}
-header #who{
- order:1!important;flex:0 1 auto!important;text-align:left!important;margin:0!important;
- min-width:0!important;max-width:100%!important;height:auto!important;overflow:visible!important;
- white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.2!important;
-}
-header #whoName,header #whoRole{
- display:block!important;max-width:100%!important;height:auto!important;white-space:normal!important;
- overflow:visible!important;overflow-wrap:anywhere!important;text-overflow:clip!important;line-height:1.2!important;
-}
+header #headerProfileAvatar{flex:0 0 34px!important;width:34px!important;height:34px!important;margin:0!important}
+header #who{min-width:0!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important}
+header #whoName,header #whoRole{white-space:normal!important;overflow-wrap:anywhere!important}
 header #headerButtons{
- order:1!important;flex:0 0 132px!important;display:flex!important;flex-direction:column!important;
- align-items:flex-end!important;justify-content:center!important;width:132px!important;min-width:132px!important;
- max-width:132px!important;margin:0 0 0 auto!important;gap:4px!important;
+ grid-area:actions!important;display:flex!important;flex-direction:column!important;
+ align-items:flex-end!important;justify-content:flex-start!important;gap:4px!important;
+ width:132px!important;min-width:132px!important;max-width:132px!important;
+ margin:0!important;align-self:start!important;justify-self:end!important;
 }
-header #refreshAppBtn,header #installAppBtn{
- display:inline-flex!important;align-items:center!important;justify-content:center!important;
- box-sizing:border-box!important;height:auto!important;min-height:32px!important;
- margin:0!important;padding:6px 8px!important;transform:none!important;
- white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important;
- line-height:1.15!important;font-size:11px!important;
+header #logout,header #refreshAppBtn,header #installAppBtn{
+ position:static!important;display:inline-flex!important;align-items:center!important;
+ justify-content:center!important;box-sizing:border-box!important;height:auto!important;
+ min-height:30px!important;margin:0!important;transform:none!important;
+ white-space:nowrap!important;overflow:visible!important;text-align:center!important;
+ line-height:1.1!important;padding:5px 7px!important;font-size:10px!important;
 }
-header #refreshAppBtn{width:99px!important;min-width:99px!important;max-width:99px!important}
-header #installAppBtn{width:132px!important;min-width:132px!important;max-width:132px!important}
-@media(min-width:768px){
- header .max-w-6xl{row-gap:6px!important}
- header #headerButtons{flex-direction:column!important;align-items:flex-end!important;gap:5px!important}
- header #logout{width:66px!important;min-width:66px!important;max-width:66px!important;font-size:10px!important;white-space:nowrap!important}
- header #refreshAppBtn{width:99px!important;min-width:99px!important;max-width:99px!important}
- header #installAppBtn{width:132px!important;min-width:132px!important;max-width:132px!important}
+header #logout{width:66px!important;min-width:66px!important;max-width:66px!important}
+header #refreshAppBtn{width:99px!important;min-width:99px!important;max-width:99px!important;font-size:11px!important}
+header #installAppBtn{width:132px!important;min-width:132px!important;max-width:132px!important;font-size:11px!important}
+header #roleSubtitle{
+ display:block!important;white-space:normal!important;overflow-wrap:normal!important;
+ max-width:100%!important;line-height:1.2!important;
 }
+header #appCreatorCredit{grid-area:credit!important}
 @media(max-width:360px){
+ header .max-w-6xl{grid-template-columns:minmax(0,1fr) 120px!important}
+ header #headerButtons{width:120px!important;min-width:120px!important;max-width:120px!important}
  header #logout{width:60px!important;min-width:60px!important;max-width:60px!important}
- header #headerButtons{flex-basis:120px!important;width:120px!important;min-width:120px!important;max-width:120px!important}
  header #refreshAppBtn{width:90px!important;min-width:90px!important;max-width:90px!important}
  header #installAppBtn{width:120px!important;min-width:120px!important;max-width:120px!important}
+ header #roleSubtitle{font-size:8px!important}
 }
 </style>
 </head>
 <body class="min-h-screen">
 <header class="brand text-white px-4 py-5">
  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 relative">
-  <div class="rt-header-brand"><img class="rt-header-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div><div class="rt-header-name text-xl">RUANG TEGAK</div><p class="rt-header-sub text-sm">Ruang Belajar Pramuka Penegak</p><p id="roleSubtitle" class="text-amber-200 text-xs">Materi umum · SKU Bantara · SKU Laksana · Progres kecakapan</p></div></div>
-  <div id="headerActions" class="rt-account-actions"><div id="profileIdentity"><img id="headerProfileAvatar" class="rt-profile-mark" alt="Foto profil"><span id="who" class="text-sm text-amber-100"><span id="whoName"></span><span id="whoRole"></span></span></div><div id="headerButtons"><button id="refreshAppBtn" type="button" class="rounded-lg font-bold" aria-label="Perbarui halaman" onclick="window.location.reload()">↻ Perbarui</button><button id="installAppBtn" type="button" class="rounded-xl bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 border border-yellow-200 px-3 py-2 text-xs font-extrabold text-stone-950 shadow-md"><span aria-hidden="true">⬇</span> Unduh Aplikasi</button></div></div><button id="logout" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button>
+  <div class="rt-header-brand"><img class="rt-header-logo" src="https://bopxmtxfrlrnywwhywne.supabase.co/storage/v1/object/public/ruang-tegak-brand/brand/logo.png" data-ruang-tegak-logo onerror="this.onerror=null;this.src='assets/ruang-tegak-icon.svg'" alt="Logo Ruang Tegak"><div><div class="rt-header-name text-xl">RUANG TEGAK</div><p class="rt-header-sub text-sm">Ruang Belajar Pramuka Penegak</p><p id="roleSubtitle" class="text-amber-200 text-xs">Materi umum · SKU Bantara · SKU Laksana<br>Progres kecakapan</p></div></div>
+  <div id="headerActions" class="rt-account-actions"><div id="profileIdentity"><img id="headerProfileAvatar" class="rt-profile-mark" alt="Foto profil"><span id="who" class="text-sm text-amber-100"><span id="whoName"></span><span id="whoRole"></span></span></div><div id="headerButtons"><button id="logout" type="button" class="hidden rounded-lg bg-amber-800 px-3 py-2 text-sm">Keluar</button><button id="refreshAppBtn" type="button" class="rounded-lg font-bold" aria-label="Perbarui halaman" onclick="window.location.reload()">↻ Perbarui</button><button id="installAppBtn" type="button" class="rounded-xl bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 border border-yellow-200 px-3 py-2 text-xs font-extrabold text-stone-950 shadow-md"><span aria-hidden="true">⬇</span> Unduh Aplikasi</button></div></div>
   <p id="appCreatorCredit">Pembuat &amp; Pengembang Aplikasi: Yayan Hadiyanto, S.Pd.-MT.</p>
  </div>
 </header>
