@@ -455,7 +455,7 @@ button.rt-registration-tab:focus-visible{outline:3px solid #1d4ed8;outline-offse
 // Jangan pernah menaruh service_role key di browser.
 const SUPABASE_URL = 'https://bopxmtxfrlrnywwhywne.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: window.localStorage, storageKey: 'sb-bopxmtxfrlrnywwhywne-auth-token' } });
  
 // Firebase Cloud Messaging: menerima token dari APK Android dan mendaftarkannya
 // hanya untuk akun administrator utama melalui kebijakan RLS Supabase.
