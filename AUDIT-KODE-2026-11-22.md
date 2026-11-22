@@ -31,6 +31,8 @@ Pemeriksaan dilakukan dengan membaca berkas dari branch utama, penelusuran alur 
 
 | 12 | Database Supabase · indeks `public.pangkalan_sangga` | Terdapat dua unique index identik pada `(id_pangkalan, jenis_kelamin, nama_sangga)`, satu bagian dari constraint unik dan satu indeks duplikat mandiri. | Indeks duplikat mandiri dihapus; indeks yang menopang constraint unik tetap ada. Pemeriksaan pascaperubahan memastikan indeks duplikat hilang dan constraint unik tetap terjaga. Migrasi `20261122152341_remove_duplicate_pangkalan_sangga_index`. Commit `0f1b703`. |
 
+| 13 | Database Supabase · foreign key pada tabel aplikasi publik | Advisor menemukan 14 foreign key tabel `public` tanpa indeks pendukung. Kolom relasi yang sering dipakai untuk penghapusan/pembaruan berpotensi melambat saat data bertambah. | Ditambahkan 14 indeks untuk seluruh foreign key tabel `public` yang terdeteksi. Foreign key pada schema terkelola `auth` dan `storage` tidak diubah. Verifikasi ulang query katalog menunjukkan tidak ada lagi foreign key tanpa indeks di schema `public`. Migrasi `20261122152406_index_public_foreign_key_columns`. Commit `d809592`. |
+
 ## Temuan yang perlu tindak lanjut sebelum dinyatakan tuntas
 
 1. **Gejala kolom email/kata sandi pada halaman Belajar belum terbukti akar masalahnya.** Pada kode login yang diperiksa, tidak ditemukan pemanggilan `form.reset()` atau assignment yang sengaja mengosongkan kolom login. Handler login juga menyimpan nilai sebelum permintaan dan mengembalikannya jika formulir tetap ditampilkan. Atribut autofill sudah diperbaiki, tetapi perlu pengujian langsung di browser Android/WebView untuk membedakan autofill yang tidak mengisi dari nilai yang terhapus akibat reload/navigasi.
