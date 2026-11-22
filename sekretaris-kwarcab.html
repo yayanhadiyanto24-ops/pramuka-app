@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RUANG TEGAK · Sekretaris Kwarcab</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.tailwindcss.com"></script><style>
 :root{--brown:#392316;--gold:#ffd400;--red:#c62828}body{background:#f7f2e9;color:#302313}header{background:linear-gradient(115deg,#24150e,#60402a);color:white;border-bottom:8px solid var(--red)}.panel{background:white;border:1px solid #e8d7b7;border-radius:14px;box-shadow:0 6px 20px #39231610}th{background:#f6ecd8;white-space:nowrap}td,th{padding:8px;border-bottom:1px solid #eee4d4;text-align:left;font-size:12px}button.primary{background:linear-gradient(110deg,#d99c00,#ffd400,#fff0a0);color:#17120a}
-</style></head><body class="min-h-screen">
+</style><link rel="stylesheet" href="./assets/ruang-tegak-ui.css?v=1">
+</head><body class="min-h-screen">
 <header class="p-4"><div class="max-w-6xl mx-auto flex items-center justify-between gap-3"><div><div class="text-xs tracking-widest text-amber-200">RUANG TEGAK · KWARCAB CIANJUR</div><h1 class="text-xl font-black">Pemantauan Sekretaris Kwarcab</h1><p class="text-xs text-amber-100">Dari Kampung untuk Kemajuan Kwarcab Cianjur</p></div><button id="logout" class="hidden rounded-lg bg-white/15 border border-white/30 px-3 py-2 text-xs font-semibold text-white">Keluar</button></div></header>
 <main class="max-w-6xl mx-auto p-3 sm:p-5 space-y-4">
 <section id="login-box" class="panel max-w-md mx-auto p-5 mt-8"><h2 class="font-bold text-lg mb-1">Masuk Ruang Tegak</h2><p class="text-sm text-slate-600 mb-4">Gunakan email dan password yang dibuat saat pendaftaran.</p><form id="login-form" class="space-y-3"><input id="email" type="email" required autocomplete="username" placeholder="Email" class="w-full border rounded-lg p-3"><input id="password" type="password" required autocomplete="current-password" placeholder="Password" class="w-full border rounded-lg p-3"><button class="primary w-full rounded-lg p-3 font-bold" type="submit">Masuk</button></form><p id="login-message" class="text-sm mt-3" role="status"></p></section>
@@ -81,4 +82,5 @@ button:focus-visible,a:focus-visible{outline:3px solid #c9a875!important;outline
  mark();window.addEventListener('hashchange',mark);
 })();
 </script>
+<script src="./assets/ruang-tegak-ui.js?v=1"></script>
 </body></html>
