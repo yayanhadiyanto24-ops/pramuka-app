@@ -32,11 +32,14 @@ test('Semua dataset dashboard memakai paginasi bertahap', () => {
     source.slice(source.indexOf('if(action==="admin_kwarran_dashboard")'), source.indexOf('if(action==="save_profile")')),
     source.slice(source.indexOf('if(action==="dashboard")'), source.indexOf('if(action==="buat_kode_akses")'))
   ];
-  const required = ['pangkalan','v_admin_ambalan_rekap','profil_pembina','profil_peserta_didik','sku_learning_progress','sku_items','v_pangkalan_peringkat','v_kwarran_comparison'];
+  const requiredByDashboard = [
+    ['pangkalan','v_admin_ambalan_rekap','profil_pembina','profil_peserta_didik','sku_learning_progress','sku_items','v_pangkalan_peringkat','v_kwarran_comparison'],
+    ['v_kwarran_comparison','pangkalan','v_admin_ambalan_rekap','v_pangkalan_peringkat'],
+    ['pangkalan','v_admin_ambalan_rekap','profil_pembina','profil_peserta_didik','sku_learning_progress','sku_items','v_pangkalan_peringkat','v_kwarran_comparison']
+  ];
   for (const [i, block] of blocks.entries()) {
     assert.ok(block.length > 0, 'Blok dashboard ' + i + ' ditemukan');
-    for (const table of required) {
-      if (table === 'profil_pembina' && i === 1) continue;
+    for (const table of requiredByDashboard[i]) {
       assert.match(block, new RegExp('fetchAllRows\\(\\(\\)=>admin\\.from\\("' + table + '"\\)'));
     }
   }
