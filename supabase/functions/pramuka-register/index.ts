@@ -252,10 +252,10 @@ Deno.serve(async(req:Request)=>{
    if(me.role==="peserta_didik"){
     const {data:student,error:studentError}=await admin.from("profil_peserta_didik").select("tingkatan,nta,tanggal_lahir").eq("id_user",authData.user.id).single();if(studentError)throw studentError;
     const nta=clean(body.nta,80)||null;
-    const birthDate=typeof body.tanggal_lahir==="string"&&/^\\d{4}-\\d{2}-\\d{2}$/.test(body.tanggal_lahir)?body.tanggal_lahir:null;
+    const birthDate=typeof body.tanggal_lahir==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(body.tanggal_lahir)?body.tanggal_lahir:null;
     if(body.tanggal_lahir&&!birthDate)return reply({ok:false,message:"Tanggal lahir tidak valid."},400);
     if(nta){
-     const match=nta.match(/^(\\d{2})\\.(\\d{2})\\.(\\d{2})\\.(\\d{6})\\.(\\d{4})$/);
+     const match=nta.match(/^(\d{2})\.(\d{2})\.(\d{2})\.(\d{6})\.(\d{4})$/);
      if(!match)return reply({ok:false,message:"Format NTA harus seperti 09.03.00.200780.0001 (lima kelompok angka dipisahkan titik)."},400);
      if(!birthDate)return reply({ok:false,message:"Isi tanggal lahir sesuai KTA terlebih dahulu."},400);
      const d=new Date(birthDate+"T00:00:00Z");
