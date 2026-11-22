@@ -521,6 +521,23 @@ a[class*="rounded"]{
 'use strict';
 const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
 const $=id=>document.getElementById(id);
+function parseNtaNumber(value){
+ const m=String(value||'').trim().match(/^(\d{2})\.(\d{2})\.(\d{2})\.(\d{6})\.(\d{4})$/);
+ if(!m)return null;
+ const yy=Number(m[4].slice(4,6)),nowYear=new Date().getFullYear(),year=(yy<=nowYear%100?2000:1900)+yy;
+ const day=Number(m[4].slice(0,2)),month=Number(m[4].slice(2,4)),date=new Date(Date.UTC(year,month-1,day));
+ if(date.getUTCFullYear()!==year||date.getUTCMonth()!==month-1||date.getUTCDate()!==day)return null;
+ return {kwarda:m[1]==='09'?'Jawa Barat':'Kode '+m[1],kwarcab:m[1]==='09'&&m[2]==='03'?'Cianjur':'Kode '+m[2],kwarran:m[3]==='00'?'Penerbitan langsung tingkat Kwartir':(m[1]==='09'&&m[2]==='03'&&m[3]==='30'?'Leles, Cianjur':'Kode '+m[3]),birthDate:year+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0'),sequence:m[5]};
+}
+function renderNtaParseInfo(){
+ const box=$('ntaParseInfo');if(!box)return;
+ const value=$('profileNta')?.value||'',p=parseNtaNumber(value);
+ if(!value){box.textContent='Rincian wilayah dan tanggal lahir dari NTA akan muncul setelah nomor diisi.';return;}
+ if(!p){box.textContent='Format atau tanggal pada NTA belum valid. Gunakan AA.BB.CC.DDMMYY.XXXX.';return;}
+ box.innerHTML='<b>Hasil pembacaan NTA</b><div class="mt-1">Kwarda: '+esc(p.kwarda)+'<br>Kwarcab: '+esc(p.kwarcab)+'<br>Kwarran: '+esc(p.kwarran)+'<br>Tanggal lahir dari NTA: <b>'+esc(p.birthDate.split('-').reverse().join('-'))+'</b><br>Nomor urut: '+esc(p.sequence)+'</div>';
+ if($('profileBirthDate')&&!$('profileBirthDate').value)$('profileBirthDate').value=p.birthDate;
+}
+
 window.addEventListener('error',e=>{const m=$('loginMsg');if(m&&!currentUser)m.textContent='Aplikasi mengalami kendala saat dimuat: '+(e.message||'Kesalahan JavaScript. Muat ulang halaman.');});
 window.addEventListener('unhandledrejection',e=>{const m=$('loginMsg');if(m&&!currentUser)m.textContent='Koneksi aplikasi bermasalah: '+(e.reason?.message||'Silakan muat ulang halaman.');});
 const SUPABASE_KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
@@ -669,6 +686,41 @@ async function saveProfile(extra={}){
  finally{$('saveProfile').disabled=false;}
 }
 $('saveProfile').onclick=()=>saveProfile();
+$('profileNta')?.addEventListener('input',renderNtaParseInfo);
+let ktaQrScanner=null;
+$('ktaQrStart')?.addEventListener('click',async()=>{
+ const result=$('ktaQrResult'),reader=$('ktaQrReader');
+ if(!window.Html5Qrcode){result.textContent='Modul pemindai QR belum berhasil dimuat. Periksa koneksi internet lalu muat ulang halaman.';return;}
+ try{
+  reader.classList.remove('hidden');$('ktaQrStart').disabled=true;$('ktaQrStop').classList.remove('hidden');
+  ktaQrScanner=new Html5Qrcode('ktaQrReader');
+  await ktaQrScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:230,height:230},aspectRatio:1.0},async(decoded)=>{
+   try{await ktaQrScanner.stop();}catch(_){}
+   try{await ktaQrScanner.clear();}catch(_){}
+   reader.classList.add('hidden');$('ktaQrStart').disabled=false;$('ktaQrStop').classList.add('hidden');
+   const decodedText=String(decoded||'').trim();
+   let candidate=decodedText;try{candidate=decodeURIComponent(decodedText);}catch(_){}
+   const match=candidate.match(/\d{2}\.\d{2}\.\d{2}\.\d{6}\.\d{4}/);
+   if(match){
+    $('profileNta').value=match[0];renderNtaParseInfo();
+    result.textContent='QR berhasil dibaca. NTA '+match[0]+' ditemukan dan dimasukkan ke kolom NTA. Cocokkan nama dan nomor dengan KTA.';
+   }else{
+    let safe='QR berhasil dibaca dan berisi data verifikasi.';
+    try{const u=new URL(decodedText);safe='QR mengarah ke '+u.hostname+u.pathname+' (parameter/token disembunyikan).';}catch(_){}
+    result.textContent=safe+' Status aktif belum dapat dipastikan karena endpoint verifikasi resmi AyoPramuka belum dikonfirmasi.';
+   }
+  },()=>{});
+ }catch(err){
+  reader.classList.add('hidden');$('ktaQrStart').disabled=false;$('ktaQrStop').classList.add('hidden');
+  result.textContent='Kamera tidak dapat dibuka: '+(err.message||'Pastikan izin kamera diberikan dan aplikasi dibuka melalui HTTPS.');
+ }
+});
+$('ktaQrStop')?.addEventListener('click',async()=>{
+ if(ktaQrScanner){try{await ktaQrScanner.stop();}catch(_){}try{await ktaQrScanner.clear();}catch(_){}ktaQrScanner=null;}
+ $('ktaQrReader')?.classList.add('hidden');$('ktaQrStart').disabled=false;$('ktaQrStop').classList.add('hidden');
+ $('ktaQrResult').textContent='Pemindaian dihentikan.';
+});
+
 function setupProfilePad(canvasId,openId,clearId,saveId,editorId,field){
  const c=$(canvasId),ctx=c.getContext('2d');ctx.strokeStyle='#111827';ctx.lineWidth=7;ctx.lineCap='round';ctx.lineJoin='round';let drawing=false;
  const pos=e=>{const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height};};
