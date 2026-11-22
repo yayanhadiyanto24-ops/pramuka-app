@@ -582,7 +582,7 @@ $('loginForm').addEventListener('submit',async e=>{
 });
 
 
-$('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
+$('logout').onclick=async()=>{const {error}=await sb.auth.signOut();if(error){setMsg('Keluar belum berhasil: '+error.message);return;}window.location.replace('./index.html');};
 async function boot(user){
  currentUser=user;
  const {data:u,error:ue}=await sb.from('users').select('role,status_akun,kode_unik,foto_profil_data').eq('id_user',user.id).maybeSingle();
