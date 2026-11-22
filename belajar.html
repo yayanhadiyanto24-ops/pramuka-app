@@ -730,13 +730,27 @@ function showTab(name){
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
 $('loginForm').addEventListener('submit',async e=>{
  e.preventDefault();
- const email=$('email').value.trim(),password=$('password').value;
- if(!email||!password){$('loginMsg').textContent='Email dan password wajib diisi.';return;}
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){$('loginMsg').textContent='Format email belum benar.';return;}
- $('loginBtn').disabled=true;$('loginBtn').textContent='Memeriksa...';$('loginMsg').textContent='Menghubungkan ke server...';
- try{const client=await sbReady;const {data,error}=await client.auth.signInWithPassword({email,password});if(error)throw error;await boot(data.user);}
- catch(err){$('loginMsg').textContent='Login belum berhasil: '+(err.message||'Periksa email dan password.');}
- finally{$('loginBtn').disabled=false;$('loginBtn').textContent='Masuk';}
+ const emailValue=$('email').value.trim(),passwordValue=$('password').value;
+ if(!emailValue||!passwordValue){$('loginMsg').textContent='Email dan kata sandi wajib diisi.';return;}
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)){$('loginMsg').textContent='Format email belum benar.';return;}
+ $('email').value=emailValue;
+ $('loginBtn').disabled=true;$('loginBtn').textContent='Menghubungkan...';$('loginMsg').textContent='Menghubungkan ke layanan masuk...';
+ try{
+  const client=await sbReady;
+  const {data,error}=await client.auth.signInWithPassword({email:emailValue,password:passwordValue});
+  if(error)throw error;
+  if(!data?.user)throw new Error('Server belum mengembalikan data akun setelah masuk.');
+  await boot(data.user);
+ }catch(err){
+  console.error('Ruang Tegak login error:',err);
+  $('loginMsg').textContent='Login gagal: '+(err?.message||'Terjadi kendala yang belum dikenali.');
+ }finally{
+  if(!$('login').classList.contains('hidden')){
+   $('email').value=emailValue;
+   $('password').value=passwordValue;
+  }
+  $('loginBtn').disabled=false;$('loginBtn').textContent='Masuk';
+ }
 });
 
 
