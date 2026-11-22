@@ -2,6 +2,18 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const corsHeaders = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS"};
 const reply=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,"Content-Type":"application/json"}});
 const clean=(v:unknown,max=180)=>typeof v==="string"?v.trim().slice(0,max):"";
+// Ambil seluruh baris bertahap agar batas PostgREST tidak memotong dashboard.
+async function fetchAllRows(buildQuery:()=>any,pageSize=500){
+ const rows:any[]=[];
+ for(let offset=0;;offset+=pageSize){
+  const {data,error}=await buildQuery().range(offset,offset+pageSize-1);
+  if(error)throw error;
+  const page=data||[];
+  rows.push(...page);
+  if(page.length<pageSize)break;
+ }
+ return {data:rows,error:null};
+}
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:corsHeaders});
  if(req.method!=="POST")return reply({ok:false,message:"Metode tidak didukung."},405);
@@ -78,7 +90,7 @@ Deno.serve(async(req:Request)=>{
    }catch(exchangeError){await admin.from("qr_login_approvals").update({status:"approved"}).eq("id",row.id).eq("status","processing");throw exchangeError;}
   }
   if(action==="kwarran_registration_options"){
-   const {data,error}=await admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran");
+   const {data,error}=await fetchAllRows(()=>admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran"));
    if(error)throw error;return reply({ok:true,kwarran:data||[]});
   }
   if(action==="kwarran_invite_options"){
@@ -196,15 +208,15 @@ Deno.serve(async(req:Request)=>{
    if(secretaryError)throw secretaryError;
    if(!secretary)return reply({ok:false,message:"Data akun Sekretaris Kwarcab tidak ditemukan."},403);
    const [pangkalan,rekap,pembina,peserta,progress,sku,peringkatPangkalan,peringkatKwarran,kwarranResult]=await Promise.all([
-    admin.from("pangkalan").select("id_pangkalan,id_kwarran,nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,created_at,kwarran(nama_kwarran)").order("nama_pangkalan"),
+    fetchAllRows(()=>admin.from("pangkalan").select("id_pangkalan,id_kwarran,nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,created_at,kwarran(nama_kwarran)").order("nama_pangkalan").order("id_pangkalan")),
     admin.from("v_admin_ambalan_rekap").select("*").order("nama_pangkalan").order("jenis_kelamin").order("urutan_ambalan"),
-    admin.from("profil_pembina").select("id_pembina,id_user,id_pangkalan,nama_lengkap,jabatan,jenis_kelamin,nta,nta_status_verifikasi,users!inner(email,status_akun)").order("nama_lengkap"),
-    admin.from("profil_peserta_didik").select("id_peserta,id_user,id_pangkalan,nama_lengkap,jenis_kelamin,nta,tingkatan,sangga,kelas_sekolah,jurusan,tahun_pelajaran,status_keanggotaan,tanggal_alumni").order("nama_lengkap"),
+    fetchAllRows(()=>admin.from("profil_pembina").select("id_pembina,id_user,id_pangkalan,nama_lengkap,jabatan,jenis_kelamin,nta,nta_status_verifikasi,users!inner(email,status_akun)").order("nama_lengkap").order("id_pembina")),
+    fetchAllRows(()=>admin.from("profil_peserta_didik").select("id_peserta,id_user,id_pangkalan,nama_lengkap,jenis_kelamin,nta,tingkatan,sangga,kelas_sekolah,jurusan,tahun_pelajaran,status_keanggotaan,tanggal_alumni").order("nama_lengkap").order("id_peserta")),
     admin.from("sku_learning_progress").select("id_progress,id_user,id_sku_item,status,mulai_belajar_at,diajukan_at,diperiksa_at").order("id_progress",{ascending:false}),
     admin.from("sku_items").select("id_sku_item,tingkat,kode_butir,nomor_butir,judul_butir,area_pengembangan,kompetensi_dasar,aktif").eq("aktif",true).order("tingkat").order("urutan"),
     admin.from("v_pangkalan_peringkat").select("*").order("id_kwarran").order("peringkat_kwarran",{ascending:true,nullsFirst:false}).order("nama_pangkalan"),
     admin.from("v_kwarran_comparison").select("*").order("peringkat_kwarran",{ascending:true,nullsFirst:false}).order("nama_kwarran"),
-    admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran")
+    fetchAllRows(()=>admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran"))
    ]);
    for(const x of [pangkalan,rekap,pembina,peserta,progress,sku,peringkatPangkalan,peringkatKwarran,kwarranResult])if(x.error)throw x.error;
    const pangkalanMap=new Map((pangkalan.data||[]).map(x=>[String(x.id_pangkalan),x]));
@@ -227,7 +239,7 @@ Deno.serve(async(req:Request)=>{
   if(action==="kwarran_options"){
    const {data:me,error:meError}=await admin.from("users").select("role,status_akun").eq("id_user",authData.user.id).maybeSingle();
    if(meError)throw meError;if(!me||me.role!=="pembina"||me.status_akun!=="aktif")return reply({ok:false,message:"Akses hanya untuk Pembina aktif."},403);
-   const {data,error}=await admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran");if(error)throw error;
+   const {data,error}=await fetchAllRows(()=>admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran"));if(error)throw error;
    return reply({ok:true,kwarran:data||[]});
   }
 
@@ -450,9 +462,9 @@ Deno.serve(async(req:Request)=>{
   }
   if(action==="kwarran_management_data"){
    const [kwarran,pangkalan,admins,invites]=await Promise.all([
-    admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran"),
-    admin.from("pangkalan").select("id_pangkalan,nama_pangkalan,no_gudep,id_kwarran").order("nama_pangkalan"),
-    admin.from("admin_kwarran").select("id_user,id_kwarran,nama_lengkap,kwarran!inner(nama_kwarran),users!admin_kwarran_id_user_fkey!inner(email,status_akun)").order("nama_lengkap"),
+    fetchAllRows(()=>admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran")),
+    fetchAllRows(()=>admin.from("pangkalan").select("id_pangkalan,nama_pangkalan,no_gudep,id_kwarran").order("nama_pangkalan").order("id_pangkalan")),
+    fetchAllRows(()=>admin.from("admin_kwarran").select("id_user,id_kwarran,nama_lengkap,kwarran!inner(nama_kwarran),users!admin_kwarran_id_user_fkey!inner(email,status_akun)").order("nama_lengkap").order("id_user")),
     admin.from("kwarran_admin_invites").select("id_invite,id_kwarran,invite_code,created_at,used_at,revoked_at,kwarran!inner(nama_kwarran)").order("created_at",{ascending:false}).limit(100)
    ]);
    for(const x of [kwarran,pangkalan,admins,invites])if(x.error)throw x.error;
@@ -493,15 +505,15 @@ Deno.serve(async(req:Request)=>{
   }
   if(action==="dashboard"){
    const [pangkalan,rekap,pembina,peserta,progress,sku,peringkatPangkalan,peringkatKwarran,pending]=await Promise.all([
-    admin.from("pangkalan").select("id_pangkalan,id_kwarran,nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,kode_gabung_peserta,created_at,kwarran(nama_kwarran)").order("nama_pangkalan"),
+    fetchAllRows(()=>admin.from("pangkalan").select("id_pangkalan,id_kwarran,nama_pangkalan,no_gudep,nama_ambalan_putra,nama_ambalan_putri,nama_ketua_gudep,nama_ketua_mabigus,kode_gabung_peserta,created_at,kwarran(nama_kwarran)").order("nama_pangkalan").order("id_pangkalan")),
     admin.from("v_admin_ambalan_rekap").select("*").order("nama_pangkalan").order("jenis_kelamin").order("urutan_ambalan"),
-    admin.from("profil_pembina").select("id_pembina,id_user,id_pangkalan,nama_lengkap,jabatan,jenis_kelamin,nta,id_qr_kta,nta_bukti_kta,nta_status_verifikasi,jumlah_ambalan_berbayar,users!inner(email,status_akun)").order("nama_lengkap"),
+    fetchAllRows(()=>admin.from("profil_pembina").select("id_pembina,id_user,id_pangkalan,nama_lengkap,jabatan,jenis_kelamin,nta,id_qr_kta,nta_bukti_kta,nta_status_verifikasi,jumlah_ambalan_berbayar,users!inner(email,status_akun)").order("nama_lengkap").order("id_pembina")),
     admin.from("profil_peserta_didik").select("id_peserta,id_user,id_pangkalan,nama_lengkap,jenis_kelamin,nta,id_qr_kta,tingkatan,sangga,kelas_sekolah,jurusan,tahun_pelajaran,status_keanggotaan,tanggal_alumni").order("nama_lengkap"),
-    admin.from("sku_learning_progress").select("id_progress,id_user,id_sku_item,status").order("id_progress",{ascending:false}),
-    admin.from("sku_items").select("id_sku_item,tingkat").eq("aktif",true),
+    fetchAllRows(()=>admin.from("sku_learning_progress").select("id_progress,id_user,id_sku_item,status").order("id_progress",{ascending:false})),
+    fetchAllRows(()=>admin.from("sku_items").select("id_sku_item,tingkat").eq("aktif",true).order("id_sku_item")),
     admin.from("v_pangkalan_peringkat").select("*").order("id_kwarran").order("peringkat_kwarran",{ascending:true,nullsFirst:false}).order("nama_pangkalan"),
     admin.from("v_kwarran_comparison").select("*").order("peringkat_kwarran",{ascending:true,nullsFirst:false}).order("nama_kwarran"),
-    admin.from("users").select("id_user,email,role,created_at").eq("status_akun","pending").order("created_at",{ascending:false})
+    fetchAllRows(()=>admin.from("users").select("id_user,email,role,created_at").eq("status_akun","pending").order("created_at",{ascending:false}))
    ]);
    for(const x of [pangkalan,rekap,pembina,peserta,progress,sku,peringkatPangkalan,peringkatKwarran,pending])if(x.error)throw x.error;
    const pangkalanMap=new Map((pangkalan.data||[]).map(x=>[String(x.id_pangkalan),x]));
@@ -525,7 +537,7 @@ Deno.serve(async(req:Request)=>{
     return {...p,nama_pangkalan:g.nama_pangkalan||"-",no_gudep:g.no_gudep||"",nama_ambalan:p.jenis_kelamin==="L"?(g.nama_ambalan_putra||"Ambalan Putra"):(g.nama_ambalan_putri||"Ambalan Putri"),progress:progressByUser.get(p.id_user)||emptyCounts()};
    });
    const rekapDenganKwarran=(rekap.data||[]).map(x=>{const g=pangkalanMap.get(String(x.id_pangkalan))||{};return {...x,id_kwarran:g.id_kwarran||null,nama_kwarran:g.kwarran?.nama_kwarran||"-"};});
-   const {data:kwarran,error:kwarranError}=await admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran");if(kwarranError)throw kwarranError;
+   const {data:kwarran,error:kwarranError}=await fetchAllRows(()=>admin.from("kwarran").select("id_kwarran,nama_kwarran").order("nama_kwarran"));if(kwarranError)throw kwarranError;
    const pembinaDetail=await Promise.all((pembina.data||[]).map(async p=>{let ktaUrl=null;if(p.nta_bukti_kta?.path){const {data:signed}=await admin.storage.from("sku-bukti").createSignedUrl(p.nta_bukti_kta.path,300);ktaUrl=signed?.signedUrl||null;}return {...p,nta_bukti_kta_url:ktaUrl};}));
    return reply({ok:true,pangkalan:pangkalan.data,rekap:rekapDenganKwarran,peringkat_pangkalan:peringkatPangkalan.data||[],peringkat_kwarran:peringkatKwarran.data||[],kwarran:kwarran||[],pembina:pembinaDetail,peserta:pesertaDetail,pending:pending.data||[]});
   }
