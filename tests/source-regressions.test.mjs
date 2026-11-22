@@ -42,7 +42,7 @@ test('Perpindahan tab benar-benar memindahkan email dan kata sandi dua arah', ()
     classList: { toggle() {} }
   }]));
   const api = vm.runInNewContext(
-    html.slice(start, end) + '\\n({ switchTab, getRole: () => activeRegistrationRole })',
+    html.slice(start, end) + '\n({ switchTab, getRole: () => activeRegistrationRole })',
     { document: { getElementById: id => elements[id] || null }, hideAlert() {} }
   );
   elements['pd-email'].value = 'peserta@example.test';
