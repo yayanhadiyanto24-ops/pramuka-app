@@ -64,3 +64,15 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
 @media(prefers-reduced-motion:no-preference){
  .panel,.card,.doc-card,.sku-card{transition:border-color .18s ease,box-shadow .18s ease}
 }
+
+/* Ikon kalender/jam pada input tanggal dan waktu mengikuti aksen hasduk. */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator{
+ filter: invert(19%) sepia(69%) saturate(2354%) hue-rotate(337deg) brightness(83%) contrast(93%);
+ opacity:.95;
+ cursor:pointer;
+}
+input[type="date"],input[type="datetime-local"],input[type="time"]{
+ accent-color:var(--rt-hasduk-red,#b3262d);
+}
