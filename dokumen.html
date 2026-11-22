@@ -159,7 +159,7 @@ async function init(){
  const user=sess?.session?.user;
  if(user){
   const {data:profile}=await sb.from('users').select('role,status_akun').eq('id_user',user.id).maybeSingle();
-  if(profile?.role==='admin_kwarcab'&&profile?.status_akun!=='nonaktif')$('adminUpload').classList.remove('hidden');
+  if(profile?.role==='admin_utama'&&profile?.status_akun!=='nonaktif')$('adminUpload').classList.remove('hidden');
  }
 }
 $('searchDocs').addEventListener('input',render);$('categoryFilter').addEventListener('change',render);
