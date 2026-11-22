@@ -759,7 +759,32 @@ $('poster-upload').addEventListener('click',async()=>{
 })();
 </script>
 <script id="admin-header-active-button">
-(()=>{const nav=document.getElementById('admin-header-nav');if(!nav)return;const links=[...nav.querySelectorAll('a')];const setActive=(link)=>{links.forEach(a=>a.classList.toggle('rt-nav-active',a===link));};const current=links.find(a=>a.getAttribute('href')===location.hash);if(current)setActive(current);links.forEach(a=>a.addEventListener('click',()=>setActive(a)));})();
+(()=> {
+ const nav=document.getElementById('admin-header-nav'); if(!nav)return;
+ const links=[...nav.querySelectorAll('a')];
+ const setActive=(link)=>{
+  links.forEach(a=>{
+   const active=a===link;
+   a.classList.toggle('rt-nav-active',active);
+   if(active)a.setAttribute('aria-current','location');
+   else a.removeAttribute('aria-current');
+  });
+ };
+ const syncFromHash=()=>{
+  const match=links.find(a=>{
+   try{return new URL(a.getAttribute('href'),location.href).hash===location.hash&&!!location.hash}catch(_){return false}
+  });
+  if(match)setActive(match);
+ };
+ nav.addEventListener('click',event=>{
+  const link=event.target.closest('a[href]');
+  if(!link||!nav.contains(link))return;
+  setActive(link);
+ });
+ window.addEventListener('hashchange',syncFromHash);
+ window.addEventListener('popstate',syncFromHash);
+ syncFromHash();
+})();
 </script>
 
 <style id="rt-active-navigation-style">
