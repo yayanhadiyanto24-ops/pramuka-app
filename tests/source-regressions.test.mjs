@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import vm from 'node:vm';
 
 const read = (file) => fs.readFileSync(new URL('../' + file, import.meta.url), 'utf8');
 
@@ -27,6 +28,40 @@ test('Memilih halaman Peserta Didik/Pembina tidak mereset formulir', () => {
   assert.match(handler, /if \(fromPassword && toPassword && !toPassword\.value\) toPassword\.value = fromPassword\.value/);
   assert.match(handler, /activeRegistrationRole = role/);
   assert.doesNotMatch(handler, /localStorage|sessionStorage/);
+});
+
+test('Perpindahan tab benar-benar memindahkan email dan kata sandi dua arah', () => {
+  const html = read('index.html');
+  const start = html.indexOf("let activeRegistrationRole = 'peserta';");
+  const end = html.indexOf('let loadedPangkalanKey', start);
+  assert.ok(start >= 0 && end > start, 'kode switchTab ditemukan');
+  const ids = ['pd-email','pd-password','pb-email','pb-password','form-peserta','form-pembina','form-admin_kwarran','tab-peserta','tab-pembina','tab-admin_kwarran'];
+  const elements = Object.fromEntries(ids.map(id => [id, {
+    value: '',
+    className: '',
+    classList: { toggle() {} }
+  }]));
+  const api = vm.runInNewContext(
+    html.slice(start, end) + '\\n({ switchTab, getRole: () => activeRegistrationRole })',
+    { document: { getElementById: id => elements[id] || null }, hideAlert() {} }
+  );
+  elements['pd-email'].value = 'peserta@example.test';
+  elements['pd-password'].value = 'password-peserta';
+  api.switchTab('pembina');
+  assert.equal(elements['pb-email'].value, 'peserta@example.test');
+  assert.equal(elements['pb-password'].value, 'password-peserta');
+  elements['pb-email'].value = 'pembina@example.test';
+  elements['pb-password'].value = 'password-pembina';
+  elements['pd-email'].value = '';
+  elements['pd-password'].value = '';
+  api.switchTab('peserta');
+  assert.equal(elements['pd-email'].value, 'pembina@example.test');
+  assert.equal(elements['pd-password'].value, 'password-pembina');
+  elements['pd-email'].value = 'nilai-yang-sudah-ada@example.test';
+  elements['pb-email'].value = 'jangan-ditimpa@example.test';
+  api.switchTab('pembina');
+  assert.equal(elements['pb-email'].value, 'jangan-ditimpa@example.test');
+  assert.equal(api.getRole(), 'pembina');
 });
 
 test('Semua dataset dashboard memakai paginasi bertahap', () => {
