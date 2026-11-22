@@ -1701,12 +1701,19 @@ const withAuthTimeout=(promise,label,ms=12000)=>Promise.race([
 withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
  let {data,error}=await withAuthTimeout(client.auth.getSession(),'Pemeriksaan sesi');
  if(error)throw error;
+ // Jangan pernah memakai jembatan sesi yang tertinggal dari kunjungan sebelumnya.
+ // Hanya URL yang secara eksplisit dikirim Admin Utama boleh melakukan login otomatis.
+ const allowAdminHandoff=new URLSearchParams(window.location.search).get('admin_handoff')==='1';
  const candidates=[];
- for(const store of [sessionStorage,localStorage]){
-  try{
-   const candidate=JSON.parse(store.getItem('ruang-tegak-auth-bridge')||'null');
-   if(candidate?.access_token&&candidate?.refresh_token&&Date.now()-Number(candidate.created_at||0)<600000)candidates.push(candidate);
-  }catch(_){}
+ if(allowAdminHandoff){
+  for(const store of [sessionStorage,localStorage]){
+   try{
+    const candidate=JSON.parse(store.getItem('ruang-tegak-auth-bridge')||'null');
+    if(candidate?.access_token&&candidate?.refresh_token&&Date.now()-Number(candidate.created_at||0)<600000)candidates.push(candidate);
+   }catch(_){}
+  }
+ }else{
+  try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
  }
  candidates.sort((a,b)=>Number(b.created_at||0)-Number(a.created_at||0));
  const bridge=candidates[0];
