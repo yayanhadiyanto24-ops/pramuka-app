@@ -366,6 +366,18 @@ header nav button{
  <div><h3 class="font-semibold mb-2">Akun Admin Kwarran Terdaftar</h3><div id="kwarran-admin-list" class="space-y-2"></div></div>
  <p id="kwarran-manager-status" class="text-sm text-slate-500" role="status"></p>
 </section>
+<section id="sekretaris-manager" class="bg-white rounded-2xl shadow-sm p-4 space-y-3">
+ <div><h2 class="font-bold text-lg">Akses Sekretaris Kwarcab</h2><p class="text-sm text-slate-600">Buat satu link pendaftaran khusus. Link hanya dapat dipakai satu kali; Sekretaris mengisi nama, email, dan password sendiri.</p></div>
+ <button id="sekretaris-create-link" type="button" class="rounded-lg bg-amber-400 px-4 py-2 font-bold text-stone-950">Buat Link Pendaftaran Sekretaris</button>
+ <div id="sekretaris-link-result" class="hidden rounded-xl border border-amber-200 bg-amber-50 p-3 space-y-2">
+  <p class="text-sm font-semibold">Link pendaftaran sekali pakai</p>
+  <input id="sekretaris-link" readonly class="w-full rounded-lg border bg-white p-2 text-xs" aria-label="Link pendaftaran Sekretaris Kwarcab">
+  <button id="sekretaris-copy-link" type="button" class="rounded-lg bg-amber-800 px-3 py-2 text-sm font-bold text-white">Salin Link</button>
+  <p class="text-xs text-slate-600">Kirim link ini langsung hanya kepada Sekretaris Kwarcab yang dituju. Setelah berhasil digunakan, link otomatis tidak berlaku lagi.</p>
+ </div>
+ <div id="sekretaris-account" class="rounded-xl border p-3 text-sm">Memeriksa status akun Sekretaris...</div>
+ <p id="sekretaris-manager-status" class="text-sm text-slate-500" role="status"></p>
+</section>
 <div id="status" class="text-sm text-slate-500"></div></section></main>
 <script>
 const SUPABASE_URL='https://bopxmtxfrlrnywwhywne.supabase.co';
@@ -436,7 +448,7 @@ function renderPesertaDetail(rows){
  $('peserta-detail-count').textContent='Menampilkan '+filtered.length+' dari '+pesertaAdminCache.length+' peserta.';
 }
 $('peserta-search')?.addEventListener('input',()=>renderPesertaDetail(pesertaAdminCache));
-async function showDashboard(){$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');await loadDashboard();await loadPosterGallery();await loadKwarranManager();}
+async function showDashboard(){$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');await loadDashboard();await loadPosterGallery();await loadKwarranManager();await loadSekretarisManager();}
 let pembinaAccessCache=[];
 function renderPembinaAccess(){
  const q=($('pembina-access-search')?.value||'').trim().toLowerCase();
@@ -496,6 +508,46 @@ async function loadKwarranManager(){
   status.textContent='Pengaturan Kwarran berhasil dimuat.';
  }catch(err){status.textContent='Gagal memuat pengaturan Kwarran: '+err.message;}
 }
+async function loadSekretarisManager(){
+ const status=$('sekretaris-manager-status'),account=$('sekretaris-account'),create=$('sekretaris-create-link');
+ try{
+  const d=await callApi({action:'sekretaris_management_data'});
+  const a=d.secretary;
+  if(a){
+   const active=a.users?.status_akun==='aktif';
+   account.innerHTML='<b>'+esc(a.nama_lengkap)+'</b><div>'+esc(a.users?.email||'')+'</div><div class="mt-1 font-semibold '+(active?'text-green-700':'text-red-700')+'">'+(active?'Akses aktif':'Akses ditutup')+'</div><div class="text-xs text-slate-500">Terdaftar: '+new Date(a.created_at).toLocaleString('id-ID')+'</div>'+(active?'<button id="sekretaris-close-access" type="button" class="mt-3 rounded-lg bg-red-700 px-3 py-2 text-xs font-bold text-white">Tutup Akses Sekretaris</button>':'');
+   create.disabled=true;create.textContent='Akun Sekretaris Sudah Terdaftar';
+  }else{
+   account.textContent='Belum ada akun Sekretaris Kwarcab.';
+   create.disabled=false;create.textContent='Buat Link Pendaftaran Sekretaris';
+  }
+  const latest=(d.invites||[])[0];
+  if(latest){
+   const state=latest.revoked_at?'Link dicabut':latest.used_at?'Link sudah digunakan':'Link aktif menunggu pendaftaran';
+   status.textContent=state+'.';
+  }else status.textContent='Belum ada link pendaftaran yang dibuat.';
+ }catch(err){account.textContent='Status belum dapat dimuat.';status.textContent='Gagal memuat status Sekretaris: '+err.message;}
+}
+$('sekretaris-create-link').addEventListener('click',async()=>{
+ const b=$('sekretaris-create-link');b.disabled=true;$('sekretaris-manager-status').textContent='Membuat link sekali pakai...';
+ try{
+  const d=await callApi({action:'sekretaris_create_invite'});
+  $('sekretaris-link').value=d.link;$('sekretaris-link-result').classList.remove('hidden');
+  $('sekretaris-manager-status').textContent='Link pendaftaran berhasil dibuat. Salin dan kirim hanya kepada Sekretaris Kwarcab.';
+  await loadSekretarisManager();
+ }catch(err){$('sekretaris-manager-status').textContent='Gagal membuat link: '+err.message;}
+ finally{b.disabled=false;}
+});
+$('sekretaris-copy-link').addEventListener('click',async()=>{
+ try{await navigator.clipboard.writeText($('sekretaris-link').value);$('sekretaris-manager-status').textContent='Link berhasil disalin.';}
+ catch(err){$('sekretaris-manager-status').textContent='Salin link yang tampil secara manual.';}
+});
+$('sekretaris-account').addEventListener('click',async e=>{
+ if(!e.target.closest('#sekretaris-close-access'))return;
+ const b=e.target.closest('#sekretaris-close-access');b.disabled=true;b.textContent='Menutup akses...';
+ try{const d=await callApi({action:'sekretaris_set_inactive'});$('sekretaris-manager-status').textContent=d.message;await loadSekretarisManager();}
+ catch(err){$('sekretaris-manager-status').textContent='Gagal menutup akses: '+err.message;b.disabled=false;b.textContent='Tutup Akses Sekretaris';}
+});
 $('kwarran-invite-form').addEventListener('submit',async e=>{
  e.preventDefault();const b=e.submitter;b.disabled=true;$('kwarran-manager-status').textContent='Menerbitkan undangan...';
  try{const result=await callApi({action:'kwarran_create_invite',id_kwarran:$('kwarran-invite-region').value});await loadKwarranManager();$('kwarran-manager-status').textContent='Undangan untuk '+result.invite.nama_kwarran+' berhasil dibuat. Kode aktivasi: '+result.invite.invite_code+' — bagikan kode ini kepada calon Admin Kwarran.';}
