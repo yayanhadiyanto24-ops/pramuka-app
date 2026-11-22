@@ -1703,13 +1703,17 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
  }
  candidates.sort((a,b)=>Number(b.created_at||0)-Number(a.created_at||0));
  const bridge=candidates[0];
- if(bridge){
+ // Utamakan sesi aktif dari penyimpanan bersama Supabase.
+ // Token jembatan hanya dipakai jika sesi bersama benar-benar tidak tersedia.
+ if(bridge&&!data.session){
   const restored=await withAuthTimeout(client.auth.setSession({access_token:bridge.access_token,refresh_token:bridge.refresh_token}),'Pemulihan sesi');
   if(restored.error)throw restored.error;
   const check=await withAuthTimeout(client.auth.getSession(),'Verifikasi sesi');
   if(check.error)throw check.error;
   data=check.data;
   if(!data.session)throw new Error('Sesi Admin Utama belum berhasil dipulihkan. Silakan masuk kembali dari halaman Admin Utama.');
+ }
+ if(data.session){
   try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
  }
  $('sessionLoading')?.classList.add('hidden');
