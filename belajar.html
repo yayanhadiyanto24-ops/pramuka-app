@@ -671,10 +671,24 @@ async function saveProfile(extra={}){
    if(!window.Tesseract?.recognize){$('profileMsg').textContent='Mesin pembaca NTA belum termuat. Periksa koneksi internet lalu muat ulang halaman.';return false;}
    $('profileMsg').textContent='Membaca NTA pada foto KTA secara otomatis...';
    try{
-    const ocr=await Tesseract.recognize(ktaFile,'eng');
     const target=payload.nta.replace(/\D/g,'');
-    const candidates=String(ocr?.data?.text||'').split(/\r?\n/).map(line=>line.toUpperCase().replace(/[OQ]/g,'0').replace(/[IL|]/g,'1').replace(/[^0-9]/g,'')).flatMap(line=>line.match(/\d{16}/g)||[]);
-    if(!candidates.includes(target)){$('profileMsg').textContent='NTA pada foto KTA belum terbaca cocok dengan NTA yang diinput. Pastikan foto jelas, utuh, tidak miring, lalu unggah ulang.';return false;}
+    // Perbesar dan tingkatkan kontras agar angka kecil pada KTA lebih mudah dikenali.
+    const bitmap=await createImageBitmap(ktaFile);
+    const scale=Math.min(2.5,2600/Math.max(bitmap.width,bitmap.height));
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
+    const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
+    for(let i=0;i<pixels.data.length;i+=4){const gray=Math.round(pixels.data[i]*.299+pixels.data[i+1]*.587+pixels.data[i+2]*.114);const contrast=Math.max(0,Math.min(255,(gray-128)*1.35+128));pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=contrast;}
+    ctx.putImageData(pixels,0,0);
+    const normalizeOcr=value=>String(value||'').toUpperCase().replace(/[OQ]/g,'0').replace(/[IL|]/g,'1').replace(/[^0-9]/g,'');
+    let recognized='';
+    for(const pageMode of [6,11,4]){
+     const result=await Tesseract.recognize(canvas,'eng',{tessedit_pageseg_mode:pageMode,tessedit_char_whitelist:'0123456789.OQIL| -'});
+     recognized=normalizeOcr(result?.data?.text);
+     if(recognized.includes(target))break;
+    }
+    if(!recognized.includes(target)){$('profileMsg').textContent='NTA belum berhasil dicocokkan oleh pembaca otomatis. Pastikan seluruh nomor NTA terlihat; jika tetap gagal, kirimkan hasil pemeriksaan agar metode OCR kami perbaiki.';return false;}
     payload.kta_ocr_nta=payload.nta;
    }catch(ocrError){$('profileMsg').textContent='Foto KTA gagal dibaca otomatis. Coba foto ulang dengan pencahayaan yang baik.';return false;}
   }
