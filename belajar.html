@@ -630,6 +630,13 @@ $('profilePhotoInput').addEventListener('change',async e=>{
 async function saveProfile(extra={}){
  const isTeacher=account.role==='pembina',isStudent=account.role==='peserta_didik';
  const payload={action:'save_profile',nta:$('profileNta').value.trim(),tanggal_lahir:$('profileBirthDate')?.value||null,foto_profil_data:profilePhotoData,...extra};
+ if(isStudent&&payload.nta){
+  const m=payload.nta.match(/^(\\d{2})\\.(\\d{2})\\.(\\d{2})\\.(\\d{6})\\.(\\d{4})$/);
+  if(!m){$('profileMsg').textContent='Format NTA harus seperti 09.03.00.200780.0001.';return false;}
+  if(!payload.tanggal_lahir){$('profileMsg').textContent='Isi tanggal lahir sesuai KTA terlebih dahulu.';return false;}
+  const encoded=payload.tanggal_lahir.slice(8,10)+payload.tanggal_lahir.slice(5,7)+payload.tanggal_lahir.slice(2,4);
+  if(m[4]!==encoded){$('profileMsg').textContent='Enam digit tanggal lahir pada NTA tidak cocok dengan tanggal lahir profil.';return false;}
+ }
  const ktaFile=$('ktaEvidenceInput')?.files?.[0];
  if(ktaFile){
   const allowed=['image/jpeg','image/png','image/webp','application/pdf'];
@@ -646,7 +653,7 @@ async function saveProfile(extra={}){
  $('profileMsg').textContent='Menyimpan profil...';$('saveProfile').disabled=true;
  try{const {data,error}=await sb.functions.invoke('pramuka-register',{body:payload});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Profil gagal disimpan.');
   if(isTeacher)teacher={...teacher,nta:payload.nta,foto_profil_data:profilePhotoData,tahun_kmd:payload.tahun_kmd,tahun_kml:payload.tahun_kml,tahun_kpd:payload.tahun_kpd,tahun_kpl:payload.tahun_kpl,tanda_tangan_data:payload.tanda_tangan_data,paraf_data:payload.paraf_data,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:{})};
-  if(isStudent){const nextLevel=participant.tingkatan;participant={...participant,nta:payload.nta,tingkatan:nextLevel,foto_profil_data:profilePhotoData,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows,jabatan_ambalan:payload.jabatan_ambalan,jabatan_sangga:payload.jabatan_sangga,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:{})};}if($('studentTierLabel'))$('studentTierLabel').textContent='Tingkatan: '+participant.tingkatan;
+  if(isStudent){const nextLevel=participant.tingkatan;participant={...participant,nta:payload.nta,tanggal_lahir:payload.tanggal_lahir,tingkatan:nextLevel,foto_profil_data:profilePhotoData,pengalaman_kegiatan:experienceRows,organisasi_aktif:organizationRows,jabatan_ambalan:payload.jabatan_ambalan,jabatan_sangga:payload.jabatan_sangga,...(payload.nta_bukti_kta?{nta_bukti_kta:payload.nta_bukti_kta,nta_status_verifikasi:'menunggu'}:{})};}if($('studentTierLabel'))$('studentTierLabel').textContent='Tingkatan: '+participant.tingkatan;
   if(!isTeacher&&!isStudent)account={...account,foto_profil_data:profilePhotoData};
   renderProfile();
    $('profileMsg').textContent='Profil berhasil disimpan.';
