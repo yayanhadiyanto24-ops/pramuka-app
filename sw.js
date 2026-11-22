@@ -1,5 +1,9 @@
-const CACHE_NAME='ruang-tegak-shell-v15';
+const CACHE_NAME='ruang-tegak-shell-v16';
 const APP_SHELL=['./','./index.html','./belajar.html','./login-confirm.html','./dokumen.html','./uji.html','./admin-kwarran.html','./manifest.webmanifest','./assets/ruang-tegak-icon.svg'];
+// Mendukung tombol Perbarui pada pemberitahuan aplikasi.
+self.addEventListener('message',event=>{
+ if(event.data&&event.data.type==='SKIP_WAITING')self.skipWaiting();
+});
 self.addEventListener('install',event=>{
  event.waitUntil((async()=>{
   const cache=await caches.open(CACHE_NAME);
