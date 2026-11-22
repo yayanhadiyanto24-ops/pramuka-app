@@ -918,7 +918,7 @@ async function loadAll(){
   if(tokenError)throw tokenError;
   for(const t of (myTokens||[])){const rec=examRecords.find(x=>x.id===t.id);if(rec)rec.token_value=t.token_value;}
  }
- renderGeneral();renderSkuList();if(account.role==='pembina'){await loadMonitor();renderNtaReviewPanel();renderCompletionPlanReviews();}
+ renderGeneral();renderSkuList();if(account.role!=='peserta_didik'){await loadMonitor();if(account.role==='pembina'){renderNtaReviewPanel();renderCompletionPlanReviews();}}
  setMsg('Materi berhasil dimuat.');
 }
 function renderNtaReviewPanel(){
