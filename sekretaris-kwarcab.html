@@ -44,4 +44,41 @@ $('login-form').addEventListener('submit',async e=>{e.preventDefault();const b=e
 $('refresh').addEventListener('click',async()=>{try{await loadDashboard();}catch(err){$('dashboard-message').textContent=err.message;await sb.auth.signOut();$('dashboard').classList.add('hidden');$('login-box').classList.remove('hidden');$('logout').classList.add('hidden');}});
 $('logout').addEventListener('click',async()=>{await sb.auth.signOut();location.reload();});
 (async()=>{const {data}=await sb.auth.getSession();if(data?.session){try{await loadDashboard();$('login-box').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden');}catch(e){await sb.auth.signOut();}}})();
-</script></body></html>
+</script>
+<style id="rt-active-navigation-style">
+/* Penanda konsisten untuk menu/tautan halaman yang sedang aktif */
+nav a.rt-nav-active, .rt-nav-active.quick-link {
+ background:linear-gradient(115deg,#f3c623 0%,#ffe98a 55%,#f7c842 100%) !important;
+ color:#3b2508 !important;
+ border:1px solid #fff0a8 !important;
+ box-shadow:0 2px 8px rgba(120,72,0,.22),inset 0 1px 0 rgba(255,255,255,.65) !important;
+ font-weight:900 !important;
+}
+nav a.rt-nav-active::before{content:"●";font-size:.65em;margin-right:5px;vertical-align:1px}
+button.tab.active,[role="tab"][aria-selected="true"]{
+ background:linear-gradient(115deg,#f3c623 0%,#ffe98a 55%,#f7c842 100%) !important;
+ color:#3b2508 !important;
+ border:1px solid #fff0a8 !important;
+ box-shadow:0 2px 8px rgba(120,72,0,.18),inset 0 1px 0 rgba(255,255,255,.65) !important;
+ font-weight:900 !important;
+}
+</style>
+<script id="rt-active-navigation">
+(()=>{
+ const mark=()=>{
+  const here=new URL(location.href);
+  document.querySelectorAll('nav a[href], .rt-account-actions a[href]').forEach(a=>{
+   let target;try{target=new URL(a.getAttribute('href'),here.href)}catch(_){return}
+   if(target.origin!==here.origin)return;
+   const samePage=target.pathname.replace(/\\/$/,'')===here.pathname.replace(/\\/$/,'');
+   const sameHash=!!target.hash&&target.hash===here.hash;
+   const active=samePage&&(target.hash?sameHash:!here.hash);
+   a.classList.toggle('rt-nav-active',active);
+   if(active)a.setAttribute('aria-current',target.hash?'location':'page');
+   else if(a.getAttribute('aria-current')==='page'||a.getAttribute('aria-current')==='location')a.removeAttribute('aria-current');
+  });
+ };
+ mark();window.addEventListener('hashchange',mark);
+})();
+</script>
+</body></html>
