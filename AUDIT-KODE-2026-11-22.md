@@ -78,3 +78,29 @@ Pemeriksaan dilakukan dengan membaca berkas dari branch utama, penelusuran alur 
 - Fungsi `pembina_review_nta(uuid,text)` memang dapat dijalankan oleh `authenticated`, tetapi isi fungsi memerlukan `auth.uid()` dan memanggil `private.can_review_student`. Pemeriksaan tersebut mencocokkan Pembina aktif, status KTA/validasi Pembina, satuan yang sama, serta jenis kelamin peserta sebelum status NTA diubah. Grant `anon` sudah dicabut pada migrasi sebelumnya.
 - Pemeriksaan data live menemukan 5 pangkalan dengan penempatan pada 2 Kwarran: 4 pada Leles dan 1 pada Sindangbarang. Tidak terlihat seluruh data saat ini terseragamkan ke satu Kwarran.
 - Pemeriksaan ini bersifat audit baca-saja; tidak ada perubahan data anggota atau penempatan Kwarran pada tahap ini.
+
+
+## Audit lanjutan autentikasi, konsistensi akun, dan berkas — 22 November 2026
+
+### Autentikasi dan peran
+- Pemeriksaan konfigurasi live memastikan akun yang emailnya ditetapkan pada `app_admin_config` sudah memiliki baris `users` berperan `admin_utama` dan berstatus aktif.
+- Terdapat 1 Admin Kwarran aktif yang terhubung ke Kwarran Sindangbarang. Belum ada akun Sekretaris Kwarcab aktif; mekanisme pendaftarannya memang menunggu undangan sekali pakai dari Admin Utama.
+- Dashboard Sekretaris memverifikasi role `sekretaris_kwarcab`, status aktif, serta baris singleton sekretaris. Dashboard Admin Kwarran memverifikasi role/status dan mengambil cakupan wilayah dari relasi `admin_kwarran`, bukan dari parameter wilayah kiriman browser.
+- Operasi administratif lainnya melewati validasi token Auth dan pencocokan email Admin Utama dengan konfigurasi server. `bootstrap_admin` hanya dapat melewati pemeriksaan itu untuk email yang dikonfigurasi.
+- Fungsi RPC `pramuka_register_profile` tidak dapat dipanggil oleh `anon` atau `authenticated`; EXECUTE hanya untuk `service_role` dan owner. RPC perubahan pangkalan juga hanya untuk service role dan owner. Fungsi penilaian NTA dapat dipanggil authenticated, tetapi memeriksa identitas Pembina aktif, status verifikasi KTA, pangkalan yang sama, dan kecocokan satuan.
+
+### Konsistensi data akun live
+- Ditemukan 31 akun Auth dan 31 profil aplikasi. Tidak ada akun Auth tanpa profil aplikasi, profil aplikasi tanpa akun Auth, atau email ganda (pemeriksaan tanpa menampilkan alamat email).
+- Seluruh 31 akun yang diperiksa memiliki profil sesuai perannya. Tidak ditemukan ketidaksesuaian Kwarran pada profil Peserta Didik maupun Pembina.
+- Fungsi pendaftaran Peserta Didik memeriksa pangkalan, Kwarran, Pembina aktif sesuai satuan, kuota, ambalan, dan sangga di sisi database. Pendaftaran Pembina memeriksa Kwarran dan kecocokan jabatan dengan jenis satuan. Pemeriksaan kuota pendaftaran diserialisasi per pangkalan dan satuan untuk mencegah pendaftaran bersamaan melampaui kuota.
+
+### Perlindungan berkas
+- Bucket bukti SKU/KTA `sku-bukti` dan bukti penilaian Gudep `gudep-penilaian-bukti` bersifat privat.
+- Policy `sku-bukti` membatasi unggah/hapus ke folder milik akun sendiri; pembacaan hanya untuk pemilik, Pembina yang berwenang pada satuan peserta, atau Admin Utama. Dokumen bukti penilaian Gudep juga berada di bucket privat.
+- Bucket logo, poster, dan dokumen Ruang Tegak bersifat publik untuk dibaca sesuai fungsinya; perubahan dan penghapusan dibatasi kepada Admin Utama.
+- View `v_peserta_didik_lengkap` memang memiliki grant SELECT untuk anon/authenticated, tetapi memakai `security_invoker=true`; RLS tabel sumber tetap berlaku. Anon tidak memiliki policy baca pada tabel sumber, sedangkan authenticated hanya dapat membaca data sesuai cakupan policy.
+- Fungsi SECURITY DEFINER yang dapat dijalankan authenticated pada schema private telah diperiksa: helper peran dan cakupan Pembina hanya mengembalikan hasil boolean berdasarkan `auth.uid()`; fungsi lainnya yang terdaftar sebagai trigger tidak dapat digunakan sebagai endpoint pemanggilan biasa.
+
+### Batas pemeriksaan
+- Audit ini tidak membuat akun uji, tidak mengubah data anggota, dan tidak mengubah penempatan Kwarran.
+- Pengaturan perlindungan kata sandi bocor pada Supabase Auth belum dapat diverifikasi melalui koneksi administrasi yang tersedia. Ini tetap menjadi pemeriksaan konfigurasi tersendiri, bukan dianggap sudah aktif.
