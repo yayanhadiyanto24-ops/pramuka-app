@@ -717,67 +717,61 @@ async function saveProfile(extra={}){
 $('saveProfile').onclick=()=>saveProfile();
 $('profileNta')?.addEventListener('input',renderNtaParseInfo);
 let ktaQrScanner=null;
-function extractNtaFromQr(raw){
- const textValue=String(raw||'').trim();
- const decodedValues=[textValue];
- try{decodedValues.push(decodeURIComponent(textValue));}catch(_){}
- const addValue=v=>{if(typeof v==='string'||typeof v==='number')decodedValues.push(String(v));};
- const inspect=(value,key='')=>{
-  if(value==null)return;
-  if(typeof value==='object'){for(const [k,v] of Object.entries(value))inspect(v,k);}
-  else if(/nta|nomor.?tanda.?anggota|member.?number/i.test(key))addValue(value);
+function getQrInspection(raw){
+ const rawText=String(raw||'').trim(),keys=[],parts=[rawText];
+ const walk=(v,path='')=>{
+  if(v==null)return;
+  if(Array.isArray(v)){v.forEach((x,i)=>walk(x,path+'['+i+']'));return;}
+  if(typeof v==='object'){for(const [k,x] of Object.entries(v)){keys.push(k);walk(x,path?path+'.'+k:k);}return;}
+  if(typeof v==='string'||typeof v==='number')parts.push(path+' : '+String(v));
  };
- for(const value of [...decodedValues]){
-  try{inspect(JSON.parse(value));}catch(_){}
-  try{
-   const u=new URL(value);
-   for(const [k,v] of u.searchParams.entries())if(/nta|nomor.?tanda.?anggota|member.?number/i.test(k))addValue(v);
-   const pathMatch=u.pathname.match(/\d{2}[.\-/]?\d{2}[.\-/]?\d{2}[.\-/]?\d{6}[.\-/]?\d{4}/);
-   if(pathMatch)addValue(pathMatch[0]);
-  }catch(_){}
+ const candidates=[rawText];
+ try{candidates.push(decodeURIComponent(rawText));}catch(_){}
+ for(const v of candidates){
+  try{walk(JSON.parse(v));}catch(_){}
+  try{const u=new URL(v);for(const [k,x] of u.searchParams.entries()){keys.push(k);parts.push(k+' : '+x);} }catch(_){}
  }
- const results=[];
- for(const value of decodedValues){
-  const formatted=value.match(/\d{2}[.\s-]?\d{2}[.\s-]?\d{2}[.\s-]?\d{6}[.\s-]?\d{4}/g)||[];
-  for(const item of formatted){const digits=item.replace(/\D/g,'');if(digits.length===16)results.push(digits);}
-  const compact=value.replace(/\D/g,'');
-  if(compact.length===16)results.push(compact);
- }
- const unique=[...new Set(results)];
+ const source=parts.join(' | ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ const relevant=parts.filter(x=>/(nta|kwarda|kwartir|kwarcab|kwarran|ranting|lahir|birth|serial|urut|sequence|jawa|barat|cianjur|langsung|\b\d{1,2}[.\-/ ]\d{1,2}[.\-/ ]\d{4}\b)/i.test(x));
+ return {source,format:rawText.startsWith('{')?'JSON':/^https?:/i.test(rawText)?'URL':'teks/terenkripsi',length:rawText.length,keys:[...new Set(keys)].slice(0,20),relevant:relevant.slice(0,10).map(x=>x.slice(0,100))};
+}
+function extractNtaFromQr(raw){
+ const info=getQrInspection(raw),source=info.source;
+ const compactMatches=[...source.matchAll(/(?:^|\D)(\d{2})[.\s-]?(\d{2})[.\s-]?(\d{2})[.\s-]?(\d{6})[.\s-]?(\d{4})(?:\D|$)/g)].map(m=>m.slice(1).join(''));
+ const unique=[...new Set(compactMatches)];
  if(unique.length===1)return unique[0];
-
- // QR KTA tertentu menyimpan unsur NTA sebagai data terpisah, bukan satu nomor utuh.
- const source=decodedValues.join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
- const getField=(patterns)=>{
-  for(const pattern of patterns){const m=source.match(pattern);if(m)return m[1].trim();}
+ const field=(names)=>{
+  for(const name of names){
+   const re=new RegExp('(?:^|[|,;\\s])'+name+'\\s*[:=\\-]\\s*([^,;|\\n]+)','i');
+   const m=source.match(re);if(m)return m[1].trim();
+  }
   return '';
  };
- let kwarda=getField([/(?:kwarda|kwartir\s+daerah)\s*[:=\-]\s*([^,;|\n]+)/,/(jawa\s+barat)/]);
- let kwarcab=getField([/(?:kwarcab|kwartir\s+cabang)\s*[:=\-]\s*([^,;|\n]+)/,/(cianjur)/]);
- let kwarran=getField([/(?:kwarran|kwartir\s+rანტing|ranting)\s*[:=\-]\s*([^,;|\n]+)/,/(penerbitan\s+langsung(?:\s+tingkat\s+kwartir)?)/]);
- const regionCode=(value,type)=>{
-  const v=value.toLowerCase();
-  if(type==='a'&&/jawa\s+barat/.test(v))return '09';
-  if(type==='b'&&/cianjur/.test(v))return '03';
-  if(type==='c'&&/(penerbitan\s+langsung|tingkat\s+kwartir|langsung)/.test(v))return '00';
-  const m=v.match(/(?:^|\D)(\d{2})(?:\D|$)/);return m?m[1]:'';
+ const aText=field(['kode[_ ]?kwarda','kwarda','kwartir daerah']);
+ const bText=field(['kode[_ ]?kwarcab','kwarcab','kwartir cabang']);
+ const cText=field(['kode[_ ]?kwarran','kwarran','kwartir ranting','ranting']);
+ const code=(v,type)=>{
+  const t=v.toLowerCase();
+  if(type==='a'&&/jawa\\s+barat/.test(t))return '09';
+  if(type==='b'&&/cianjur/.test(t))return '03';
+  if(type==='c'&&/(penerbitan\\s+langsung|tingkat\\s+kwartir|langsung)/.test(t))return '00';
+  const m=t.match(/(?:^|\\D)(\\d{2})(?:\\D|$)/);return m?m[1]:'';
  };
- const a=regionCode(kwarda,'a'),b=regionCode(kwarcab,'b'),c=regionCode(kwarran,'c');
- let dateText=getField([/(?:tanggal\s+lahir|tgl\s+lahir|birth\s*date|dob)\s*[:=\-]\s*(\d{1,2}[.\-/ ]\d{1,2}[.\-/ ]\d{4})/,/(\d{1,2}[.\-/ ]\d{1,2}[.\-/ ]\d{4})/]);
- let dateDigits=dateText.replace(/\D/g,'');
- if(dateDigits.length===8){
-  let day,month,year;
-  const parts=dateText.match(/(\d{1,2})[.\-/ ](\d{1,2})[.\-/ ](\d{4})/);
-  if(parts){day=parts[1].padStart(2,'0');month=parts[2].padStart(2,'0');year=parts[3].slice(-2);}
-  else{day=dateDigits.slice(0,2);month=dateDigits.slice(2,4);year=dateDigits.slice(6,8);}
-  dateDigits=day+month+year;
- }
- const seqText=getField([/(?:nomor\s+urut|no\.?\s*urut|nomor\s+seri|serial\s*(?:number|no)?|sequence)\s*[:=\-]\s*(\d{1,4})/]);
- const seq=seqText.replace(/\D/g,'').padStart(4,'0');
- if(a&&b&&c&&dateDigits.length===6&&seq.length===4&&Number(dateDigits.slice(2,4))>=1&&Number(dateDigits.slice(2,4))<=12&&Number(dateDigits.slice(0,2))>=1&&Number(dateDigits.slice(0,2))<=31){
-  return a+b+c+dateDigits+seq;
- }
+ const a=code(aText,'a')||(/jawa\\s+barat/.test(source)?'09':'');
+ const b=code(bText,'b')||(/cianjur/.test(source)?'03':'');
+ const c=code(cText,'c')||(/penerbitan\\s+langsung|tingkat\\s+kwartir/.test(source)?'00':'');
+ let d='';
+ const dob=source.match(/(?:tanggal\\s+lahir|tgl\\.?\\s*lahir|birth[_ ]?date|dob)\\s*[:=\\-]\\s*(\\d{1,2}[.\\-/ ]\\d{1,2}[.\\-/ ]\\d{4})/i);
+ if(dob){const p=dob[1].match(/(\\d{1,2})[.\\-/ ](\\d{1,2})[.\\-/ ](\\d{4})/);if(p)d=p[1].padStart(2,'0')+p[2].padStart(2,'0')+p[3].slice(-2);}
+ const seqMatch=source.match(/(?:nomor[_ ]?urut|no\\.?[_ ]?urut|nomor[_ ]?seri|serial(?:[_ ]?number|[_ ]?no)?|sequence)\\s*[:=\\-]\\s*(\\d{1,4})/i);
+ const seq=seqMatch?seqMatch[1].padStart(4,'0'):'';
+ if(a&&b&&c&&d.length===6&&seq.length===4)return a+b+c+d+seq;
  return null;
+}
+function formatQrInspection(raw){
+ const x=getQrInspection(raw);
+ const fields=x.relevant.length?x.relevant.join(' ; '):'Tidak ada label NTA/wilayah/tanggal/nomor urut yang dikenali.';
+ return 'Hasil pemeriksaan QR untuk dikirim: Format='+x.format+'; panjang data='+x.length+' karakter; nama kolom='+ (x.keys.join(', ')||'tidak terdeteksi')+'; potongan data relevan='+fields+'.';
 }
 $('ktaQrStart')?.addEventListener('click',async()=>{
  const result=$('ktaQrResult'),reader=$('ktaQrReader');
@@ -796,7 +790,7 @@ $('ktaQrStart')?.addEventListener('click',async()=>{
     else if(existing===qrNta){result.textContent='QR KTA cocok dengan NTA pada profil ('+formatted+'). Pemeriksaan data berhasil.';}
     else{result.textContent='NTA pada QR ('+formatted+') TIDAK cocok dengan NTA profil. Kolom profil tidak diubah. Periksa KTA dan NTA yang dimasukkan.';}
    }else{
-    result.textContent='QR berhasil dipindai, tetapi nomor NTA tidak ditemukan secara jelas di dalam data QR. Sistem tidak akan menebak atau mengubah NTA profil.';
+    result.textContent='QR berhasil dipindai, tetapi NTA belum dapat disusun dari data QR. Sistem tidak mengubah NTA profil. '+formatQrInspection(decoded);
    }
   },()=>{});
  }catch(err){
