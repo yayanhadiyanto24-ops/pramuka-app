@@ -35,7 +35,7 @@ test('Perpindahan tab benar-benar memindahkan email dan kata sandi dua arah', ()
   const start = html.indexOf("let activeRegistrationRole = 'peserta';");
   const end = html.indexOf('let loadedPangkalanKey', start);
   assert.ok(start >= 0 && end > start, 'kode switchTab ditemukan');
-  const ids = ['pd-email','pd-password','pb-email','pb-password','form-peserta','form-pembina','form-admin_kwarran','tab-peserta','tab-pembina','tab-admin_kwarran'];
+  const ids = ['pd-email','pd-password','pb-email','pb-password','form-peserta','form-pembina','form-admin-kwarran','tab-peserta','tab-pembina','tab-admin-kwarran'];
   const elements = Object.fromEntries(ids.map(id => [id, {
     value: '',
     className: '',
