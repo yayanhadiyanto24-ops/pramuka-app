@@ -16,6 +16,10 @@ Pemeriksaan dilakukan dengan membaca berkas dari branch utama, penelusuran alur 
 | 4 | `belajar.html` | Kolom login tidak memiliki atribut `name`, yang dapat mengurangi pengenalan kolom oleh autofill/password manager Android. | Menambahkan `name=email/password`, `inputmode=email`, `autocapitalize=none`, dan `spellcheck=false` pada kolom email. Ini peningkatan kompatibilitas autofill, belum membuktikan akar masalah nilai kolom yang hilang. Commit `515f170`. |
 | 5 | `README.md` | Dokumentasi masih menunjuk `admin.html` sebagai halaman Admin utama dan menyatakan semua akun menunggu persetujuan, tidak sesuai dengan halaman/perilaku pendaftaran terbaru. | Dokumentasi diperbarui mengikuti halaman dan struktur kewenangan saat ini. Commit `fae29cc`. |
 
+## Perbaikan lanjutan setelah audit awal
+
+| 6 | `android/app/src/main/java/id/ruangtegak/app/MainActivity.java` | Jika Android memulihkan Activity tetapi `WebView.restoreState()` tidak menghasilkan riwayat yang valid, WebView dapat tetap tanpa halaman awal. | Hasil pemulihan sekarang diperiksa; jika gagal/kosong, aplikasi memuat `APP_URL` sebagai fallback. Commit `f272a06`. |
+
 ## Temuan yang perlu tindak lanjut sebelum dinyatakan tuntas
 
 1. **Gejala kolom email/kata sandi pada halaman Belajar belum terbukti akar masalahnya.** Pada kode login yang diperiksa, tidak ditemukan pemanggilan `form.reset()` atau assignment yang sengaja mengosongkan kolom login. Handler login juga menyimpan nilai sebelum permintaan dan mengembalikannya jika formulir tetap ditampilkan. Atribut autofill sudah diperbaiki, tetapi perlu pengujian langsung di browser Android/WebView untuk membedakan autofill yang tidak mengisi dari nilai yang terhapus akibat reload/navigasi.
