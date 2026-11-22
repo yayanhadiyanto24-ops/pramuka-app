@@ -1730,20 +1730,22 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
   try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
  }
  $('sessionLoading')?.classList.add('hidden');
- if(allowAdminHandoff&&data.session){
-  // Hanya perpindahan langsung dari Admin Utama yang boleh melewati formulir.
-  // Pembina dan Peserta Didik selalu mendapat formulir masuk yang siap digunakan.
+ if(allowAdminHandoff&&bridge&&data.session){
+  // Hanya sesi yang dibawa langsung oleh tombol Admin Utama yang boleh
+  // melewati formulir. Sesi lokal lama tidak boleh dipakai sebagai pengganti.
   $('login').classList.add('hidden');$('application').classList.remove('hidden');
   try{await boot(data.session.user);}
   catch(err){
-   // Jika handoff gagal, jangan pernah meninggalkan pengguna di layar kosong.
    $('application').classList.add('hidden');
    $('login').classList.remove('hidden');
    $('accountNotice').classList.add('hidden');
    $('loginMsg').textContent='Sesi Admin Utama belum dapat diteruskan: '+(err.message||'Kesalahan pemuatan data')+'. Silakan kembali ke Admin Utama lalu ketuk Belajar & SKU sekali lagi.';
    console.error('Ruang Tegak boot error:',err);
   }
- }else{$('login').classList.remove('hidden');$('application').classList.add('hidden');}
+ }else{
+  $('login').classList.remove('hidden');$('application').classList.add('hidden');
+  if(allowAdminHandoff)$('loginMsg').textContent='Token perpindahan Admin Utama tidak ditemukan atau sudah kedaluwarsa. Silakan kembali ke Admin Utama lalu ketuk Belajar & SKU sekali lagi.';
+ }
 }).catch(err=>{
  $('sessionLoading')?.classList.add('hidden');
  $('login').classList.remove('hidden');
