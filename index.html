@@ -484,8 +484,26 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 });
 
 
+let activeRegistrationRole = 'peserta';
 function switchTab(role) {
     const roles = ['peserta', 'pembina', 'admin_kwarran'];
+    if (!roles.includes(role)) return;
+
+    // Saat berpindah antara Peserta Didik dan Pembina, jangan membuat
+    // email/kata sandi yang sedang diketik hilang. Nilai hanya dipindahkan
+    // antar input di halaman yang sama; tidak disimpan ke storage.
+    if ((activeRegistrationRole === 'peserta' && role === 'pembina') ||
+        (activeRegistrationRole === 'pembina' && role === 'peserta')) {
+        const fromPrefix = activeRegistrationRole === 'peserta' ? 'pd' : 'pb';
+        const toPrefix = role === 'peserta' ? 'pd' : 'pb';
+        const fromEmail = document.getElementById(fromPrefix + '-email');
+        const fromPassword = document.getElementById(fromPrefix + '-password');
+        const toEmail = document.getElementById(toPrefix + '-email');
+        const toPassword = document.getElementById(toPrefix + '-password');
+        if (fromEmail && toEmail && !toEmail.value) toEmail.value = fromEmail.value;
+        if (fromPassword && toPassword && !toPassword.value) toPassword.value = fromPassword.value;
+    }
+
     roles.forEach(item => {
         const active = item === role;
         const formId = item === 'admin_kwarran' ? 'form-admin-kwarran' : 'form-' + item;
@@ -495,6 +513,7 @@ function switchTab(role) {
             ? 'rt-registration-tab is-active'
             : 'rt-registration-tab';
     });
+    activeRegistrationRole = role;
     hideAlert();
 }
 let loadedPangkalanKey='';
