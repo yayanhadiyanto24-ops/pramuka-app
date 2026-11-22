@@ -689,7 +689,7 @@ $('kwarran-invite-list').addEventListener('click',async e=>{
 });
 
 $('refresh').type='button';$('refresh').onclick=async()=>{const b=$('refresh');b.disabled=true;const old=b.textContent;b.textContent='Memuat...';try{await loadDashboard();}finally{b.disabled=false;b.textContent=old;}};
-$('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
+$('logout').onclick=async()=>{const {error}=await sb.auth.signOut();if(error){$('login-msg').textContent='Keluar belum berhasil: '+error.message;return;}window.location.replace('./index.html');};
 (async()=>{
   try{
     await ensureSb();
