@@ -418,6 +418,34 @@ async function ensureSb(){
 }
 const $=id=>document.getElementById(id);
 
+// Teruskan sesi Admin Utama ke halaman Belajar pada tab yang sama.
+// belajar.html sudah memiliki penerima/pemulih token ini.
+$('open-belajar-sku')?.addEventListener('click',async event=>{
+  if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+  event.preventDefault();
+  const link=$('open-belajar-sku');
+  const original=link.textContent;
+  link.textContent='Membuka Belajar...';
+  link.setAttribute('aria-busy','true');
+  try{
+    await ensureSb();
+    const {data,error}=await sb.auth.getSession();
+    if(error)throw error;
+    const session=data?.session;
+    if(!session?.access_token||!session?.refresh_token)throw new Error('Sesi Admin Utama tidak ditemukan. Silakan masuk kembali.');
+    sessionStorage.setItem('ruang-tegak-auth-bridge',JSON.stringify({
+      access_token:session.access_token,
+      refresh_token:session.refresh_token,
+      created_at:Date.now()
+    }));
+    window.location.assign(link.href);
+  }catch(error){
+    $('status').textContent='Belum dapat membuka Belajar & SKU: '+(error?.message||'Sesi login tidak dapat diteruskan.');
+    link.textContent=original;
+    link.removeAttribute('aria-busy');
+  }
+});
+
 // Daftarkan token FCM hanya setelah administrator utama berhasil login.
 let ruangTegakFcmToken=null;
 async function simpanTokenNotifikasiRuangTegak(){
