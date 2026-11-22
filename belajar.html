@@ -393,6 +393,25 @@ a[class*="rounded"]{
 /* Pulihkan lebar asli tombol Unduh Aplikasi seperti rancangan awal */
 #installAppBtn{width:132px!important;min-width:132px!important;max-width:132px!important;box-sizing:border-box!important;justify-content:center!important;white-space:nowrap!important}
 </style>
+<style id="ruang-tegak-login-layout">
+#login.rt-login-card{position:relative;overflow:hidden;border:1px solid #d8c39f;border-radius:22px;background:linear-gradient(155deg,#fff 0%,#fffdf7 62%,#f7edda 100%);box-shadow:0 16px 42px rgba(65,43,24,.13),inset 0 1px 0 #fff}
+#login.rt-login-card::before{content:"";position:absolute;inset:0 0 auto;height:7px;background:linear-gradient(90deg,#8b642e 0%,#f2ce58 28%,#fff0a8 50%,#d5a52d 75%,#765235 100%)}
+.rt-login-heading{display:flex;align-items:center;gap:14px}
+.rt-login-logo{width:58px;height:58px;flex:0 0 58px;object-fit:contain;padding:7px;border-radius:16px;background:linear-gradient(145deg,#fff5c9,#e9c65a);border:1px solid #d5b45c;box-shadow:0 4px 12px #76523520}
+.rt-login-kicker{display:block;margin-bottom:3px;color:#9a7028;font-size:10px;font-weight:900;letter-spacing:.18em}
+.rt-login-heading h1{color:#392719;line-height:1.2}
+.rt-login-divider{height:1px;margin:20px 0 17px;background:linear-gradient(90deg,transparent,#d9c39d 15%,#d9c39d 85%,transparent)}
+.rt-login-form{display:grid;gap:14px}
+.rt-login-field{display:grid;gap:6px;color:#513b27;font-size:13px;font-weight:800}
+.rt-login-field input{box-sizing:border-box;min-width:0;height:48px;border:1px solid #d8c9b2!important;border-radius:11px!important;background:#fff!important;color:#30261d!important;padding:0 13px!important;font-size:14px;box-shadow:inset 0 1px 2px #3b26190a!important}
+.rt-login-field input:focus{border-color:#a77a35!important;outline:3px solid #e8d6a7!important;outline-offset:1px}
+.rt-login-field input::placeholder{color:#a69a89}
+#login .rt-login-submit{min-height:48px;margin-top:3px;color:#fff!important;background:linear-gradient(115deg,#765638 0%,#5b3d27 48%,#392719 100%)!important;border:1px solid #c8a36c!important;box-shadow:0 4px 0 #2c1b11,0 7px 15px #39271924,inset 0 1px 0 #ffffff55!important;letter-spacing:.02em}
+#login .rt-login-submit:hover{filter:brightness(1.1)}
+.rt-login-message{min-height:0;overflow-wrap:anywhere;color:#9b2c25}
+.rt-login-note{margin-top:12px;padding:10px 12px;border:1px solid #eadfc9;border-radius:10px;background:#f8f2e7;color:#78664f;font-size:11px;line-height:1.55}
+@media(max-width:480px){#login.rt-login-card{margin-top:14px;padding:19px!important;border-radius:18px}.rt-login-logo{width:49px;height:49px;flex-basis:49px}.rt-login-heading{gap:11px}.rt-login-heading h1{font-size:19px}}
+</style>
 <link rel="stylesheet" href="./assets/ruang-tegak-ui.css?v=1">
 </head>
 <body class="min-h-screen">
@@ -404,15 +423,19 @@ a[class*="rounded"]{
  </div>
 </header>
 <main class="max-w-6xl mx-auto p-4 md:p-6">
- <section id="login" class="panel max-w-md mx-auto p-6 mt-8 hidden">
-  <h1 class="text-xl font-bold mb-1">Masuk ke Ruang Belajar</h1><p class="text-sm muted mb-4">Masuk menggunakan email dan sandi akun yang sudah terdaftar dan aktif.</p>
-   <form id="loginForm" class="space-y-3" novalidate>
-   <input id="email" type="email" required autocomplete="username" placeholder="Email" class="w-full border rounded-lg p-3">
-   <input id="password" type="password" required autocomplete="current-password" placeholder="Password" class="w-full border rounded-lg p-3">
-   <button id="loginBtn" type="submit" class="w-full rounded-lg bg-amber-800 text-white font-bold p-3">Masuk</button>
+ <section id="login" class="rt-login-card panel max-w-md mx-auto p-5 sm:p-7 mt-5 sm:mt-8 hidden">
+  <div class="rt-login-heading">
+   <img src="assets/ruang-tegak-icon.svg" alt="Logo Ruang Tegak" class="rt-login-logo">
+   <div><span class="rt-login-kicker">RUANG TEGAK</span><h1 class="text-xl sm:text-2xl font-extrabold">Masuk ke Ruang Belajar</h1><p class="text-sm muted mt-1">Gunakan akun Pembina atau Peserta Didik yang telah terdaftar.</p></div>
+  </div>
+  <div class="rt-login-divider"></div>
+  <form id="loginForm" class="rt-login-form" novalidate>
+   <label class="rt-login-field" for="email"><span>Email akun</span><input id="email" type="email" required autocomplete="username" placeholder="nama@email.com" class="w-full border rounded-lg p-3"></label>
+   <label class="rt-login-field" for="password"><span>Kata sandi</span><input id="password" type="password" required autocomplete="current-password" placeholder="Masukkan kata sandi" class="w-full border rounded-lg p-3"></label>
+   <button id="loginBtn" type="submit" class="rt-login-submit w-full rounded-lg font-bold p-3">Masuk</button>
   </form>
-<p id="loginMsg" class="text-sm mt-3" role="status"></p>
-
+  <p id="loginMsg" class="rt-login-message text-sm mt-3" role="status"></p>
+  <p class="rt-login-note">Pastikan email dan kata sandi sesuai dengan akun yang didaftarkan oleh Admin/Pembina.</p>
  </section>
  <p id="sessionLoading" class="panel max-w-md mx-auto p-4 mt-8 text-sm text-center">Memeriksa sesi akun...</p>
   <section id="application" class="hidden space-y-5">
