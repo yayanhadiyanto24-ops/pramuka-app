@@ -1710,21 +1710,21 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
  }
  candidates.sort((a,b)=>Number(b.created_at||0)-Number(a.created_at||0));
  const bridge=candidates[0];
- // Utamakan sesi aktif dari penyimpanan bersama Supabase.
- // Token jembatan hanya dipakai jika sesi bersama benar-benar tidak tersedia.
- if(bridge&&!data.session){
-  const restored=await withAuthTimeout(client.auth.setSession({access_token:bridge.access_token,refresh_token:bridge.refresh_token}),'Pemulihan sesi');
-  if(restored.error)throw restored.error;
-  const check=await withAuthTimeout(client.auth.getSession(),'Verifikasi sesi');
-  if(check.error)throw check.error;
-  data=check.data;
-  if(!data.session)throw new Error('Sesi Admin Utama belum berhasil dipulihkan. Silakan masuk kembali dari halaman Admin Utama.');
- }
- if(data.session){
+ // Sesi otomatis hanya berlaku untuk perpindahan langsung dari Admin Utama.
+ // Kunjungan biasa dari tombol Pembina/Peserta Didik harus menunggu ketukan tombol Masuk.
+ if(bridge){
+  if(!data.session){
+   const restored=await withAuthTimeout(client.auth.setSession({access_token:bridge.access_token,refresh_token:bridge.refresh_token}),'Pemulihan sesi');
+   if(restored.error)throw restored.error;
+   const check=await withAuthTimeout(client.auth.getSession(),'Verifikasi sesi');
+   if(check.error)throw check.error;
+   data=check.data;
+   if(!data.session)throw new Error('Sesi Admin Utama belum berhasil dipulihkan. Silakan masuk kembali dari halaman Admin Utama.');
+  }
   try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
  }
  $('sessionLoading')?.classList.add('hidden');
- if(data.session){
+ if(bridge&&data.session){
   $('login').classList.add('hidden');$('application').classList.remove('hidden');
   try{await boot(data.session.user);}
   catch(err){$('application').classList.remove('hidden');$('login').classList.add('hidden');$('accountNotice').classList.remove('hidden');$('accountNotice').textContent='Akun sudah masuk, tetapi data Ruang Belajar belum berhasil dimuat: '+(err.message||'Kesalahan pemuatan data')+'. Muat ulang halaman atau hubungi Admin Utama jika berulang.';console.error('Ruang Tegak boot error:',err);}
