@@ -393,6 +393,7 @@ a[class*="rounded"]{
 /* Pulihkan lebar asli tombol Unduh Aplikasi seperti rancangan awal */
 #installAppBtn{width:132px!important;min-width:132px!important;max-width:132px!important;box-sizing:border-box!important;justify-content:center!important;white-space:nowrap!important}
 </style>
+<link rel="stylesheet" href="./assets/ruang-tegak-ui.css?v=1">
 </head>
 <body class="min-h-screen">
 <header class="brand text-white px-4 py-5">
@@ -1322,7 +1323,8 @@ setupSavedReportSignature('mabigus');
 
 function exportMonitorReport(kind){
  if(!monitorReportHtml){setMsg('Data laporan belum tersedia. Muat ulang halaman pantau.');return;}
- const full='<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Perkembangan SKU</title><style>body{font-family:Arial,sans-serif;color:#222;padding:24px}h1,h2{color:#78350f}table{width:100%;border-collapse:collapse;margin:12px 0 24px;font-size:12px}th,td{border:1px solid #bbb;padding:6px;text-align:left;vertical-align:top}th{background:#fef3c7}.muted{color:#555}.group{page-break-inside:avoid;margin-bottom:24px}img{object-fit:contain}@media print{body{padding:0}h2{page-break-after:avoid}}</style></head><body>'+monitorReportHtml+reportApprovalHtml()+'</body></html>';
+ const full='<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Perkembangan SKU</title><style>body{font-family:Arial,sans-serif;color:#222;padding:24px}h1,h2{color:#78350f}table{width:100%;border-collapse:collapse;margin:12px 0 24px;font-size:12px}th,td{border:1px solid #bbb;padding:6px;text-align:left;vertical-align:top}th{background:#fef3c7}.muted{color:#555}.group{page-break-inside:avoid;margin-bottom:24px}img{object-fit:contain}@media print{body{padding:0}h2{page-break-after:avoid}}</style></head><body>'+monitorReportHtml+reportApprovalHtml()+'<script src="./assets/ruang-tegak-ui.js?v=1"></script>
+</body></html>';
  if(kind==='word'){
   const blob=new Blob(['\ufeff',full],{type:'application/msword'});
   const url=URL.createObjectURL(blob),a=document.createElement('a');
