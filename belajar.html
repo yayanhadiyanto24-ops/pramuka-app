@@ -618,8 +618,8 @@ function renderProfile(){
   renderNtaParseInfo();
  const ktaStatus=p?.nta_status_verifikasi||'belum_ada';
  const ktaLabels={belum_ada:'Belum ada bukti KTA yang diunggah atau NTA berubah.',menunggu:isTeacher?'Pemeriksaan KTA sedang berlangsung.':'Bukti KTA sudah diunggah dan menunggu pemeriksaan Pembina.',terverifikasi_otomatis:'NTA pada foto KTA cocok dengan NTA profil. Verifikasi otomatis berhasil; Anda berwenang melakukan validasi akhir NTA peserta.',disetujui_admin:'Verifikasi lama: KTA Pembina telah disetujui Admin Utama.',disetujui_pembina:'Bukti KTA telah diperiksa Pembina.',terverifikasi_resmi:'KTA terverifikasi melalui kanal resmi.',ditolak:'NTA pada foto KTA tidak cocok atau bukti perlu diunggah ulang.'};
- if($('ktaEvidenceStatus'))$('ktaEvidenceStatus').textContent=ktaLabels[ktaStatus]||ktaLabels.belum_ada;
- if($('ktaEvidenceLink')){const meta=p?.nta_bukti_kta;$('ktaEvidenceLink').classList.toggle('hidden',!meta?.path);$('ktaEvidenceLink').removeAttribute('href');if(meta?.path){sb.storage.from('sku-bukti').createSignedUrl(meta.path,300).then(({data,error})=>{if(!error&&data?.signedUrl){$('ktaEvidenceLink').href=data.signedUrl;$('ktaEvidenceLink').classList.remove('hidden');}});}}
+ const ktaMeta=p?.nta_bukti_kta;if($('ktaEvidenceStatus'))$('ktaEvidenceStatus').textContent=ktaMeta?.path?'Bukti KTA tersimpan: '+(ktaMeta.name||'Berkas KTA')+'. '+(ktaLabels[ktaStatus]||'Berkas tersedia.'):(ktaLabels[ktaStatus]||ktaLabels.belum_ada);
+ if($('ktaEvidenceLink')){$('ktaEvidenceLink').classList.toggle('hidden',!ktaMeta?.path);$('ktaEvidenceLink').removeAttribute('href');if(ktaMeta?.path){sb.storage.from('sku-bukti').createSignedUrl(ktaMeta.path,300).then(({data,error})=>{if(!error&&data?.signedUrl){$('ktaEvidenceLink').href=data.signedUrl;$('ktaEvidenceLink').classList.remove('hidden');}});}}
  if($('ktaEvidenceInput'))$('ktaEvidenceInput').value='';
  if(isTeacher){
   $('yearKmd').value=teacher.tahun_kmd||'';$('yearKml').value=teacher.tahun_kml||'';$('yearKpd').value=teacher.tahun_kpd||'';$('yearKpl').value=teacher.tahun_kpl||'';
@@ -646,6 +646,7 @@ function renderOrganizationRows(){
 $('studentJabatanAmbalan').onchange=()=>{$('studentJabatanAmbalanOtherWrap').classList.toggle('hidden',$('studentJabatanAmbalan').value!=='Lainnya');if($('studentJabatanAmbalan').value!=='Lainnya')$('studentJabatanAmbalanOther').value='';};
  $('addExperience').onclick=()=>{const nama=$('experienceName').value.trim();if(!nama){$('profileMsg').textContent='Isi nama kegiatan terlebih dahulu.';return;}experienceRows.push({nama,peran:$('experienceRole').value,keterangan:$('experienceDesc').value.trim()});$('experienceName').value='';$('experienceDesc').value='';renderExperienceRows();};
 $('addOrganization').onclick=()=>{const nama=$('organizationName').value.trim();if(!nama)return;if(!organizationRows.some(x=>(typeof x==='string'?x:x.nama||'').toLowerCase()===nama.toLowerCase()))organizationRows.push({nama});$('organizationName').value='';renderOrganizationRows();};
+$('ktaEvidenceInput')?.addEventListener('change',e=>{const file=e.target.files?.[0];if(!file)return;const status=$('ktaEvidenceStatus');if(status)status.textContent='Berkas dipilih: '+file.name+' ('+(file.size/1024/1024).toFixed(2)+' MB). Siap disimpan. Tekan tombol Simpan Profil agar bukti KTA diunggah dan disimpan.';});
 $('profilePhotoInput').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;
  if(!file.type.startsWith('image/')){$('profileMsg').textContent='Pilih berkas gambar.';return;}
