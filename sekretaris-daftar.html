@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RUANG TEGAK · Pendaftaran Sekretaris Kwarcab</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.tailwindcss.com"></script><style>
+:root{--brown:#392316;--gold:#ffd400;--red:#c62828}body{background:#f7f2e9;color:#302313}header{background:linear-gradient(115deg,#24150e,#60402a);color:white;border-bottom:8px solid var(--red)}.panel{background:white;border:1px solid #e8d7b7;border-radius:16px;box-shadow:0 8px 24px #39231612}button{background:linear-gradient(110deg,#d99c00,#ffd400,#fff0a0,#ffd400);color:#17120a}
+</style></head><body class="min-h-screen">
+<header class="p-5"><div class="max-w-xl mx-auto"><div class="text-xs tracking-widest text-amber-200">RUANG TEGAK · KWARCAB CIANJUR</div><h1 class="text-2xl font-black mt-1">Pendaftaran Sekretaris Kwarcab</h1><p class="text-sm text-amber-100 mt-1">Akses khusus untuk melihat dan membaca perkembangan Pramuka Penegak se-Kwarcab Cianjur.</p></div></header>
+<main class="max-w-xl mx-auto p-4 py-8"><section class="panel p-5 space-y-4">
+<div class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm">Link khusus ini hanya dapat digunakan <b>satu kali</b>. Setelah pendaftaran berhasil, link otomatis tidak berlaku lagi. Sekretaris membuat email dan password sendiri.</div>
+<form id="register-form" class="space-y-3">
+<div><label class="block text-sm font-semibold mb-1" for="nama">Nama lengkap</label><input id="nama" required maxlength="150" autocomplete="name" class="w-full rounded-lg border p-3 bg-white"></div>
+<div><label class="block text-sm font-semibold mb-1" for="email">Email aktif</label><input id="email" type="email" required maxlength="254" autocomplete="email" class="w-full rounded-lg border p-3 bg-white"></div>
+<div><label class="block text-sm font-semibold mb-1" for="password">Buat password</label><input id="password" type="password" required minlength="10" autocomplete="new-password" class="w-full rounded-lg border p-3 bg-white"><p class="text-xs text-slate-500 mt-1">Minimal 10 karakter. Simpan password untuk login berikutnya.</p></div>
+<button id="submit" type="submit" class="w-full rounded-lg p-3 font-bold">Daftar dan Aktifkan Akses</button>
+</form><p id="message" class="text-sm" role="status" aria-live="polite"></p>
+</section><p class="text-center text-xs text-slate-500 mt-5">Akses bersifat baca saja. Tidak tersedia fasilitas menambah, mengubah, menghapus, atau menyetujui data.</p></main>
+<script>
+const URL='https://bopxmtxfrlrnywwhywne.supabase.co',KEY='sb_publishable_cVuaKtOM6yrSsQr1MNmzFg_HUv8mxw0';
+const sb=window.supabase.createClient(URL,KEY),$=id=>document.getElementById(id);
+const token=new URLSearchParams(location.search).get('token')||'';
+if(!/^[a-f0-9]{64}$/i.test(token)){ $('message').textContent='Link pendaftaran tidak valid atau tidak lengkap.';$('submit').disabled=true; }
+$('register-form').addEventListener('submit',async e=>{
+ e.preventDefault();const b=$('submit');b.disabled=true;b.textContent='Memproses pendaftaran...';$('message').textContent='';
+ try{
+  const payload={action:'sekretaris_register',token,nama_lengkap:$('nama').value.trim(),email:$('email').value.trim(),password:$('password').value};
+  const {data,error}=await sb.functions.invoke('pramuka-register',{body:payload});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Pendaftaran belum berhasil.');
+  $('message').textContent='Pendaftaran berhasil. Menyiapkan halaman masuk...';
+  const {error:loginError}=await sb.auth.signInWithPassword({email:payload.email,password:payload.password});
+  if(loginError){$('message').textContent='Pendaftaran berhasil. Silakan masuk melalui halaman Sekretaris Kwarcab.';location.href='sekretaris-kwarcab.html';return;}
+  location.replace('sekretaris-kwarcab.html');
+ }catch(err){$('message').textContent=err.message||'Pendaftaran gagal. Periksa kembali data yang diisi.';b.disabled=false;b.textContent='Daftar dan Aktifkan Akses';}
+});
+</script></body></html>
