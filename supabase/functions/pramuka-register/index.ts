@@ -250,13 +250,24 @@ Deno.serve(async(req:Request)=>{
     if(!path.startsWith(allowedPrefix)||path.includes(".."))return reply({ok:false,message:"Lokasi berkas KTA tidak valid."},400);
    }
    if(me.role==="peserta_didik"){
-    const {data:student,error:studentError}=await admin.from("profil_peserta_didik").select("tingkatan,nta").eq("id_user",authData.user.id).single();if(studentError)throw studentError;
+    const {data:student,error:studentError}=await admin.from("profil_peserta_didik").select("tingkatan,nta,tanggal_lahir").eq("id_user",authData.user.id).single();if(studentError)throw studentError;
     const nta=clean(body.nta,80)||null;
+    const birthDate=typeof body.tanggal_lahir==="string"&&/^\\d{4}-\\d{2}-\\d{2}$/.test(body.tanggal_lahir)?body.tanggal_lahir:null;
+    if(body.tanggal_lahir&&!birthDate)return reply({ok:false,message:"Tanggal lahir tidak valid."},400);
+    if(nta){
+     const match=nta.match(/^(\\d{2})\\.(\\d{2})\\.(\\d{2})\\.(\\d{6})\\.(\\d{4})$/);
+     if(!match)return reply({ok:false,message:"Format NTA harus seperti 09.03.00.200780.0001 (lima kelompok angka dipisahkan titik)."},400);
+     if(!birthDate)return reply({ok:false,message:"Isi tanggal lahir sesuai KTA terlebih dahulu."},400);
+     const d=new Date(birthDate+"T00:00:00Z");
+     if(Number.isNaN(d.getTime())||d.toISOString().slice(0,10)!==birthDate)return reply({ok:false,message:"Tanggal lahir tidak valid."},400);
+     const encodedBirth=birthDate.slice(8,10)+birthDate.slice(5,7)+birthDate.slice(2,4);
+     if(match[4]!==encodedBirth)return reply({ok:false,message:"Enam digit tanggal lahir pada NTA tidak cocok dengan tanggal lahir profil."},400);
+    }
     const jabatanAmbalan=clean(body.jabatan_ambalan,100),jabatanSangga=clean(body.jabatan_sangga,30);
     if(jabatanAmbalan==="Lainnya"||jabatanSangga&&!["Pinsa","Wapinsa","Anggota"].includes(jabatanSangga))return reply({ok:false,message:"Pilihan jabatan tidak valid."},400);
-    const patch={nta,foto_profil_data:photo||null,jabatan_ambalan:jabatanAmbalan||null,jabatan_sangga:jabatanSangga||null,pengalaman_kegiatan:Array.isArray(body.pengalaman_kegiatan)?body.pengalaman_kegiatan.slice(0,40):[],organisasi_aktif:Array.isArray(body.organisasi_aktif)?body.organisasi_aktif.slice(0,30):[]};
+    const patch={nta,tanggal_lahir:birthDate,foto_profil_data:photo||null,jabatan_ambalan:jabatanAmbalan||null,jabatan_sangga:jabatanSangga||null,pengalaman_kegiatan:Array.isArray(body.pengalaman_kegiatan)?body.pengalaman_kegiatan.slice(0,40):[],organisasi_aktif:Array.isArray(body.organisasi_aktif)?body.organisasi_aktif.slice(0,30):[]};
     if(ktaEvidence){patch.nta_bukti_kta=ktaEvidence;patch.nta_status_verifikasi="menunggu";}
-    else if(student.nta!==nta)patch.nta_status_verifikasi="belum_ada";
+    else if(student.nta!==nta||student.tanggal_lahir!==birthDate)patch.nta_status_verifikasi="belum_ada";
     if(student.tingkatan==="Calon Penegak"&&!nta)patch.tingkatan="Peserta Tamu";
     const {error}=await admin.from("profil_peserta_didik").update(patch).eq("id_user",authData.user.id);if(error)throw error;
    }else if(me.role==="pembina"){
