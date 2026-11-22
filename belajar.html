@@ -1333,6 +1333,7 @@ function exportMonitorReport(kind){
 }
 $('exportMonitorWord').addEventListener('click',()=>exportMonitorReport('word'));
 $('exportMonitorPdf').addEventListener('click',()=>exportMonitorReport('pdf'));
+function statusText(s){return ({lulus:'Lulus',siap_diuji:'Menunggu ujian',perlu_perbaikan:'Perlu perbaikan',dipelajari:'Sedang dipelajari'})[s]||'Belum mulai';}
 function renderStudentSubpointProgress(rows,studentId){
  if(!rows.length)return '';
  const groups=new Map();
@@ -1372,7 +1373,6 @@ async function loadMonitor(){
   if(!groups.has(key))groups.set(key,{p:pMap.get(s.id_pangkalan),jk:s.jenis_kelamin,students:[]});
   groups.get(key).students.push(s);
  }
- const statusText=s=>({lulus:'Lulus',siap_diuji:'Menunggu ujian',perlu_perbaikan:'Perlu perbaikan',dipelajari:'Sedang dipelajari'})[s]||'Belum mulai';
  const reportGroups=[...groups.values()].map(g=>{
   const ambalan=g.jk==='L'?g.p?.nama_ambalan_putra:g.p?.nama_ambalan_putri;
   const title=(g.p?.nama_pangkalan||'Pangkalan')+' — Ambalan '+(g.jk==='L'?'Putera':'Puteri')+' '+(ambalan||'');
