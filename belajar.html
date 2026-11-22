@@ -1596,23 +1596,56 @@ async function review(id,status){
 }
 sb.auth.getSession().then(async({data})=>{if(data.session){try{await boot(data.session.user);}catch(err){$('loginMsg').textContent=err.message;$('login').classList.remove('hidden');$('application').classList.add('hidden');}}});
 
-// Pemeriksaan versi otomatis Ruang Tegak.
-// Versi baru diaktifkan oleh sw.js; halaman lama dimuat ulang satu kali.
+// Pemeriksaan versi otomatis dan pemberitahuan jika pembaruan perlu tindakan pengguna.
 (()=>{
  if(!('serviceWorker' in navigator))return;
- const hadController=!!navigator.serviceWorker.controller;
- let reloading=false;
- navigator.serviceWorker.addEventListener('controllerchange',()=>{
-  if(!hadController||reloading)return;
+ let reloading=false,registrationRef=null,notice=null;
+ const reloadPage=()=>{
+  if(reloading)return;
   reloading=true;
   window.location.reload();
+ };
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{
+  if(registrationRef)reloadPage();
  });
+ function showUpdateNotice(registration){
+  if(notice||!registration.waiting)return;
+  notice=document.createElement('div');
+  notice.setAttribute('role','status');
+  notice.style.cssText='position:fixed;z-index:99999;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid #e2b84d;border-radius:12px;background:#fff7d6;color:#432b13;box-shadow:0 4px 18px #0003;font:600 13px/1.4 system-ui,sans-serif';
+  const message=document.createElement('span');
+  message.textContent='Pembaruan RUANG TEGAK siap. Ketuk Perbarui agar aplikasi menggunakan versi terbaru.';
+  const button=document.createElement('button');
+  button.type='button';button.textContent='Perbarui';
+  button.style.cssText='flex:none;border:0;border-radius:8px;padding:9px 13px;background:#a51e2b;color:white;font-weight:700';
+  button.addEventListener('click',()=>{
+   button.disabled=true;button.textContent='Memperbarui…';
+   registration.waiting?.postMessage({type:'SKIP_WAITING'});
+   window.setTimeout(()=>{if(!reloading)reloadPage();},1800);
+  });
+  notice.append(message,button);
+  document.body.appendChild(notice);
+ }
+ function watchRegistration(registration){
+  registrationRef=registration;
+  if(registration.waiting&&navigator.serviceWorker.controller)showUpdateNotice(registration);
+  registration.addEventListener('updatefound',()=>{
+   const worker=registration.installing;
+   if(!worker)return;
+   worker.addEventListener('statechange',()=>{
+    if(worker.state==='installed'&&navigator.serviceWorker.controller&&registration.waiting){
+     showUpdateNotice(registration);
+    }
+   });
+  });
+ }
  let updateTimer=null;
  const checkForAppUpdate=async()=>{
   if(document.visibilityState==='hidden')return;
   try{
    const registration=await navigator.serviceWorker.getRegistration('./')||
     await navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'});
+   watchRegistration(registration);
    await registration.update();
    if(!updateTimer)updateTimer=window.setInterval(()=>{
     if(document.visibilityState==='visible')registration.update().catch(()=>{});
