@@ -1794,6 +1794,10 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
   data=check.data;
   if(!data.session)throw new Error('Sesi Admin Utama belum berhasil dipulihkan. Silakan masuk kembali dari halaman Admin Utama.');
   try{sessionStorage.removeItem('ruang-tegak-auth-bridge');localStorage.removeItem('ruang-tegak-auth-bridge');}catch(_){}
+  if(allowRefreshHandoff){
+   const cleanUrl=new URL(window.location.href);cleanUrl.searchParams.delete('refresh_handoff');
+   window.history.replaceState({},'',cleanUrl.toString());
+  }
  }
  $('sessionLoading')?.classList.add('hidden');
  // Gunakan sesi Supabase yang masih aktif, baik setelah pembaruan halaman
