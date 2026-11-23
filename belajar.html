@@ -1303,7 +1303,7 @@ async function saveCompletionPlan(status){
   }
   completionPlans=completionPlans.filter(p=>p.id_user!==currentUser.id).concat(data||[]);
   openSku(itemId);
-  setMsg(status==='diajukan'?'Berhasil! Rencana penyelesaian SKU sudah terkirim kepada Pembina.':'Berhasil! Rancangan penyelesaian SKU sudah tersimpan.');
+  setMsg(status==='diajukan'?'Berhasil! Rencana penyelesaian SKU sudah terkirim kepada Pembina.':'Berhasil! Rencana penyelesaian SKU sudah tersimpan.');
  }catch(err){
   const reason=err?.message||String(err)||'Kesalahan tidak diketahui.';
   setMsg((status==='diajukan'?'Pengiriman gagal.':'Penyimpanan gagal.')+' Rencana belum dapat dikonfirmasi: '+reason);
