@@ -1673,7 +1673,6 @@ $('closeStudentLetter').onclick=()=>$('studentLetterModal').classList.add('hidde
 
 let pendingPembinaSignoff=null;
 function openPembinaSignoff(row,targetType,pk){
- if(!teacher?.paraf_data){setMsg('Simpan paraf Pembina terlebih dahulu pada menu Lengkapi Profil.');showTab('profile');return;}
  pendingPembinaSignoff={studentId:row.id_user,targetType,progressId:row[pk]};
  $('pembinaSignoffInfo').textContent=(row.student?.nama_lengkap||'Peserta didik')+' · '+(targetType==='subpoin'?'Subpoin SKU':'Butir SKU')+'. Setelah disahkan, status menjadi Lulus dan paraf tersimpan permanen.';
  $('pembinaSignoffNote').value='';$('pembinaSignoffMsg').textContent='';
