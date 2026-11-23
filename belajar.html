@@ -670,6 +670,7 @@ header #appCreatorCredit{grid-area:credit!important}
   </section>
   <p id="appMsg" class="text-sm muted" role="status"></p>
  </section>
+<div id="pembinaSignoffModal" class="hidden fixed inset-0 z-[60] bg-black/60 p-4 overflow-y-auto"><div class="panel max-w-md mx-auto mt-8 p-5 space-y-3"><div class="flex justify-between items-center"><h3 class="font-bold text-lg">Pengesahan Kelulusan SKU</h3><button id="closePembinaSignoff" type="button" class="text-sm text-amber-800 font-semibold">Tutup ✕</button></div><p id="pembinaSignoffInfo" class="text-sm muted"></p><label class="block text-sm font-semibold">Catatan Pembina (opsional)<textarea id="pembinaSignoffNote" rows="2" maxlength="1500" class="w-full border rounded-lg p-2 mt-1" placeholder="Catatan penilaian"></textarea></label><p class="text-sm font-semibold">Paraf Pembina</p><canvas id="pembinaSignoffCanvas" width="900" height="320" class="w-full border rounded-lg bg-white touch-none" style="height:190px;touch-action:none"></canvas><div class="flex gap-2"><button id="clearPembinaSignoff" type="button" class="border rounded-lg px-3 py-2 text-sm">Ulangi paraf</button><button id="confirmPembinaSignoff" type="button" class="rounded-lg bg-emerald-700 text-white px-4 py-2 text-sm font-semibold flex-1">Sahkan lulus + paraf</button></div><p id="pembinaSignoffMsg" class="text-xs muted" role="status"></p></div></div>
 <div id="examModal" class="hidden fixed inset-0 z-50 bg-black/60 p-4 overflow-y-auto"><div class="panel max-w-md mx-auto mt-8 p-5"><div class="flex justify-between items-center gap-3"><h3 class="font-bold text-lg">Buat Akses Penguji</h3><button id="closeExamModal" class="text-sm text-amber-800 font-semibold">Tutup ✕</button></div><p id="examModalInfo" class="text-sm muted mt-2">Masukkan identitas penguji. Peserta akan membuka akses ujian dari HP-nya sendiri.</p><label class="block text-sm font-semibold mt-3">Nama penguji<input id="expectedExaminerName" maxlength="150" required class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Nama lengkap penguji"></label><label class="block text-sm font-semibold mt-3">Instansi / jabatan penguji<input id="expectedExaminerInstitution" maxlength="150" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Opsional"></label><label class="block text-sm font-semibold mt-3">Jadwal ujian<input id="examScheduledAt" type="datetime-local" required class="w-full border rounded-lg p-3 mt-1 font-normal"><span class="block text-xs muted mt-1">Pilih waktu pertemuan dengan penguji (maksimal 90 hari ke depan).</span></label><label class="block text-sm font-semibold mt-3">Catatan jadwal<textarea id="examScheduleNote" rows="2" maxlength="500" class="w-full border rounded-lg p-3 mt-1 font-normal" placeholder="Tempat pertemuan atau keterangan tambahan (opsional)"></textarea></label><button id="createExamAccess" class="w-full rounded-lg bg-amber-800 text-white font-semibold p-3 mt-4">Buat akses penguji</button><p id="examModalMsg" class="text-xs muted mt-2" role="status"></p></div></div><div id="studentLetterModal" class="hidden fixed inset-0 z-50 bg-black/60 p-4 overflow-y-auto"><div class="panel max-w-md mx-auto mt-8 p-5"><div class="flex justify-between items-center gap-3"><h3 class="font-bold text-lg">Akses Pengujian SKU</h3><button id="closeStudentLetter" class="text-sm text-amber-800 font-semibold">Tutup ✕</button></div><div id="studentLetterInfo" class="text-sm leading-6 mt-3"></div><p class="text-xs muted mt-3">Buka halaman ini di HP peserta, lalu serahkan HP kepada penguji untuk memeriksa hasil dan membubuhkan tanda tangan digital.</p><button id="openExamOnThisPhone" class="w-full rounded-lg bg-amber-800 text-white font-bold p-3 mt-4">Buka halaman ujian di HP ini</button></div></div>
 </main>
 <script>
@@ -1609,9 +1610,10 @@ function renderSkuReadinessList(){
   const hasFiles=Array.isArray(p.bukti_lampiran)&&p.bukti_lampiran.length>0;
   const ready=(p.catatan_pembina||'').toLowerCase().includes('siap mengajukan pengujian');
   const evidenceId='readiness_evidence_'+(isSub?'sub_':'item_')+(isSub?p.id_subpoint:p.id_progress)+'_'+i;
-  return '<article class="rounded-xl border p-3 space-y-2"><div class="flex flex-wrap justify-between gap-2"><div><b>'+esc(p.student.nama_lengkap)+'</b><p class="text-xs muted">'+esc(p.student.tingkatan||'')+' · Ambalan '+esc(p.student.jenis_kelamin==='L'?'Putra':'Putri')+' · Sangga '+esc(p.student.sangga||'-')+'</p></div><span class="pill '+(ready?'status-lulus':hasFiles?'status-menunggu':'status-revisi')+'">'+(ready?'Siap mengajukan ujian':hasFiles?'Bukti tersedia':'Belum ada lampiran')+'</span></div><div class="text-sm"><b>Jawaban:</b><p class="whitespace-pre-wrap mt-1">'+esc(p.catatan_peserta||'Belum mengisi jawaban.')+'</p><b class="block mt-2">Keterangan bukti/pengalaman:</b><p class="whitespace-pre-wrap mt-1">'+esc(p.bukti_pencapaian||'-')+'</p><div id="'+evidenceId+'" class="mt-2"></div></div>'+(p.catatan_pembina?'<div class="rounded bg-amber-50 p-2 text-xs"><b>Catatan Pembina:</b><p class="whitespace-pre-wrap">'+esc(p.catatan_pembina)+'</p></div>':'')+'<div class="flex flex-wrap gap-2"><button type="button" data-ready-row="'+i+'" class="rounded-lg bg-emerald-700 text-white px-3 py-2 text-xs font-semibold">Siap mengajukan pengujian</button><button type="button" data-instruct-row="'+i+'" class="rounded-lg border px-3 py-2 text-xs font-semibold">Kirim instruksi/pemantapan</button></div></article>';
+  return '<article class="rounded-xl border p-3 space-y-2"><div class="flex flex-wrap justify-between gap-2"><div><b>'+esc(p.student.nama_lengkap)+'</b><p class="text-xs muted">'+esc(p.student.tingkatan||'')+' · Ambalan '+esc(p.student.jenis_kelamin==='L'?'Putra':'Putri')+' · Sangga '+esc(p.student.sangga||'-')+'</p></div><span class="pill '+(ready?'status-lulus':hasFiles?'status-menunggu':'status-revisi')+'">'+(ready?'Siap mengajukan ujian':hasFiles?'Bukti tersedia':'Belum ada lampiran')+'</span></div><div class="text-sm"><b>Jawaban:</b><p class="whitespace-pre-wrap mt-1">'+esc(p.catatan_peserta||'Belum mengisi jawaban.')+'</p><b class="block mt-2">Keterangan bukti/pengalaman:</b><p class="whitespace-pre-wrap mt-1">'+esc(p.bukti_pencapaian||'-')+'</p><div id="'+evidenceId+'" class="mt-2"></div></div>'+(p.catatan_pembina?'<div class="rounded bg-amber-50 p-2 text-xs"><b>Catatan Pembina:</b><p class="whitespace-pre-wrap">'+esc(p.catatan_pembina)+'</p></div>':'')+'<div class="flex flex-wrap gap-2">'+(p.status==='siap_diuji'||p.status==='perlu_perbaikan'?'<button type="button" data-signoff-row="'+i+'" class="rounded-lg bg-emerald-700 text-white px-3 py-2 text-xs font-semibold">Nyatakan lulus + paraf</button>':'')+'<button type="button" data-ready-row="'+i+'" class="rounded-lg bg-emerald-700 text-white px-3 py-2 text-xs font-semibold">Siap mengajukan pengujian</button><button type="button" data-instruct-row="'+i+'" class="rounded-lg border px-3 py-2 text-xs font-semibold">Kirim instruksi/pemantapan</button></div></article>';
  }).join(''):'<p class="rounded-lg bg-slate-50 p-3 text-sm muted">Belum ada progres peserta pada butir ini. Peserta yang sudah mulai belajar akan muncul di sini.</p>');
  rows.forEach((p,i)=>{const id='readiness_evidence_'+(isSub?'sub_':'item_')+(isSub?p.id_subpoint:p.id_progress)+'_'+i;renderReadinessEvidence(id,p.bukti_lampiran||[]);});
+ target.querySelectorAll('[data-signoff-row]').forEach(btn=>btn.onclick=()=>openPembinaSignoff(rows[Number(btn.dataset.signoffRow)],selection.kind==='sub'?'subpoin':'butir',selection.pk));
  target.querySelectorAll('[data-ready-row]').forEach(btn=>btn.onclick=()=>updateReadinessNote(rows[Number(btn.dataset.readyRow)],selection,'Pembina menyatakan Anda siap mengajukan pengujian. Silakan kembali ke butir SKU ini dan tekan tombol "Ajukan ujian" jika sudah siap.'));
  target.querySelectorAll('[data-instruct-row]').forEach(btn=>btn.onclick=()=>{const note=$('readinessGroupNote').value.trim();if(!note){$('readinessActionMsg').textContent='Tuliskan instruksi atau pemantapan terlebih dahulu.';return;}updateReadinessNote(rows[Number(btn.dataset.instructRow)],selection,note);});
 }
@@ -1666,6 +1668,37 @@ function showStudentExamLetter(id){
 }
 $('closeStudentLetter').onclick=()=>$('studentLetterModal').classList.add('hidden');
 
+let pendingPembinaSignoff=null;
+function openPembinaSignoff(row,targetType,pk){
+ if(!teacher?.paraf_data){setMsg('Simpan paraf Pembina terlebih dahulu pada menu Lengkapi Profil.');showTab('profile');return;}
+ pendingPembinaSignoff={studentId:row.id_user,targetType,progressId:row[pk]};
+ $('pembinaSignoffInfo').textContent=(row.student?.nama_lengkap||'Peserta didik')+' · '+(targetType==='subpoin'?'Subpoin SKU':'Butir SKU')+'. Setelah disahkan, status menjadi Lulus dan paraf tersimpan permanen.';
+ $('pembinaSignoffNote').value='';$('pembinaSignoffMsg').textContent='';
+ const canvas=$('pembinaSignoffCanvas'),ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+ $('pembinaSignoffModal').classList.remove('hidden');
+}
+(()=>{
+ const canvas=$('pembinaSignoffCanvas'),ctx=canvas.getContext('2d');let drawing=false;
+ ctx.strokeStyle='#111827';ctx.lineWidth=7;ctx.lineCap='round';ctx.lineJoin='round';
+ const point=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height};};
+ canvas.addEventListener('pointerdown',e=>{e.preventDefault();drawing=true;canvas.setPointerCapture(e.pointerId);const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+ canvas.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+ ['pointerup','pointercancel','lostpointercapture'].forEach(n=>canvas.addEventListener(n,()=>drawing=false));
+ $('clearPembinaSignoff').onclick=()=>ctx.clearRect(0,0,canvas.width,canvas.height);
+ $('closePembinaSignoff').onclick=()=>{$('pembinaSignoffModal').classList.add('hidden');pendingPembinaSignoff=null;};
+ $('confirmPembinaSignoff').onclick=async()=>{
+  if(!pendingPembinaSignoff)return;
+  if(!signatureImage('pembinaSignoffCanvas')){$('pembinaSignoffMsg').textContent='Paraf Pembina wajib dibubuhkan.';return;}
+  const btn=$('confirmPembinaSignoff');btn.disabled=true;$('pembinaSignoffMsg').textContent='Menyimpan pengesahan secara aman...';
+  try{
+   const q=pendingPembinaSignoff;
+   const {data,error}=await sb.functions.invoke('sku-digital-exam',{body:{action:'review_direct',student_id:q.studentId,target_type:q.targetType,progress_id:q.progressId,note:$('pembinaSignoffNote').value.trim(),paraf_data:signatureImage('pembinaSignoffCanvas')}});
+   if(error||!data?.ok)throw new Error(data?.message||error?.message||'Pengesahan gagal disimpan.');
+   $('pembinaSignoffModal').classList.add('hidden');pendingPembinaSignoff=null;await loadAll();setMsg(data.message||'Kelulusan SKU disahkan Pembina.');
+  }catch(err){$('pembinaSignoffMsg').textContent='Belum tersimpan: '+(err.message||'Kesalahan');}
+  finally{btn.disabled=false;}
+ };
+})();
 async function reviewExamReferral(referralId,decision){
  if(decision==='selesai'&&!teacher?.paraf_data){setMsg('Simpan paraf Pembina terlebih dahulu pada menu Lengkapi Profil.');showTab('profile');return;}
  const note='';
