@@ -131,7 +131,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === "review_exam" || action === "review_direct") {
-      const jwt = (req.headers.get("Authorization") || "").replace(/^Bearer\\s+/i, "");
+      const jwt = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
       if (!jwt) return reply({ ok: false, message: "Silakan login sebagai Pembina." }, 401);
       const { data: auth, error: authError } = await db.auth.getUser(jwt);
       if (authError || !auth.user) return reply({ ok: false, message: "Sesi login tidak valid." }, 401);
