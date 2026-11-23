@@ -1765,9 +1765,12 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
  if(error)throw error;
  // Jangan pernah memakai jembatan sesi yang tertinggal dari kunjungan sebelumnya.
  // Hanya URL yang secara eksplisit dikirim Admin Utama boleh melakukan login otomatis.
- const allowAdminHandoff=new URLSearchParams(window.location.search).get('admin_handoff')==='1';
+ const params=new URLSearchParams(window.location.search);
+ const allowAdminHandoff=params.get('admin_handoff')==='1';
+ const allowRefreshHandoff=params.get('refresh_handoff')==='1';
+ const allowSessionHandoff=allowAdminHandoff||allowRefreshHandoff;
  const candidates=[];
- if(allowAdminHandoff){
+ if(allowSessionHandoff){
   for(const store of [sessionStorage,localStorage]){
    try{
     const candidate=JSON.parse(store.getItem('ruang-tegak-auth-bridge')||'null');
@@ -1779,8 +1782,8 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
  }
  candidates.sort((a,b)=>Number(b.created_at||0)-Number(a.created_at||0));
  const bridge=candidates[0];
- // Sesi otomatis hanya berlaku untuk perpindahan langsung dari Admin Utama.
- // Kunjungan biasa dari tombol Pembina/Peserta Didik harus menunggu ketukan tombol Masuk.
+ // Pulihkan sesi eksplisit dari perpindahan Admin Utama atau tombol Perbarui.
+ // Kunjungan biasa tanpa penanda handoff tetap mengikuti alur login normal.
  if(bridge){
   // Token dari klik Admin Utama menjadi sumber sesi yang otoritatif.
   // Jangan memakai sesi lokal lama yang mungkin milik akun berbeda.
@@ -1809,6 +1812,7 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
  }else{
   $('login').classList.remove('hidden');$('application').classList.add('hidden');
   if(allowAdminHandoff)$('loginMsg').textContent='Sesi Admin Utama tidak ditemukan atau sudah kedaluwarsa. Silakan kembali ke Admin Utama lalu ketuk Belajar & SKU sekali lagi.';
+  else if(allowRefreshHandoff)$('loginMsg').textContent='Sesi sebelum pembaruan tidak berhasil dipulihkan. Silakan masuk kembali satu kali.';
  }
 }).catch(err=>{
  $('sessionLoading')?.classList.add('hidden');
@@ -1841,11 +1845,28 @@ withAuthTimeout(sbReady,'Pustaka autentikasi',18000).then(async client=>{
   const button=document.createElement('button');
   button.type='button';button.textContent='Perbarui';
   button.style.cssText='flex:none;border:0;border-radius:8px;padding:9px 13px;background:#a51e2b;color:white;font-weight:700';
-  button.addEventListener('click',()=>{
-   button.disabled=true;button.textContent='Memperbarui…';
-   userRequestedReload=true;
-   registration.waiting?.postMessage({type:'SKIP_WAITING'});
-   window.setTimeout(()=>{if(!reloading)reloadPage();},1800);
+  button.addEventListener('click',async()=>{
+   button.disabled=true;button.textContent='Menyiapkan sesi…';
+   try{
+    // Simpan token sesi aktif sebelum Service Worker mengganti versi halaman.
+    const client=await sbReady;
+    const {data,error}=await withAuthTimeout(client.auth.getSession(),'Penyimpanan sesi sebelum pembaruan');
+    if(error)throw error;
+    if(data?.session?.access_token&&data?.session?.refresh_token){
+     const bridge={access_token:data.session.access_token,refresh_token:data.session.refresh_token,created_at:Date.now()};
+     sessionStorage.setItem('ruang-tegak-auth-bridge',JSON.stringify(bridge));
+     localStorage.setItem('ruang-tegak-auth-bridge',JSON.stringify(bridge));
+     const url=new URL(window.location.href);url.searchParams.set('refresh_handoff','1');
+     window.history.replaceState({},'',url.toString());
+    }
+    button.textContent='Memperbarui…';
+    userRequestedReload=true;
+    registration.waiting?.postMessage({type:'SKIP_WAITING'});
+    window.setTimeout(()=>{if(!reloading)reloadPage();},1800);
+   }catch(err){
+    button.disabled=false;button.textContent='Perbarui';
+    message.textContent='Sesi belum dapat diamankan untuk pembaruan: '+(err?.message||'Silakan coba lagi.');
+   }
   });
   notice.append(message,button);
   document.body.appendChild(notice);
